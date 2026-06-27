@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "target": "ES2017",
+    "lib": ["ES2017"],
+    "types": [],
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@noriskclient/nrc-skin-renderer": ["node_modules/@noriskclient/nrc-skin-renderer/dist/core/index.d.ts"]
+    }
+  },
+  "include": ["ts/**/*"]
+}

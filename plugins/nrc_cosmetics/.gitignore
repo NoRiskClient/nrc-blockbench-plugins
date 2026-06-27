@@ -1,0 +1,7 @@
+# Dev artifacts — not part of the shippable plugin
+_refs/
+nrc_debug.log
+*.tgz
+src/resources/
+
+# node_modules is already ignored by the repo root .gitignore
