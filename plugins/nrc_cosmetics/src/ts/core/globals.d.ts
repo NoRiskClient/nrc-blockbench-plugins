@@ -12,6 +12,7 @@ declare const EffectAnimator: any;
 declare const document: any;
 declare function fetch(url: string, opts?: any): Promise<any>;
 declare function btoa(data: string): string;
+declare function atob(data: string): string;
 declare function requestAnimationFrame(cb: (t: number) => void): number;
 declare function cancelAnimationFrame(id: number): void;
 declare const performance: { now(): number };
@@ -83,7 +84,7 @@ declare const MenuBar: { addAction(action: any, path: string): void };
 declare const BarItems: { [id: string]: any };
 declare const Preview: any;
 declare const THREE: any;
-declare class Image { constructor(); src: string; onload: any; }
+declare class Image { constructor(); src: string; onload: any; width: number; height: number; }
 declare const BBPlugin: { register(id: string, options: any): void };
 declare const Blockbench: {
     export(options: any, callback?: (path?: string) => void): void;

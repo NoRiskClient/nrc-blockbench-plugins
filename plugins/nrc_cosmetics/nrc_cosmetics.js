@@ -3022,6 +3022,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ui/exportDialog */ "./ts/ui/exportDialog.ts");
 /* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
 /* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
+/* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
+
 
 
 
@@ -3049,9 +3051,9 @@ function registerCosmeticType(type, registry) {
     }
     if (type.hasSkinPreview) {
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleSkinAction)(registry, type));
-        registry.event('update_view', _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.reapplyIfActive);
-        registry.event('finished_edit', _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.reapplyIfActive);
-        registry.event('add_cube', _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.reapplyIfActive);
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleLayerAction)(registry, type));
+        registry.previewMenu((0,_ui_skinDialog__WEBPACK_IMPORTED_MODULE_6__.createSkinAction)(registry, type));
+        (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.installSkinPreview)(registry);
     }
 }
 
@@ -3683,60 +3685,145 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
 
+const FACE_KEYS = ['north', 'east', 'south', 'west', 'up', 'down'];
+function negateXY(values) {
+    values.forEach((v, axis) => {
+        if (axis !== 2)
+            values[axis] = -v;
+    });
+}
+function applyCubeUv(cube, raw) {
+    if (Array.isArray(raw)) {
+        cube.box_uv = true;
+        cube.uv_offset = [raw[0], raw[1]];
+        return;
+    }
+    if (!raw)
+        return;
+    cube.box_uv = false;
+    for (const key of FACE_KEYS) {
+        const face = cube.faces[key];
+        if (!face)
+            continue;
+        const source = raw[key];
+        if (!source || !source.uv) {
+            face.texture = null;
+            face.uv = [0, 0, 0, 0];
+            face.rotation = 0;
+            continue;
+        }
+        face.extend({
+            material_name: source.material_instance,
+            uv: [source.uv[0], source.uv[1]],
+            rotation: source.uv_rotation,
+        });
+        if (source.uv_size) {
+            face.uv_size = [source.uv_size[0], source.uv_size[1]];
+        }
+        else {
+            cube.autouv = 1;
+            cube.mapAutoUV();
+        }
+        if (key === 'up' || key === 'down') {
+            face.uv = [face.uv[2], face.uv[3], face.uv[0], face.uv[1]];
+        }
+    }
+}
+function buildCube(c, group, bone) {
+    const cube = new Cube({
+        name: c.name || group.name,
+        autouv: 0,
+        color: group.color,
+        rotation: c.rotation,
+        origin: c.pivot,
+    });
+    negateXY(cube.rotation);
+    cube.origin[0] = -cube.origin[0];
+    const size = c.size || [0, 0, 0];
+    if (c.origin) {
+        cube.from[0] = -(c.origin[0] + size[0]);
+        cube.from[1] = c.origin[1];
+        cube.from[2] = c.origin[2];
+        cube.to[0] = size[0] + cube.from[0];
+        cube.to[1] = size[1] + cube.from[1];
+        cube.to[2] = size[2] + cube.from[2];
+    }
+    applyCubeUv(cube, c.uv);
+    const inflate = c.inflate !== undefined ? c.inflate : (bone ? bone.inflate : undefined);
+    if (typeof inflate === 'number')
+        cube.inflate = inflate;
+    cube.mirror_uv = c.mirror === undefined ? group.mirror_uv === true : c.mirror === true;
+    return cube.addTo(group).init();
+}
+function buildGroup(b) {
+    const group = new Group({
+        name: b.name,
+        origin: b.pivot || [0, 0, 0],
+        rotation: b.rotation || [0, 0, 0],
+    }).init();
+    if (b.pivot)
+        group.origin[0] = -group.origin[0];
+    negateXY(group.rotation);
+    group.mirror_uv = b.mirror === true;
+    return group;
+}
 function importGeometry(geoJson, textureDataUri) {
     try {
         const geos = geoJson['minecraft:geometry'] || [];
         Undo.initEdit({ outliner: true, elements: [], textures: [] });
+        const description = (geos[0] && geos[0].description) || {};
+        if (description.texture_width)
+            Project.texture_width = description.texture_width;
+        if (description.texture_height)
+            Project.texture_height = description.texture_height;
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_0__.log)('geometry uv resolution ' + Project.texture_width + 'x' + Project.texture_height);
         let tex = null;
         if (textureDataUri) {
             tex = new Texture({ name: 'prop' }).fromDataURL(textureDataUri).add(false);
         }
+        const knownGroups = {};
+        for (const g of (Group.all || [])) {
+            if (g.name && !knownGroups[g.name])
+                knownGroups[g.name] = g;
+        }
         const propCubes = [];
         for (const geo of geos) {
             const bones = geo.bones || [];
-            const groupByName = {};
+            const created = new Set();
             for (const b of bones) {
-                const g = new Group({ name: b.name, origin: b.pivot || [0, 0, 0], rotation: b.rotation || [0, 0, 0] }).init();
-                groupByName[b.name] = g;
+                if (knownGroups[b.name])
+                    continue;
+                knownGroups[b.name] = buildGroup(b);
+                created.add(b.name);
             }
             for (const b of bones) {
-                if (!b.parent)
+                if (!b.parent || !created.has(b.name))
                     continue;
-                const child = groupByName[b.name];
-                const parent = groupByName[b.parent] || (Group.all || []).find((x) => x.name === b.parent);
+                const child = knownGroups[b.name];
+                const parent = knownGroups[b.parent];
                 if (child && parent)
                     child.addTo(parent);
             }
             for (const b of bones) {
-                const g = groupByName[b.name];
-                for (const c of b.cubes || []) {
-                    const from = c.origin || [0, 0, 0];
-                    const size = c.size || [0, 0, 0];
-                    const to = [from[0] + size[0], from[1] + size[1], from[2] + size[2]];
-                    const cube = new Cube({ name: b.name, from, to }).init();
-                    cube.addTo(g);
-                    if (c.pivot)
-                        cube.origin = c.pivot;
-                    if (c.rotation)
-                        cube.rotation = c.rotation;
-                    if (c.inflate)
-                        cube.inflate = c.inflate;
-                    if (Array.isArray(c.uv)) {
-                        cube.box_uv = true;
-                        cube.uv_offset = c.uv;
-                    }
-                    propCubes.push(cube);
-                }
+                if (!created.has(b.name))
+                    continue;
+                const group = knownGroups[b.name];
+                for (const c of b.cubes || [])
+                    propCubes.push(buildCube(c, group, b));
             }
         }
         if (tex) {
             for (const cube of propCubes) {
                 if (!cube.faces)
                     continue;
-                for (const key in cube.faces)
+                for (const key in cube.faces) {
+                    if (cube.faces[key].texture === null)
+                        continue;
                     cube.faces[key].texture = tex.uuid;
+                }
             }
-            Canvas.updateAllUVs && Canvas.updateAllUVs();
+            if (Canvas.updateAllUVs)
+                Canvas.updateAllUVs();
         }
         Undo.finishEdit('Import prop geometry');
         Canvas.updateAll();
@@ -3796,24 +3883,63 @@ function loadRig(type, skipDefaultAnimation = false) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   isSkinMode: () => (/* binding */ isSkinMode),
+/* harmony export */   installSkinPreview: () => (/* binding */ installSkinPreview),
+/* harmony export */   makeToggleLayerAction: () => (/* binding */ makeToggleLayerAction),
 /* harmony export */   makeToggleSkinAction: () => (/* binding */ makeToggleSkinAction),
-/* harmony export */   reapplyIfActive: () => (/* binding */ reapplyIfActive),
+/* harmony export */   setCustomSkin: () => (/* binding */ setCustomSkin),
 /* harmony export */   setSkinMode: () => (/* binding */ setSkinMode)
 /* harmony export */ });
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
 
+const MAX_MATERIALS = 8;
+const LAYER_TAG = 'nrc_skin_layer';
+const SKIN_UV = 64;
+const LAYERS = {
+    bipedHead: { du: 32, dv: 0, inflate: 0.5, needsTallSkin: false },
+    bipedBody: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
+    bipedRightArm: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
+    bipedLeftArm: { du: 16, dv: 0, inflate: 0.25, needsTallSkin: true },
+    bipedRightLeg: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
+    bipedLeftLeg: { du: -16, dv: 0, inflate: 0.25, needsTallSkin: true },
+};
 let skinMode = false;
-let playerBones = new Set();
+let secondLayer = true;
+let vanillaUuids = new Set();
+let vanillaNames = new Set();
+let resolved = new Set();
+let layerByUuid = {};
+let customSkin = null;
 const materials = {};
-function isPlayerCube(cube) {
-    let p = cube.parent;
-    while (p && p.name) {
-        if (playerBones.has(p.name))
-            return true;
-        p = p.parent;
+const materialOrder = [];
+const skinHeights = {};
+function rigElements() {
+    const t = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
+    return t ? (t.rig.elements || []) : [];
+}
+function refreshRigIds() {
+    const els = rigElements();
+    vanillaUuids = new Set(els.map((e) => e.uuid).filter(Boolean));
+    vanillaNames = new Set(els.map((e) => e.name).filter(Boolean));
+    layerByUuid = {};
+    for (const e of els) {
+        const def = LAYERS[e.name];
+        if (e.uuid && def)
+            layerByUuid[e.uuid] = def;
     }
-    return false;
+}
+function resolveVanilla() {
+    const all = (Cube.all || []);
+    let match = all.filter((c) => vanillaUuids.has(c.uuid));
+    if (!match.length) {
+        match = all.filter((c) => c.parent && vanillaNames.has(c.parent.name) && c.name === c.parent.name);
+    }
+    resolved = new Set(match.map((c) => c.uuid));
+}
+function skinUri() {
+    if (customSkin)
+        return customSkin;
+    const t = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
+    return t ? t.defaultSkin : undefined;
 }
 function materialFor(uri) {
     if (materials[uri])
@@ -3824,53 +3950,153 @@ function materialFor(uri) {
     tex.minFilter = THREE.NearestFilter;
     img.onload = function () {
         tex.needsUpdate = true;
+        skinHeights[uri] = img.height || 64;
         if (skinMode)
             applySkin();
     };
     img.src = uri;
-    materials[uri] = new THREE.MeshLambertMaterial({
+    const mat = new THREE.MeshLambertMaterial({
         map: tex,
         transparent: true,
         alphaTest: 0.05,
         side: THREE.DoubleSide,
     });
-    return materials[uri];
+    materials[uri] = mat;
+    materialOrder.push(uri);
+    while (materialOrder.length > MAX_MATERIALS) {
+        const stale = materialOrder.shift();
+        const dead = materials[stale];
+        delete materials[stale];
+        if (dead) {
+            if (dead.map && dead.map.dispose)
+                dead.map.dispose();
+            if (dead.dispose)
+                dead.dispose();
+        }
+    }
+    return mat;
 }
-function currentSkin() {
-    const t = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
-    return t ? t.defaultSkin : undefined;
+function layerDef(cube) {
+    return layerByUuid[cube.uuid] || LAYERS[cube.name] || null;
 }
-function applySkin() {
-    const uri = currentSkin();
+function removeLayer(cube) {
+    const mesh = cube.mesh;
+    if (!mesh || !mesh.children)
+        return;
+    const existing = mesh.children.filter((c) => c[LAYER_TAG]);
+    for (const layer of existing) {
+        mesh.remove(layer);
+        if (layer.geometry && layer.geometry.dispose)
+            layer.geometry.dispose();
+    }
+}
+function buildLayer(cube) {
+    removeLayer(cube);
+    if (!secondLayer)
+        return;
+    const def = layerDef(cube);
+    if (!def)
+        return;
+    const uri = skinUri();
     if (!uri)
         return;
-    const mat = materialFor(uri);
-    for (const cube of Cube.all) {
-        if (cube.mesh && isPlayerCube(cube))
-            cube.mesh.material = mat;
+    if (def.needsTallSkin && (skinHeights[uri] || 64) < 64)
+        return;
+    const source = cube.mesh && cube.mesh.geometry;
+    if (!source || !source.attributes || !source.attributes.uv)
+        return;
+    const geometry = source.clone();
+    geometry.computeBoundingBox();
+    const box = geometry.boundingBox;
+    const centre = [
+        (box.min.x + box.max.x) / 2,
+        (box.min.y + box.max.y) / 2,
+        (box.min.z + box.max.z) / 2,
+    ];
+    const position = geometry.attributes.position;
+    for (let i = 0; i < position.count; i++) {
+        for (let axis = 0; axis < 3; axis++) {
+            const at = i * 3 + axis;
+            const value = position.array[at];
+            position.array[at] = value >= centre[axis] ? value + def.inflate : value - def.inflate;
+        }
+    }
+    position.needsUpdate = true;
+    const uv = geometry.attributes.uv;
+    const du = def.du / SKIN_UV;
+    const dv = def.dv / SKIN_UV;
+    for (let i = 0; i < uv.count; i++) {
+        uv.array[i * 2] += du;
+        uv.array[i * 2 + 1] -= dv;
+    }
+    uv.needsUpdate = true;
+    const layer = new THREE.Mesh(geometry, materialFor(uri));
+    layer[LAYER_TAG] = true;
+    layer.no_export = true;
+    layer.renderOrder = 1;
+    cube.mesh.add(layer);
+}
+function rescaleToSkinUv(cube) {
+    const geometry = cube.mesh && cube.mesh.geometry;
+    const uv = geometry && geometry.attributes && geometry.attributes.uv;
+    if (!uv)
+        return;
+    const sx = (Project.texture_width || SKIN_UV) / SKIN_UV;
+    const sy = (Project.texture_height || SKIN_UV) / SKIN_UV;
+    if (sx === 1 && sy === 1)
+        return;
+    for (let i = 0; i < uv.count; i++) {
+        uv.array[i * 2] *= sx;
+        uv.array[i * 2 + 1] = 1 - (1 - uv.array[i * 2 + 1]) * sy;
+    }
+    uv.needsUpdate = true;
+}
+function applyToCube(cube) {
+    const uri = skinUri();
+    if (!uri || !cube.mesh)
+        return;
+    cube.mesh.material = materialFor(uri);
+    buildLayer(cube);
+}
+function applySkin() {
+    resolveVanilla();
+    for (const cube of (Cube.all || [])) {
+        if (!resolved.has(cube.uuid))
+            continue;
+        if (cube.preview_controller)
+            cube.preview_controller.updateUV(cube);
+        applyToCube(cube);
     }
 }
-function restoreMarkers() {
-    for (const cube of Cube.all) {
-        if (isPlayerCube(cube) && cube.preview_controller)
-            cube.preview_controller.updateFaces(cube);
+function restoreCubes() {
+    for (const cube of (Cube.all || [])) {
+        if (!resolved.has(cube.uuid))
+            continue;
+        removeLayer(cube);
+        if (!cube.preview_controller)
+            continue;
+        cube.preview_controller.updateFaces(cube);
+        cube.preview_controller.updateUV(cube);
     }
-}
-function reapplyIfActive() {
-    if (skinMode)
-        applySkin();
 }
 function isSkinMode() {
     return skinMode;
 }
 function setSkinMode(on) {
     skinMode = on;
-    const t = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
-    playerBones = new Set(t ? t.bones : []);
+    refreshRigIds();
+    resolveVanilla();
     if (on)
         applySkin();
     else
-        restoreMarkers();
+        restoreCubes();
+}
+function setCustomSkin(uri) {
+    customSkin = uri;
+    if (skinMode)
+        applySkin();
+    else
+        setSkinMode(true);
 }
 function makeToggleSkinAction(registry, type) {
     return registry.action('nrc_toggle_skin_' + type.id, {
@@ -3881,8 +4107,62 @@ function makeToggleSkinAction(registry, type) {
         condition: () => (0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type),
         click() {
             setSkinMode(!isSkinMode());
+            Blockbench.showQuickMessage('Skin preview ' + (isSkinMode() ? 'on' : 'off'), 1200);
         },
     });
+}
+function makeToggleLayerAction(registry, type) {
+    return registry.action('nrc_toggle_skin_layer_' + type.id, {
+        name: 'Toggle Skin Second Layer',
+        description: 'Show the hat, jacket, sleeve and pants overlay of the reference skin',
+        icon: 'layers',
+        category: 'view',
+        condition: () => (0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type),
+        click() {
+            secondLayer = !secondLayer;
+            if (skinMode)
+                applySkin();
+            Blockbench.showQuickMessage('Second layer ' + (secondLayer ? 'on' : 'off'), 1200);
+        },
+    });
+}
+function installSkinPreview(registry) {
+    const controller = Cube.preview_controller;
+    if (controller && controller.on) {
+        const target = (element) => {
+            if (!skinMode || !(0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)() || !element)
+                return false;
+            if (!resolved.size)
+                resolveVanilla();
+            return resolved.has(element.uuid);
+        };
+        const rebuild = controller.on('update_faces setup update_geometry', function (data) {
+            const element = data && data.element;
+            if (target(element))
+                applyToCube(element);
+        });
+        const rescale = controller.on('update_uv', function (data) {
+            const element = data && data.element;
+            if (!target(element))
+                return;
+            rescaleToSkinUv(element);
+            applyToCube(element);
+        });
+        registry.track(() => {
+            if (rebuild && rebuild.delete)
+                rebuild.delete();
+            if (rescale && rescale.delete)
+                rescale.delete();
+        });
+    }
+    const onProject = () => {
+        refreshRigIds();
+        resolveVanilla();
+        if (skinMode && (0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)())
+            applySkin();
+    };
+    registry.event('load_project', onProject);
+    registry.event('select_project', onProject);
 }
 
 
@@ -4886,6 +5166,157 @@ function openSettingsDialog(type, anim, onDone) {
             (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.applyEmoteSettings)(target, type, state);
             if (onDone)
                 onDone();
+        },
+    }).show();
+}
+
+
+/***/ },
+
+/***/ "./ts/ui/skinDialog.ts"
+/*!*****************************!*\
+  !*** ./ts/ui/skinDialog.ts ***!
+  \*****************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createSkinAction: () => (/* binding */ createSkinAction),
+/* harmony export */   openSkinDialog: () => (/* binding */ openSkinDialog)
+/* harmony export */ });
+/* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
+/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/skinPreview */ "./ts/platform/skinPreview.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
+
+const PROFILE_API = 'https://api.mojang.com/users/profiles/minecraft/';
+const SESSION_API = 'https://sessionserver.mojang.com/session/minecraft/profile/';
+const FALLBACK_API = 'https://mc-heads.net/skin/';
+async function toDataUri(url) {
+    const res = await fetch(url);
+    if (!res.ok)
+        throw new Error('http ' + res.status);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++)
+        binary += String.fromCharCode(bytes[i]);
+    return 'data:image/png;base64,' + btoa(binary);
+}
+async function mojangSkinUrl(name) {
+    const profile = await fetch(PROFILE_API + encodeURIComponent(name));
+    if (!profile.ok)
+        throw new Error('unknown player');
+    const id = (await profile.json()).id;
+    const session = await fetch(SESSION_API + id);
+    if (!session.ok)
+        throw new Error('http ' + session.status);
+    const properties = (await session.json()).properties || [];
+    if (!properties.length)
+        throw new Error('no profile properties');
+    const raw = atob(properties[0].value);
+    const codes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++)
+        codes[i] = raw.charCodeAt(i);
+    const textures = JSON.parse(new TextDecoder().decode(codes)).textures || {};
+    if (!textures.SKIN || !textures.SKIN.url)
+        throw new Error('player has no custom skin');
+    return textures.SKIN.url;
+}
+async function fetchSkin(name) {
+    try {
+        return await toDataUri(await mojangSkinUrl(name));
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('mojang skin lookup failed, falling back: ' + e);
+        return await toDataUri(FALLBACK_API + encodeURIComponent(name));
+    }
+}
+function fileToDataUri(content) {
+    if (content.indexOf('data:') === 0)
+        return content;
+    const buffer = (__webpack_require__(/*! fs */ "fs").readFileSync)(content);
+    return 'data:image/png;base64,' + buffer.toString('base64');
+}
+function createSkinAction(registry, type) {
+    return registry.action('nrc_set_skin_' + type.id, {
+        name: 'Set Preview Skin',
+        description: 'Load the reference skin from a Minecraft account or a PNG file',
+        icon: 'person',
+        category: 'view',
+        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type),
+        click() {
+            openSkinDialog(type);
+        },
+    });
+}
+function openSkinDialog(type) {
+    new Dialog('nrc_skin_' + type.id, {
+        title: 'Preview Skin',
+        width: 460,
+        form: {
+            source: {
+                label: 'Source',
+                type: 'inline_select',
+                default: 'username',
+                options: {
+                    username: 'Minecraft name',
+                    file: 'PNG file',
+                    reset: 'Default skin',
+                },
+            },
+            username: {
+                label: 'Player name',
+                type: 'text',
+                value: '',
+                placeholder: 'Notch',
+                condition: (form) => form.source === 'username',
+            },
+            file: {
+                label: 'Skin file',
+                type: 'file',
+                extensions: ['png'],
+                readtype: 'image',
+                filetype: 'PNG',
+                return_as: 'file',
+                condition: (form) => form.source === 'file',
+            },
+        },
+        onConfirm(result) {
+            if (result.source === 'reset') {
+                (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__.setCustomSkin)(null);
+                Blockbench.showQuickMessage('Preview skin reset', 1600);
+                return;
+            }
+            if (result.source === 'file') {
+                const file = result.file;
+                if (!file || !file.content) {
+                    Blockbench.showQuickMessage('Please pick a PNG file', 1600);
+                    return;
+                }
+                try {
+                    (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__.setCustomSkin)(fileToDataUri(file.content));
+                    Blockbench.showQuickMessage('Preview skin loaded', 1600);
+                }
+                catch (e) {
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('skin file read failed: ' + e);
+                    Blockbench.showQuickMessage('Could not read that file', 2400);
+                }
+                return;
+            }
+            const name = (result.username || '').trim();
+            if (!name) {
+                Blockbench.showQuickMessage('Please enter a player name', 1600);
+                return;
+            }
+            Blockbench.showQuickMessage('Loading skin for ' + name, 1600);
+            fetchSkin(name).then((uri) => {
+                (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__.setCustomSkin)(uri);
+                Blockbench.showQuickMessage('Preview skin set to ' + name, 1600);
+            }, (e) => {
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('skin fetch failed: ' + e);
+                Blockbench.showQuickMessage('Could not load a skin for ' + name, 2400);
+            });
         },
     }).show();
 }

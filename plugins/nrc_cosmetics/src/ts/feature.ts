@@ -5,7 +5,8 @@ import { lockPropKey } from './domain/meta';
 import { createSettingsAction } from './ui/settingsDialog';
 import { createExportAction, createExportAnimationsAction, ensureExportCss } from './ui/exportDialog';
 import { ensureTemplateCss, openTemplateDialog } from './ui/templateDialog';
-import { makeToggleSkinAction, reapplyIfActive } from './platform/skinPreview';
+import { makeToggleSkinAction, makeToggleLayerAction, installSkinPreview } from './platform/skinPreview';
+import { createSkinAction } from './ui/skinDialog';
 
 export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     registerFormat(registry, type);
@@ -33,8 +34,8 @@ export function registerCosmeticType(type: CosmeticType, registry: Registry) {
 
     if (type.hasSkinPreview) {
         registry.previewMenu(makeToggleSkinAction(registry, type));
-        registry.event('update_view', reapplyIfActive);
-        registry.event('finished_edit', reapplyIfActive);
-        registry.event('add_cube', reapplyIfActive);
+        registry.previewMenu(makeToggleLayerAction(registry, type));
+        registry.previewMenu(createSkinAction(registry, type));
+        installSkinPreview(registry);
     }
 }

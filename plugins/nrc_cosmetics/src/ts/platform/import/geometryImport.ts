@@ -1,55 +1,151 @@
 import { log } from '../../core/log';
 
+const FACE_KEYS = ['north', 'east', 'south', 'west', 'up', 'down'];
+
+function negateXY(values: number[]) {
+    values.forEach((v: number, axis: number) => {
+        if (axis !== 2) values[axis] = -v;
+    });
+}
+
+function applyCubeUv(cube: any, raw: any) {
+    if (Array.isArray(raw)) {
+        cube.box_uv = true;
+        cube.uv_offset = [raw[0], raw[1]];
+        return;
+    }
+    if (!raw) return;
+
+    cube.box_uv = false;
+    for (const key of FACE_KEYS) {
+        const face = cube.faces[key];
+        if (!face) continue;
+
+        const source = raw[key];
+        if (!source || !source.uv) {
+            face.texture = null;
+            face.uv = [0, 0, 0, 0];
+            face.rotation = 0;
+            continue;
+        }
+
+        face.extend({
+            material_name: source.material_instance,
+            uv: [source.uv[0], source.uv[1]],
+            rotation: source.uv_rotation,
+        });
+
+        if (source.uv_size) {
+            face.uv_size = [source.uv_size[0], source.uv_size[1]];
+        } else {
+            cube.autouv = 1;
+            cube.mapAutoUV();
+        }
+
+        if (key === 'up' || key === 'down') {
+            face.uv = [face.uv[2], face.uv[3], face.uv[0], face.uv[1]];
+        }
+    }
+}
+
+function buildCube(c: any, group: any, bone: any): any {
+    const cube: any = new Cube({
+        name: c.name || group.name,
+        autouv: 0,
+        color: group.color,
+        rotation: c.rotation,
+        origin: c.pivot,
+    });
+
+    negateXY(cube.rotation);
+    cube.origin[0] = -cube.origin[0];
+
+    const size = c.size || [0, 0, 0];
+    if (c.origin) {
+        cube.from[0] = -(c.origin[0] + size[0]);
+        cube.from[1] = c.origin[1];
+        cube.from[2] = c.origin[2];
+        cube.to[0] = size[0] + cube.from[0];
+        cube.to[1] = size[1] + cube.from[1];
+        cube.to[2] = size[2] + cube.from[2];
+    }
+
+    applyCubeUv(cube, c.uv);
+
+    const inflate = c.inflate !== undefined ? c.inflate : (bone ? bone.inflate : undefined);
+    if (typeof inflate === 'number') cube.inflate = inflate;
+    cube.mirror_uv = c.mirror === undefined ? group.mirror_uv === true : c.mirror === true;
+
+    return cube.addTo(group).init();
+}
+
+function buildGroup(b: any): any {
+    const group: any = new Group({
+        name: b.name,
+        origin: b.pivot || [0, 0, 0],
+        rotation: b.rotation || [0, 0, 0],
+    }).init();
+
+    if (b.pivot) group.origin[0] = -group.origin[0];
+    negateXY(group.rotation);
+    group.mirror_uv = b.mirror === true;
+    return group;
+}
+
 export function importGeometry(geoJson: any, textureDataUri?: string) {
     try {
         const geos = geoJson['minecraft:geometry'] || [];
         Undo.initEdit({ outliner: true, elements: [], textures: [] });
+
+        const description = (geos[0] && geos[0].description) || {};
+        if (description.texture_width) Project.texture_width = description.texture_width;
+        if (description.texture_height) Project.texture_height = description.texture_height;
+        log('geometry uv resolution ' + Project.texture_width + 'x' + Project.texture_height);
 
         let tex: any = null;
         if (textureDataUri) {
             tex = new Texture({ name: 'prop' }).fromDataURL(textureDataUri).add(false);
         }
 
+        const knownGroups: { [n: string]: any } = {};
+        for (const g of (Group.all || []) as any[]) {
+            if (g.name && !knownGroups[g.name]) knownGroups[g.name] = g;
+        }
+
         const propCubes: any[] = [];
         for (const geo of geos) {
             const bones = geo.bones || [];
-            const groupByName: { [n: string]: any } = {};
+            const created = new Set<string>();
 
             for (const b of bones) {
-                const g = new Group({ name: b.name, origin: b.pivot || [0, 0, 0], rotation: b.rotation || [0, 0, 0] }).init();
-                groupByName[b.name] = g;
+                if (knownGroups[b.name]) continue;
+                knownGroups[b.name] = buildGroup(b);
+                created.add(b.name);
             }
 
             for (const b of bones) {
-                if (!b.parent) continue;
-                const child = groupByName[b.name];
-                const parent = groupByName[b.parent] || (Group.all || []).find((x: any) => x.name === b.parent);
+                if (!b.parent || !created.has(b.name)) continue;
+                const child = knownGroups[b.name];
+                const parent = knownGroups[b.parent];
                 if (child && parent) child.addTo(parent);
             }
 
             for (const b of bones) {
-                const g = groupByName[b.name];
-                for (const c of b.cubes || []) {
-                    const from = c.origin || [0, 0, 0];
-                    const size = c.size || [0, 0, 0];
-                    const to = [from[0] + size[0], from[1] + size[1], from[2] + size[2]];
-                    const cube: any = new Cube({ name: b.name, from, to }).init();
-                    cube.addTo(g);
-                    if (c.pivot) cube.origin = c.pivot;
-                    if (c.rotation) cube.rotation = c.rotation;
-                    if (c.inflate) cube.inflate = c.inflate;
-                    if (Array.isArray(c.uv)) { cube.box_uv = true; cube.uv_offset = c.uv; }
-                    propCubes.push(cube);
-                }
+                if (!created.has(b.name)) continue;
+                const group = knownGroups[b.name];
+                for (const c of b.cubes || []) propCubes.push(buildCube(c, group, b));
             }
         }
 
         if (tex) {
             for (const cube of propCubes) {
                 if (!cube.faces) continue;
-                for (const key in cube.faces) cube.faces[key].texture = tex.uuid;
+                for (const key in cube.faces) {
+                    if (cube.faces[key].texture === null) continue;
+                    cube.faces[key].texture = tex.uuid;
+                }
             }
-            Canvas.updateAllUVs && Canvas.updateAllUVs();
+            if (Canvas.updateAllUVs) Canvas.updateAllUVs();
         }
 
         Undo.finishEdit('Import prop geometry');
