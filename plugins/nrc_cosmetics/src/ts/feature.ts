@@ -5,8 +5,9 @@ import { lockPropKey } from './domain/meta';
 import { createSettingsAction } from './ui/settingsDialog';
 import { createExportAction, createExportAnimationsAction, ensureExportCss } from './ui/exportDialog';
 import { ensureTemplateCss, openTemplateDialog } from './ui/templateDialog';
-import { makeToggleSkinAction, makeToggleLayerAction, installSkinPreview } from './platform/skinPreview';
+import { makeToggleSkinAction, makeToggleLayerAction, makeToggleArmModelAction, installSkinPreview } from './platform/skinPreview';
 import { createSkinAction } from './ui/skinDialog';
+import { makeToggleRigLockAction, installPlayerModel } from './platform/playerModel';
 
 export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     registerFormat(registry, type);
@@ -35,6 +36,9 @@ export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     if (type.hasSkinPreview) {
         registry.previewMenu(makeToggleSkinAction(registry, type));
         registry.previewMenu(makeToggleLayerAction(registry, type));
+        registry.previewMenu(makeToggleArmModelAction(registry, type));
+        registry.menu(makeToggleRigLockAction(registry, type), 'edit');
+        installPlayerModel(registry);
         registry.previewMenu(createSkinAction(registry, type));
         installSkinPreview(registry);
     }

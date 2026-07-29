@@ -1,6 +1,7 @@
 import { CosmeticType } from '../cosmetics/types';
 import { getFormat } from './format';
 import { setSkinMode } from './skinPreview';
+import { initRig } from './playerModel';
 import { log, logReset } from '../core/log';
 
 export function loadRig(type: CosmeticType, skipDefaultAnimation = false) {
@@ -16,6 +17,7 @@ export function loadRig(type: CosmeticType, skipDefaultAnimation = false) {
         }
         Canvas.updateAll();
         if (type.hasSkinPreview) setSkinMode(true);
+        initRig();
 
         log('loadRig done bones=' + (typeof Group !== 'undefined' && Group.all ? Group.all.length : '?'));
     } catch (err: any) {

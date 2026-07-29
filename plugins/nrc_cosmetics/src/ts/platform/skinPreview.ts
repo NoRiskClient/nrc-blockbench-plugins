@@ -1,6 +1,7 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
 import { currentType, isCosmeticFormat } from './format';
+import { applyArmModel, currentArmModel, isRigCube, refreshTemplate, resolveRigCubes, rigBoneName, rigCubes, rigResolved, setArmModel } from './playerModel';
 
 const MAX_MATERIALS = 8;
 const LAYER_TAG = 'nrc_skin_layer';
@@ -24,39 +25,10 @@ const LAYERS: { [bone: string]: LayerDef } = {
 
 let skinMode = false;
 let secondLayer = true;
-let vanillaUuids = new Set<string>();
-let vanillaNames = new Set<string>();
-let resolved = new Set<string>();
-let layerByUuid: { [uuid: string]: LayerDef } = {};
 let customSkin: string | null = null;
 const materials: { [uri: string]: any } = {};
 const materialOrder: string[] = [];
 const skinHeights: { [uri: string]: number } = {};
-
-function rigElements(): any[] {
-    const t = currentType();
-    return t ? ((t.rig as any).elements || []) : [];
-}
-
-function refreshRigIds() {
-    const els = rigElements();
-    vanillaUuids = new Set(els.map((e: any) => e.uuid).filter(Boolean));
-    vanillaNames = new Set(els.map((e: any) => e.name).filter(Boolean));
-    layerByUuid = {};
-    for (const e of els) {
-        const def = LAYERS[e.name];
-        if (e.uuid && def) layerByUuid[e.uuid] = def;
-    }
-}
-
-function resolveVanilla() {
-    const all = (Cube.all || []) as any[];
-    let match = all.filter((c) => vanillaUuids.has(c.uuid));
-    if (!match.length) {
-        match = all.filter((c) => c.parent && vanillaNames.has(c.parent.name) && c.name === c.parent.name);
-    }
-    resolved = new Set(match.map((c) => c.uuid));
-}
 
 function skinUri(): string | undefined {
     if (customSkin) return customSkin;
@@ -100,7 +72,7 @@ function materialFor(uri: string): any {
 }
 
 function layerDef(cube: any): LayerDef | null {
-    return layerByUuid[cube.uuid] || LAYERS[cube.name] || null;
+    return LAYERS[rigBoneName(cube)] || null;
 }
 
 function removeLayer(cube: any) {
@@ -186,17 +158,15 @@ function applyToCube(cube: any) {
 }
 
 function applySkin() {
-    resolveVanilla();
-    for (const cube of (Cube.all || []) as any[]) {
-        if (!resolved.has(cube.uuid)) continue;
+    resolveRigCubes();
+    for (const cube of rigCubes()) {
         if (cube.preview_controller) cube.preview_controller.updateUV(cube);
         applyToCube(cube);
     }
 }
 
 function restoreCubes() {
-    for (const cube of (Cube.all || []) as any[]) {
-        if (!resolved.has(cube.uuid)) continue;
+    for (const cube of rigCubes()) {
         removeLayer(cube);
         if (!cube.preview_controller) continue;
         cube.preview_controller.updateFaces(cube);
@@ -210,8 +180,9 @@ function isSkinMode(): boolean {
 
 export function setSkinMode(on: boolean) {
     skinMode = on;
-    refreshRigIds();
-    resolveVanilla();
+    refreshTemplate();
+    resolveRigCubes();
+    applyArmModel();
     if (on) applySkin();
     else restoreCubes();
 }
@@ -251,13 +222,28 @@ export function makeToggleLayerAction(registry: Registry, type: CosmeticType): a
     });
 }
 
+export function makeToggleArmModelAction(registry: Registry, type: CosmeticType): any {
+    return registry.action('nrc_toggle_arm_model_' + type.id, {
+        name: 'Toggle Slim Arms',
+        description: 'Switch the reference rig between the classic and slim player model',
+        icon: 'straighten',
+        category: 'view',
+        condition: () => isCosmeticFormat(type),
+        click() {
+            setArmModel(currentArmModel() === 'slim' ? 'classic' : 'slim');
+            if (skinMode) applySkin();
+            Blockbench.showQuickMessage(currentArmModel() === 'slim' ? 'Slim arms' : 'Classic arms', 1200);
+        },
+    });
+}
+
 export function installSkinPreview(registry: Registry) {
     const controller = (Cube as any).preview_controller;
     if (controller && controller.on) {
         const target = (element: any): boolean => {
             if (!skinMode || !isCosmeticFormat() || !element) return false;
-            if (!resolved.size) resolveVanilla();
-            return resolved.has(element.uuid);
+            if (!rigResolved()) resolveRigCubes();
+            return isRigCube(element);
         };
 
         const rebuild = controller.on('update_faces setup update_geometry', function (data: any) {
@@ -277,8 +263,8 @@ export function installSkinPreview(registry: Registry) {
     }
 
     const onProject = () => {
-        refreshRigIds();
-        resolveVanilla();
+        refreshTemplate();
+        resolveRigCubes();
         if (skinMode && isCosmeticFormat()) applySkin();
     };
     registry.event('load_project', onProject);

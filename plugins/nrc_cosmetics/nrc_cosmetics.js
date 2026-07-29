@@ -3023,6 +3023,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
 /* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
 /* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
+
 
 
 
@@ -3052,6 +3054,9 @@ function registerCosmeticType(type, registry) {
     if (type.hasSkinPreview) {
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleSkinAction)(registry, type));
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleLayerAction)(registry, type));
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleArmModelAction)(registry, type));
+        registry.menu((0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_7__.makeToggleRigLockAction)(registry, type), 'edit');
+        (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_7__.installPlayerModel)(registry);
         registry.previewMenu((0,_ui_skinDialog__WEBPACK_IMPORTED_MODULE_6__.createSkinAction)(registry, type));
         (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.installSkinPreview)(registry);
     }
@@ -3836,6 +3841,151 @@ function importGeometry(geoJson, textureDataUri) {
 
 /***/ },
 
+/***/ "./ts/platform/playerModel.ts"
+/*!************************************!*\
+  !*** ./ts/platform/playerModel.ts ***!
+  \************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   applyArmModel: () => (/* binding */ applyArmModel),
+/* harmony export */   currentArmModel: () => (/* binding */ currentArmModel),
+/* harmony export */   initRig: () => (/* binding */ initRig),
+/* harmony export */   installPlayerModel: () => (/* binding */ installPlayerModel),
+/* harmony export */   isRigCube: () => (/* binding */ isRigCube),
+/* harmony export */   makeToggleRigLockAction: () => (/* binding */ makeToggleRigLockAction),
+/* harmony export */   refreshTemplate: () => (/* binding */ refreshTemplate),
+/* harmony export */   resolveRigCubes: () => (/* binding */ resolveRigCubes),
+/* harmony export */   rigBoneName: () => (/* binding */ rigBoneName),
+/* harmony export */   rigCubes: () => (/* binding */ rigCubes),
+/* harmony export */   rigResolved: () => (/* binding */ rigResolved),
+/* harmony export */   setArmModel: () => (/* binding */ setArmModel)
+/* harmony export */ });
+/* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
+
+const ARM_WIDTHS = { classic: 4, slim: 3 };
+const ARM_ANCHORS = { bipedRightArm: 'min', bipedLeftArm: 'max' };
+let templateNames = {};
+let boneNames = new Set();
+let resolved = new Set();
+let armModel = 'classic';
+let protectRig = true;
+function templateElements() {
+    const t = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
+    return t ? (t.rig.elements || []) : [];
+}
+function refreshTemplate() {
+    templateNames = {};
+    boneNames = new Set();
+    for (const e of templateElements()) {
+        if (!e.name)
+            continue;
+        boneNames.add(e.name);
+        if (e.uuid)
+            templateNames[e.uuid] = e.name;
+    }
+}
+function resolveRigCubes() {
+    const all = (Cube.all || []);
+    let match = all.filter((c) => templateNames[c.uuid]);
+    if (!match.length) {
+        match = all.filter((c) => c.parent && boneNames.has(c.parent.name) && c.name === c.parent.name);
+    }
+    resolved = new Set(match.map((c) => c.uuid));
+}
+function rigResolved() {
+    return resolved.size > 0;
+}
+function isRigCube(cube) {
+    return !!cube && resolved.has(cube.uuid);
+}
+function rigCubes() {
+    return (Cube.all || []).filter((c) => resolved.has(c.uuid));
+}
+function rigBoneName(cube) {
+    return templateNames[cube.uuid] || (boneNames.has(cube.name) ? cube.name : '');
+}
+function currentArmModel() {
+    return armModel;
+}
+function applyArmModel() {
+    const width = ARM_WIDTHS[armModel];
+    for (const cube of rigCubes()) {
+        const anchor = ARM_ANCHORS[rigBoneName(cube)];
+        if (!anchor)
+            continue;
+        if (anchor === 'min')
+            cube.to[0] = cube.from[0] + width;
+        else
+            cube.from[0] = cube.to[0] - width;
+        if (!cube.preview_controller)
+            continue;
+        cube.preview_controller.updateGeometry(cube);
+        cube.preview_controller.updateUV(cube);
+    }
+}
+function setArmModel(model) {
+    if (armModel === model)
+        return;
+    armModel = model;
+    applyArmModel();
+}
+function rigProtected() {
+    return protectRig;
+}
+function setRigLocked(locked) {
+    for (const cube of rigCubes()) {
+        if (locked && cube.selected)
+            cube.unselect();
+        cube.locked = locked;
+    }
+    updateSelection();
+}
+function syncRigLock() {
+    const shaping = typeof Modes !== 'undefined' && (!!Modes.edit || !!Modes.paint);
+    setRigLocked(protectRig && shaping);
+}
+function setRigProtected(on) {
+    protectRig = on;
+    syncRigLock();
+}
+function initRig() {
+    refreshTemplate();
+    resolveRigCubes();
+    applyArmModel();
+    syncRigLock();
+}
+function installPlayerModel(registry) {
+    const onMode = () => {
+        if (!(0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)())
+            return;
+        refreshTemplate();
+        resolveRigCubes();
+        syncRigLock();
+    };
+    registry.event('select_mode', onMode);
+    registry.event('unselect_mode', onMode);
+    registry.event('load_project', onMode);
+    registry.event('select_project', onMode);
+}
+function makeToggleRigLockAction(registry, type) {
+    return registry.action('nrc_toggle_rig_lock_' + type.id, {
+        name: 'Protect Player Rig',
+        description: 'Keep the reference player cubes from being edited while modelling',
+        icon: 'lock',
+        category: 'edit',
+        condition: () => (0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type),
+        click() {
+            setRigProtected(!rigProtected());
+            Blockbench.showQuickMessage('Player rig ' + (rigProtected() ? 'protected' : 'editable'), 1400);
+        },
+    });
+}
+
+
+/***/ },
+
 /***/ "./ts/platform/rig.ts"
 /*!****************************!*\
   !*** ./ts/platform/rig.ts ***!
@@ -3848,13 +3998,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
 /* harmony import */ var _skinPreview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./skinPreview */ "./ts/platform/skinPreview.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _playerModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
 function loadRig(type, skipDefaultAnimation = false) {
-    (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.logReset)();
-    (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('loadRig ' + type.id);
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.logReset)();
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('loadRig ' + type.id);
     try {
         newProject((0,_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type));
         Codecs.project.parse(JSON.parse(JSON.stringify(type.rig)), '');
@@ -3865,10 +4017,11 @@ function loadRig(type, skipDefaultAnimation = false) {
         Canvas.updateAll();
         if (type.hasSkinPreview)
             (0,_skinPreview__WEBPACK_IMPORTED_MODULE_1__.setSkinMode)(true);
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('loadRig done bones=' + (typeof Group !== 'undefined' && Group.all ? Group.all.length : '?'));
+        (0,_playerModel__WEBPACK_IMPORTED_MODULE_2__.initRig)();
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('loadRig done bones=' + (typeof Group !== 'undefined' && Group.all ? Group.all.length : '?'));
     }
     catch (err) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('loadRig ERROR: ' + (err && err.stack ? err.stack : String(err)));
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('loadRig ERROR: ' + (err && err.stack ? err.stack : String(err)));
     }
 }
 
@@ -3884,12 +4037,15 @@ function loadRig(type, skipDefaultAnimation = false) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   installSkinPreview: () => (/* binding */ installSkinPreview),
+/* harmony export */   makeToggleArmModelAction: () => (/* binding */ makeToggleArmModelAction),
 /* harmony export */   makeToggleLayerAction: () => (/* binding */ makeToggleLayerAction),
 /* harmony export */   makeToggleSkinAction: () => (/* binding */ makeToggleSkinAction),
 /* harmony export */   setCustomSkin: () => (/* binding */ setCustomSkin),
 /* harmony export */   setSkinMode: () => (/* binding */ setSkinMode)
 /* harmony export */ });
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
+/* harmony import */ var _playerModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./playerModel */ "./ts/platform/playerModel.ts");
+
 
 const MAX_MATERIALS = 8;
 const LAYER_TAG = 'nrc_skin_layer';
@@ -3904,37 +4060,10 @@ const LAYERS = {
 };
 let skinMode = false;
 let secondLayer = true;
-let vanillaUuids = new Set();
-let vanillaNames = new Set();
-let resolved = new Set();
-let layerByUuid = {};
 let customSkin = null;
 const materials = {};
 const materialOrder = [];
 const skinHeights = {};
-function rigElements() {
-    const t = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
-    return t ? (t.rig.elements || []) : [];
-}
-function refreshRigIds() {
-    const els = rigElements();
-    vanillaUuids = new Set(els.map((e) => e.uuid).filter(Boolean));
-    vanillaNames = new Set(els.map((e) => e.name).filter(Boolean));
-    layerByUuid = {};
-    for (const e of els) {
-        const def = LAYERS[e.name];
-        if (e.uuid && def)
-            layerByUuid[e.uuid] = def;
-    }
-}
-function resolveVanilla() {
-    const all = (Cube.all || []);
-    let match = all.filter((c) => vanillaUuids.has(c.uuid));
-    if (!match.length) {
-        match = all.filter((c) => c.parent && vanillaNames.has(c.parent.name) && c.name === c.parent.name);
-    }
-    resolved = new Set(match.map((c) => c.uuid));
-}
 function skinUri() {
     if (customSkin)
         return customSkin;
@@ -3977,7 +4106,7 @@ function materialFor(uri) {
     return mat;
 }
 function layerDef(cube) {
-    return layerByUuid[cube.uuid] || LAYERS[cube.name] || null;
+    return LAYERS[(0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.rigBoneName)(cube)] || null;
 }
 function removeLayer(cube) {
     const mesh = cube.mesh;
@@ -4059,19 +4188,15 @@ function applyToCube(cube) {
     buildLayer(cube);
 }
 function applySkin() {
-    resolveVanilla();
-    for (const cube of (Cube.all || [])) {
-        if (!resolved.has(cube.uuid))
-            continue;
+    (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.resolveRigCubes)();
+    for (const cube of (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.rigCubes)()) {
         if (cube.preview_controller)
             cube.preview_controller.updateUV(cube);
         applyToCube(cube);
     }
 }
 function restoreCubes() {
-    for (const cube of (Cube.all || [])) {
-        if (!resolved.has(cube.uuid))
-            continue;
+    for (const cube of (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.rigCubes)()) {
         removeLayer(cube);
         if (!cube.preview_controller)
             continue;
@@ -4084,8 +4209,9 @@ function isSkinMode() {
 }
 function setSkinMode(on) {
     skinMode = on;
-    refreshRigIds();
-    resolveVanilla();
+    (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.refreshTemplate)();
+    (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.resolveRigCubes)();
+    (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.applyArmModel)();
     if (on)
         applySkin();
     else
@@ -4126,15 +4252,30 @@ function makeToggleLayerAction(registry, type) {
         },
     });
 }
+function makeToggleArmModelAction(registry, type) {
+    return registry.action('nrc_toggle_arm_model_' + type.id, {
+        name: 'Toggle Slim Arms',
+        description: 'Switch the reference rig between the classic and slim player model',
+        icon: 'straighten',
+        category: 'view',
+        condition: () => (0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type),
+        click() {
+            (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.setArmModel)((0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.currentArmModel)() === 'slim' ? 'classic' : 'slim');
+            if (skinMode)
+                applySkin();
+            Blockbench.showQuickMessage((0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.currentArmModel)() === 'slim' ? 'Slim arms' : 'Classic arms', 1200);
+        },
+    });
+}
 function installSkinPreview(registry) {
     const controller = Cube.preview_controller;
     if (controller && controller.on) {
         const target = (element) => {
             if (!skinMode || !(0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)() || !element)
                 return false;
-            if (!resolved.size)
-                resolveVanilla();
-            return resolved.has(element.uuid);
+            if (!(0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.rigResolved)())
+                (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.resolveRigCubes)();
+            return (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.isRigCube)(element);
         };
         const rebuild = controller.on('update_faces setup update_geometry', function (data) {
             const element = data && data.element;
@@ -4156,8 +4297,8 @@ function installSkinPreview(registry) {
         });
     }
     const onProject = () => {
-        refreshRigIds();
-        resolveVanilla();
+        (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.refreshTemplate)();
+        (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.resolveRigCubes)();
         if (skinMode && (0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)())
             applySkin();
     };
@@ -5186,7 +5327,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
 /* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/skinPreview */ "./ts/platform/skinPreview.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -5203,7 +5346,7 @@ async function toDataUri(url) {
         binary += String.fromCharCode(bytes[i]);
     return 'data:image/png;base64,' + btoa(binary);
 }
-async function mojangSkinUrl(name) {
+async function mojangSkin(name) {
     const profile = await fetch(PROFILE_API + encodeURIComponent(name));
     if (!profile.ok)
         throw new Error('unknown player');
@@ -5219,17 +5362,20 @@ async function mojangSkinUrl(name) {
     for (let i = 0; i < raw.length; i++)
         codes[i] = raw.charCodeAt(i);
     const textures = JSON.parse(new TextDecoder().decode(codes)).textures || {};
-    if (!textures.SKIN || !textures.SKIN.url)
+    const skin = textures.SKIN;
+    if (!skin || !skin.url)
         throw new Error('player has no custom skin');
-    return textures.SKIN.url;
+    const model = skin.metadata && skin.metadata.model;
+    return { url: skin.url, arms: model === 'slim' ? 'slim' : 'classic' };
 }
 async function fetchSkin(name) {
     try {
-        return await toDataUri(await mojangSkinUrl(name));
+        const found = await mojangSkin(name);
+        return { uri: await toDataUri(found.url), arms: found.arms };
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('mojang skin lookup failed, falling back: ' + e);
-        return await toDataUri(FALLBACK_API + encodeURIComponent(name));
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('mojang skin lookup failed, falling back: ' + e);
+        return { uri: await toDataUri(FALLBACK_API + encodeURIComponent(name)), arms: null };
     }
 }
 function fileToDataUri(content) {
@@ -5299,7 +5445,7 @@ function openSkinDialog(type) {
                     Blockbench.showQuickMessage('Preview skin loaded', 1600);
                 }
                 catch (e) {
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('skin file read failed: ' + e);
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('skin file read failed: ' + e);
                     Blockbench.showQuickMessage('Could not read that file', 2400);
                 }
                 return;
@@ -5310,11 +5456,13 @@ function openSkinDialog(type) {
                 return;
             }
             Blockbench.showQuickMessage('Loading skin for ' + name, 1600);
-            fetchSkin(name).then((uri) => {
-                (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__.setCustomSkin)(uri);
-                Blockbench.showQuickMessage('Preview skin set to ' + name, 1600);
+            fetchSkin(name).then((found) => {
+                if (found.arms)
+                    (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_2__.setArmModel)(found.arms);
+                (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__.setCustomSkin)(found.uri);
+                Blockbench.showQuickMessage('Preview skin set to ' + name + (found.arms === 'slim' ? ' (slim)' : ''), 1600);
             }, (e) => {
-                (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('skin fetch failed: ' + e);
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('skin fetch failed: ' + e);
                 Blockbench.showQuickMessage('Could not load a skin for ' + name, 2400);
             });
         },
@@ -60870,7 +61018,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.0
   \**********************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"meta":{"format_version":"4.5","model_format":"nrc_emote","box_uv":true},"name":"NRC_Emote","model_identifier":"","resolution":{"width":64,"height":64},"elements":[{"name":"bipedHead","box_uv":true,"rescale":false,"locked":false,"from":[-4,24,-4],"to":[4,32,4],"autouv":0,"color":0,"origin":[0,24,0],"uv_offset":[0,0],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":true,"uuid":"00000000-0000-0000-0000-000000000100"},{"name":"bipedBody","box_uv":true,"rescale":false,"locked":false,"from":[-4,12,-2],"to":[4,24,2],"autouv":0,"color":1,"origin":[0,24,0],"uv_offset":[16,16],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":true,"uuid":"00000000-0000-0000-0000-000000000101"},{"name":"bipedRightArm","box_uv":true,"rescale":false,"locked":false,"from":[4,12,-2],"to":[8,24,2],"autouv":0,"color":2,"origin":[5,22,0],"uv_offset":[40,16],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":true,"uuid":"00000000-0000-0000-0000-000000000102"},{"name":"bipedLeftArm","box_uv":true,"rescale":false,"locked":false,"from":[-8,12,-2],"to":[-4,24,2],"autouv":0,"color":3,"origin":[-5,22,0],"uv_offset":[32,48],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":true,"uuid":"00000000-0000-0000-0000-000000000103"},{"name":"bipedLeftLeg","box_uv":true,"rescale":false,"locked":false,"from":[-4,0,-2],"to":[0,12,2],"autouv":0,"color":4,"origin":[-2,12,0],"uv_offset":[16,48],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":true,"uuid":"00000000-0000-0000-0000-000000000104"},{"name":"bipedRightLeg","box_uv":true,"rescale":false,"locked":false,"from":[0,0,-2],"to":[4,12,2],"autouv":0,"color":5,"origin":[2,12,0],"uv_offset":[0,16],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":true,"uuid":"00000000-0000-0000-0000-000000000105"}],"outliner":[{"name":"bipedRig","uuid":"00000000-0000-0000-0000-000000000001","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[0,0,0],"children":[{"name":"bipedHead","uuid":"00000000-0000-0000-0000-000000000200","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[0,24,0],"children":["00000000-0000-0000-0000-000000000100"]},{"name":"bipedBody","uuid":"00000000-0000-0000-0000-000000000201","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[0,24,0],"children":["00000000-0000-0000-0000-000000000101"]},{"name":"bipedRightArm","uuid":"00000000-0000-0000-0000-000000000202","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[5,22,0],"children":["00000000-0000-0000-0000-000000000102"]},{"name":"bipedLeftArm","uuid":"00000000-0000-0000-0000-000000000203","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[-5,22,0],"children":["00000000-0000-0000-0000-000000000103"]},{"name":"bipedLeftLeg","uuid":"00000000-0000-0000-0000-000000000204","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[-2,12,0],"children":["00000000-0000-0000-0000-000000000104"]},{"name":"bipedRightLeg","uuid":"00000000-0000-0000-0000-000000000205","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[2,12,0],"children":["00000000-0000-0000-0000-000000000105"]}]}],"textures":[]}');
+module.exports = /*#__PURE__*/JSON.parse('{"meta":{"format_version":"4.5","model_format":"nrc_emote","box_uv":true},"name":"NRC_Emote","model_identifier":"","resolution":{"width":64,"height":64},"elements":[{"name":"bipedHead","box_uv":true,"rescale":false,"locked":true,"from":[-4,24,-4],"to":[4,32,4],"autouv":0,"color":0,"origin":[0,24,0],"uv_offset":[0,0],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":false,"uuid":"00000000-0000-0000-0000-000000000100"},{"name":"bipedBody","box_uv":true,"rescale":false,"locked":true,"from":[-4,12,-2],"to":[4,24,2],"autouv":0,"color":1,"origin":[0,24,0],"uv_offset":[16,16],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":false,"uuid":"00000000-0000-0000-0000-000000000101"},{"name":"bipedRightArm","box_uv":true,"rescale":false,"locked":true,"from":[4,12,-2],"to":[8,24,2],"autouv":0,"color":2,"origin":[5,22,0],"uv_offset":[40,16],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":false,"uuid":"00000000-0000-0000-0000-000000000102"},{"name":"bipedLeftArm","box_uv":true,"rescale":false,"locked":true,"from":[-8,12,-2],"to":[-4,24,2],"autouv":0,"color":3,"origin":[-5,22,0],"uv_offset":[32,48],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":false,"uuid":"00000000-0000-0000-0000-000000000103"},{"name":"bipedLeftLeg","box_uv":true,"rescale":false,"locked":true,"from":[-4,0,-2],"to":[0,12,2],"autouv":0,"color":4,"origin":[-2,12,0],"uv_offset":[16,48],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":false,"uuid":"00000000-0000-0000-0000-000000000104"},{"name":"bipedRightLeg","box_uv":true,"rescale":false,"locked":true,"from":[0,0,-2],"to":[4,12,2],"autouv":0,"color":5,"origin":[2,12,0],"uv_offset":[0,16],"faces":{"north":{"uv":[0,0,0,0],"texture":0},"east":{"uv":[0,0,0,0],"texture":0},"south":{"uv":[0,0,0,0],"texture":0},"west":{"uv":[0,0,0,0],"texture":0},"up":{"uv":[0,0,0,0],"texture":0},"down":{"uv":[0,0,0,0],"texture":0}},"export":false,"uuid":"00000000-0000-0000-0000-000000000105"}],"outliner":[{"name":"bipedRig","uuid":"00000000-0000-0000-0000-000000000001","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[0,0,0],"children":[{"name":"bipedHead","uuid":"00000000-0000-0000-0000-000000000200","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[0,24,0],"children":["00000000-0000-0000-0000-000000000100"]},{"name":"bipedBody","uuid":"00000000-0000-0000-0000-000000000201","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[0,24,0],"children":["00000000-0000-0000-0000-000000000101"]},{"name":"bipedRightArm","uuid":"00000000-0000-0000-0000-000000000202","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[5,22,0],"children":["00000000-0000-0000-0000-000000000102"]},{"name":"bipedLeftArm","uuid":"00000000-0000-0000-0000-000000000203","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[-5,22,0],"children":["00000000-0000-0000-0000-000000000103"]},{"name":"bipedLeftLeg","uuid":"00000000-0000-0000-0000-000000000204","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[-2,12,0],"children":["00000000-0000-0000-0000-000000000104"]},{"name":"bipedRightLeg","uuid":"00000000-0000-0000-0000-000000000205","export":true,"isOpen":true,"visibility":true,"autouv":0,"origin":[2,12,0],"children":["00000000-0000-0000-0000-000000000105"]}]}],"textures":[]}');
 
 /***/ }
 

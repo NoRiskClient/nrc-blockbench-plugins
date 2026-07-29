@@ -53,6 +53,7 @@ declare function newProject(format: any): boolean;
 declare function guid(): string;
 
 declare const Project: any;
+declare const Modes: any;
 declare const Format: { id: string; [key: string]: any };
 declare const settings: { [key: string]: { value: any } };
 declare const Codecs: { [key: string]: any };

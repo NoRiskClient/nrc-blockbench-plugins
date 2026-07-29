@@ -2,6 +2,7 @@ import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
 import { isCosmeticFormat } from '../platform/format';
 import { setCustomSkin } from '../platform/skinPreview';
+import { ArmModel, setArmModel } from '../platform/playerModel';
 import { log } from '../core/log';
 
 const PROFILE_API = 'https://api.mojang.com/users/profiles/minecraft/';
@@ -17,7 +18,12 @@ async function toDataUri(url: string): Promise<string> {
     return 'data:image/png;base64,' + btoa(binary);
 }
 
-async function mojangSkinUrl(name: string): Promise<string> {
+interface FetchedSkin {
+    uri: string;
+    arms: ArmModel | null;
+}
+
+async function mojangSkin(name: string): Promise<{ url: string; arms: ArmModel }> {
     const profile = await fetch(PROFILE_API + encodeURIComponent(name));
     if (!profile.ok) throw new Error('unknown player');
     const id = (await profile.json()).id;
@@ -31,16 +37,20 @@ async function mojangSkinUrl(name: string): Promise<string> {
     const codes = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) codes[i] = raw.charCodeAt(i);
     const textures = JSON.parse(new TextDecoder().decode(codes)).textures || {};
-    if (!textures.SKIN || !textures.SKIN.url) throw new Error('player has no custom skin');
-    return textures.SKIN.url;
+
+    const skin = textures.SKIN;
+    if (!skin || !skin.url) throw new Error('player has no custom skin');
+    const model = skin.metadata && skin.metadata.model;
+    return { url: skin.url, arms: model === 'slim' ? 'slim' : 'classic' };
 }
 
-async function fetchSkin(name: string): Promise<string> {
+async function fetchSkin(name: string): Promise<FetchedSkin> {
     try {
-        return await toDataUri(await mojangSkinUrl(name));
+        const found = await mojangSkin(name);
+        return { uri: await toDataUri(found.url), arms: found.arms };
     } catch (e) {
         log('mojang skin lookup failed, falling back: ' + e);
-        return await toDataUri(FALLBACK_API + encodeURIComponent(name));
+        return { uri: await toDataUri(FALLBACK_API + encodeURIComponent(name)), arms: null };
     }
 }
 
@@ -125,9 +135,10 @@ export function openSkinDialog(type: CosmeticType) {
             }
             Blockbench.showQuickMessage('Loading skin for ' + name, 1600);
             fetchSkin(name).then(
-                (uri) => {
-                    setCustomSkin(uri);
-                    Blockbench.showQuickMessage('Preview skin set to ' + name, 1600);
+                (found) => {
+                    if (found.arms) setArmModel(found.arms);
+                    setCustomSkin(found.uri);
+                    Blockbench.showQuickMessage('Preview skin set to ' + name + (found.arms === 'slim' ? ' (slim)' : ''), 1600);
                 },
                 (e) => {
                     log('skin fetch failed: ' + e);
