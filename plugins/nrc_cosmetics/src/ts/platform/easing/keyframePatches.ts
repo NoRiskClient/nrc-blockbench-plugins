@@ -8,7 +8,6 @@ function lerp(a: number, b: number, t: number): number {
     return a + (b - a) * t;
 }
 
-// When reversing keyframes, the easing of each segment flips In<->Out and shifts one frame.
 function rotateEasings() {
     const sel = (Timeline.selected || []) as any[];
     if (!sel.length) return;
@@ -30,9 +29,6 @@ function rotateEasings() {
     Undo.finishEdit('Reverse keyframe easing');
 }
 
-// Patches Keyframe.prototype so easing affects both the live preview (getLerp) and the
-// exported JSON (compileBedrockKeyframe), and persists through undo / .bbmodel. All gated to
-// our format; other formats fall through to the original behaviour.
 export function installEasingPatches(registry: Registry) {
     registry.monkeypatch(Keyframe.prototype, 'getLerp', (orig: any) => function (this: any, other: any, axis: any, amount: number) {
         if (!easingEnabled()) return orig.apply(this, arguments);
@@ -51,8 +47,6 @@ export function installEasingPatches(registry: Registry) {
         const result = orig.apply(this, arguments);
         if (!easingEnabled()) return result;
 
-        // Bezier: emit lerp_mode + handle arrays exactly as the runtime parser reads them,
-        // independent of whether Blockbench bakes bezier by default.
         if (this.interpolation === 'bezier') {
             const vec = Array.isArray(result) ? result : (result && result.vector) || result;
             return {
@@ -90,13 +84,11 @@ export function installEasingPatches(registry: Registry) {
             const src = (data.values && typeof data.values === 'object' && !Array.isArray(data.values)) ? data.values : data;
             if (src.easing !== undefined) this.easing = src.easing;
             if (Array.isArray(src.easingArgs)) this.easingArgs = src.easingArgs;
-            // Normalize {vector,...} back to a plain array for the original extend.
             if (data.values && !Array.isArray(data.values) && Array.isArray(data.values.vector)) data.values = data.values.vector;
         }
         return orig.apply(this, arguments);
     });
 
-    // Reverse Keyframes button: also rotate the easings of the reversed keyframes.
     if (typeof BarItems !== 'undefined' && BarItems.reverse_keyframes) {
         registry.monkeypatch(BarItems.reverse_keyframes, 'click', (orig: any) => function (this: any) {
             orig.apply(this, arguments);

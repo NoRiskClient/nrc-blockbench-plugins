@@ -1,10 +1,10 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
+import { nrcAnimationCodec } from './animationCodec';
 
 const formatsById: { [id: string]: any } = {};
 const typesById: { [id: string]: CosmeticType } = {};
 
-// Shared ModelFormat flags; per-type overrides are merged on top.
 function baseFormatOptions(type: CosmeticType): any {
     return {
         id: type.formatId,
@@ -20,14 +20,16 @@ function baseFormatOptions(type: CosmeticType): any {
         centered_grid: true,
         locators: true,
         animation_mode: true,
-        animation_files: false,
+        animation_files: true,
+        animation_codec: nrcAnimationCodec,
         display_mode: false,
         codec: Codecs.project,
     };
 }
 
 export function registerFormat(registry: Registry, type: CosmeticType): any {
-    const fmt = registry.format(Object.assign(baseFormatOptions(type), type.formatOverrides || {}));
+    const opts = Object.assign(baseFormatOptions(type), type.formatOverrides || {});
+    const fmt = registry.format(opts);
     formatsById[type.formatId] = fmt;
     typesById[type.formatId] = type;
     registry.track(() => { delete formatsById[type.formatId]; delete typesById[type.formatId]; });

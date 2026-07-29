@@ -1,11 +1,7 @@
-// Self-contained easing math (standard Penner-style curves), name helpers and curve-thumbnail
-// SVG generation. Names match what GeckoLib emits and what GeoEasingType.fromName accepts
-// (case/underscore-insensitive on the runtime side).
 
 const PI = Math.PI;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Base curve types shown in the selector, in order.
 export const BASES = ['linear', 'step', 'sine', 'quad', 'cubic', 'quart', 'quint', 'expo', 'circ', 'back', 'elastic', 'bounce'];
 
 type EaseFn = (t: number) => number;
@@ -23,7 +19,6 @@ function bounceOut(t: number): number {
     t -= 2.625 / d1; return n1 * t * t + 0.984375;
 }
 
-// Map of full easing name -> function. Args-easings take (arg, t); the rest take (t).
 const FN: { [name: string]: EaseFn | ArgEaseFn } = {
     linear: (t) => t,
     step: ((n: number, t: number) => { const s = Math.max(n || 5, 2); return Math.floor(t * s) / s; }) as ArgEaseFn,
@@ -53,7 +48,6 @@ const FN: { [name: string]: EaseFn | ArgEaseFn } = {
     easeInOutBounce: ((_b: number, t: number) => (t < 0.5 ? (1 - bounceOut(1 - 2 * t)) / 2 : (1 + bounceOut(2 * t - 1)) / 2)) as ArgEaseFn,
 };
 
-// Polynomial curves built generically.
 const POLY: { [base: string]: number } = { quad: 2, cubic: 3, quart: 4, quint: 5 };
 for (const base of Object.keys(POLY)) {
     const p = POLY[base];
@@ -84,7 +78,6 @@ export function parseArg(name: string, value: string): number {
     return parseFloat(value);
 }
 
-// Evaluates an easing at t∈[0,1], passing the arg for args-easings.
 export function evaluate(name: string, t: number, arg?: number): number {
     const f = FN[name] || FN.linear;
     if (isArgsEasing(name)) return (f as ArgEaseFn)(arg == null ? argDefault(name) : arg, t);
@@ -97,7 +90,6 @@ export function combineName(base: string, dir: string): string {
     return 'ease' + d + cap(base);
 }
 
-// Swaps In<->Out (InOut/linear/step unchanged) — used when reversing a keyframe sequence.
 export function reverseEasing(name?: string): string | undefined {
     if (!name) return name;
     const { base, dir } = splitName(name);
@@ -112,7 +104,6 @@ export function splitName(name = 'linear'): { base: string; dir: string } {
     return { base: m[2].toLowerCase(), dir: m[1].toLowerCase() };
 }
 
-// Generates a small SVG curve thumbnail by sampling the easing function.
 export function iconSvg(name: string, accent: boolean): string {
     const W = 24, H = 24, pad = 3, n = 18;
     const pts: string[] = [];

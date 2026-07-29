@@ -1,6 +1,7 @@
 import packageJson from '../package.json';
 import { Registry } from './core/registry';
 import { registerCosmeticType } from './feature';
+import { installAnimationPatches, removeAnimationPatches } from './platform/animationPatches';
 import { installEasing } from './platform/easing';
 import { EMOTE } from './cosmetics/emote';
 
@@ -18,11 +19,12 @@ const { version, blockbenchConfig } = packageJson;
             await_loading: true,
             onload() {
                 registerCosmeticType(EMOTE, registry);
-                // Future: registerCosmeticType(ACCESSORY, registry); etc.
                 installEasing(registry);
+                installAnimationPatches(EMOTE);
                 console.log('Loaded NoRisk Client Cosmetics plugin');
             },
             onunload() {
+                removeAnimationPatches();
                 registry.disposeAll();
             },
         }

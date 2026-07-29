@@ -1,5 +1,3 @@
-// Dev logger. Writes to a file on disk so it can be inspected outside Blockbench.
-// Flip DEV to false for release builds to make it a no-op.
 const DEV = true;
 
 let fs: any;

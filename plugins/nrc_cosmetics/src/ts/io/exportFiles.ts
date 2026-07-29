@@ -4,14 +4,12 @@ import { mcId } from '../core/util';
 let fs: any;
 try { fs = require('fs'); } catch (e) { /* not in electron */ }
 
-// Remembers the last export folder for convenient re-exports during a session.
 let lastDir: string | undefined;
 
 export interface OutFile { suffix: string; content: string; }
 
 export const sanitize = mcId;
 
-// Writes all files into one chosen folder. Falls back to chained save dialogs.
 export function writeFiles(base: string, files: OutFile[]) {
     if (fs && Blockbench.pickDirectory) {
         const dir = Blockbench.pickDirectory({
@@ -33,7 +31,6 @@ export function writeFiles(base: string, files: OutFile[]) {
         return;
     }
 
-    // Fallback: one save dialog per file.
     let i = 0;
     const next = () => {
         if (i >= files.length) return;

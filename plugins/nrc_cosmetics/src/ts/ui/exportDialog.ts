@@ -1,7 +1,8 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
+import { openAnimationExportDialog } from './animationExportDialog';
 import { isCosmeticFormat } from '../platform/format';
-import { initFlags, initLocks, anyLocked, writeMeta } from '../domain/meta';
+import { emoteSettingsState, applyEmoteSettings, EMOTE_SETTINGS_TEMPLATE } from './emoteSettingsPanel';
 import { buildAnimationJson } from '../serialization/animation';
 import { buildGeoJson } from '../serialization/geometry';
 import { buildNoriskJson } from '../serialization/norisk';
@@ -12,7 +13,6 @@ import { log, logReset } from '../core/log';
 
 const RARITIES = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
 
-// Official NRC rarity colors (RarityColors.kt baseColor).
 const RARITY_COLORS: { [r: string]: string } = {
     COMMON: '#757575',
     UNCOMMON: '#1c7c35',
@@ -77,6 +77,19 @@ export function ensureExportCss(registry: Registry) {
     `);
 }
 
+export function createExportAnimationsAction(registry: Registry, type: CosmeticType): any {
+    return registry.action('nrc_export_animations_' + type.id, {
+        name: 'Export ' + type.formatName + ' Animations',
+        description: 'Save the animations as their own .animation.json',
+        icon: 'movie',
+        category: 'file',
+        condition: () => isCosmeticFormat(type) && Animation.all.length > 0,
+        click() {
+            openAnimationExportDialog(type);
+        },
+    });
+}
+
 export function createExportAction(registry: Registry, type: CosmeticType): any {
     return registry.action('nrc_export_' + type.id, {
         name: 'Export NRC ' + type.formatName,
@@ -90,17 +103,12 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
             const state = {
                 name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName),
                 exportAnimation: type.exportsAnimation,
-                exportNorisk: true,
+                exportNorisk: false,
                 exportModel: type.exportsModelDefault(),
-                flags: initFlags(metaAnim, type),
-                locks: initLocks(metaAnim, type),
-                lockOpen: anyLocked(metaAnim, type),
+                ...emoteSettingsState(metaAnim, type),
                 creator: settings.credit?.value || '',
                 price: 0,
                 rarity: 'COMMON',
-                flagDefs: type.metaFields,
-                bones: type.bones,
-                hasLockBones: type.hasLockBones,
                 rarities: RARITIES,
                 colors: RARITY_COLORS,
                 icon: type.icon,
@@ -168,24 +176,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                                 </div>
                             </div>
 
-                            <div v-if="exportAnimation">
-                                <div class="nrc-x-sec-h">Emote settings</div>
-                                <div class="nrc-x-switches">
-                                    <label class="nrc-x-switch" v-for="f in flagDefs" :key="f.key">
-                                        <span class="txt"><div class="lbl">{{ f.label }}</div><div class="desc">{{ f.description }}</div></span>
-                                        <span class="nrc-x-toggle"><input type="checkbox" v-model="flags[f.key]"><span class="sl"></span></span>
-                                    </label>
-                                </div>
-                                <div class="nrc-x-locks" v-if="hasLockBones">
-                                    <label class="nrc-x-switch" style="cursor:pointer">
-                                        <span class="txt"><div class="lbl">Lock vanilla bones</div></span>
-                                        <span class="nrc-x-toggle"><input type="checkbox" v-model="lockOpen"><span class="sl"></span></span>
-                                    </label>
-                                    <div class="nrc-x-chips" v-if="lockOpen">
-                                        <span class="nrc-x-chip" v-for="b in bones" :key="b" :class="{on: locks[b]}" @click="locks[b] = !locks[b]">{{ b }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <div v-if="exportAnimation">${EMOTE_SETTINGS_TEMPLATE}</div>
 
                             <div v-if="exportNorisk">
                                 <div class="nrc-x-sec-h">Cosmetic metadata</div>
@@ -211,10 +202,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                     const base = sanitize(state.name) || type.defaultName;
                     const files: OutFile[] = [];
 
-                    if (state.exportAnimation && metaAnim) {
-                        const locks = state.lockOpen ? state.locks : {};
-                        writeMeta(metaAnim, type, state.flags, locks);
-                    }
+                    if (state.exportAnimation) applyEmoteSettings(metaAnim, type, state);
                     if (state.exportAnimation) {
                         files.push({ suffix: '.animation.json', content: JSON.stringify(buildAnimationJson(type), null, 2) });
                     }

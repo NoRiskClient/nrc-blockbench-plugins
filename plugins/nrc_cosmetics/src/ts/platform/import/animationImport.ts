@@ -2,10 +2,6 @@ import { CosmeticType } from '../../cosmetics/types';
 import { lockPropKey } from '../../domain/meta';
 import { log } from '../../core/log';
 
-// Imports a parsed <name>.animation.json onto the current rig using Blockbench's own
-// Animator.loadFile (it constructs the Animations correctly for the project), then writes our
-// NRC animation metadata onto each created animation. Per-keyframe easing is restored by our
-// Keyframe.prototype.extend patch during loadFile.
 export function importAnimation(type: CosmeticType, file: any): any {
     const animations = (file && file.animations) || {};
 

@@ -3,13 +3,10 @@ import { getFormat } from './format';
 import { setSkinMode } from './skinPreview';
 import { log, logReset } from '../core/log';
 
-// Creates a fresh project and loads the type's rig into it. Template imports pass
-// skipDefaultAnimation so they can add the template's own animations instead.
 export function loadRig(type: CosmeticType, skipDefaultAnimation = false) {
     logReset();
     log('loadRig ' + type.id);
     try {
-        // Always start a fresh project so each New Emote is its own .bbmodel.
         newProject(getFormat(type));
         Codecs.project.parse(JSON.parse(JSON.stringify(type.rig)), '');
         Project.name = type.defaultName;

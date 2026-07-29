@@ -7,9 +7,6 @@ const ASSET = 'nrc-cosmetics.zip';
 const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const ASSET_URL = `https://github.com/${REPO}/releases/latest/download/${ASSET}`;
 
-// Require each builtin independently with a STATIC require (so webpack externals apply) —
-// Blockbench's plugin require may reject some builtins, and a single combined try would
-// leave later vars undefined. Disk cache is best-effort.
 let fs: any, os: any, path: any, Buf: any;
 try { fs = require('fs'); } catch (e) { /* none */ }
 try { os = require('os'); } catch (e) { /* none */ }
@@ -37,7 +34,6 @@ async function latestTag(): Promise<string | null> {
     } catch (e) { return null; }
 }
 
-// Returns the zip bytes, using the on-disk cache when the release tag is unchanged.
 async function getZipBytes(force: boolean): Promise<Uint8Array | null> {
     const dir = cacheDir();
     const zipPath = dir ? path.join(dir, ASSET) : null;
@@ -68,7 +64,6 @@ async function getZipBytes(force: boolean): Promise<Uint8Array | null> {
     }
 }
 
-// Downloads + extracts the latest nrc-cosmetics.zip and returns the emote templates.
 export async function loadTemplates(force = false): Promise<{ templates: Template[]; error?: string }> {
     const bytes = await getZipBytes(force);
     if (!bytes) return { templates: [], error: 'Download failed and no cache available' };

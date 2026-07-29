@@ -1,5 +1,3 @@
-// Tracks every Blockbench resource the plugin creates so onunload can dispose them all
-// generically. Adding a feature never means editing an onunload list again.
 export class Registry {
     private disposers: Array<() => void> = [];
 
@@ -27,7 +25,6 @@ export class Registry {
 
     menu(action: any, path: string) {
         MenuBar.addAction(action, path);
-        // The action's own delete() (tracked above) removes it from the menu.
     }
 
     previewMenu(action: any) {
@@ -48,7 +45,6 @@ export class Registry {
         this.track(() => { if (Blockbench.removeListener) Blockbench.removeListener(name, cb); });
     }
 
-    // Reversibly replaces obj[key]. `make` receives the original to delegate to.
     monkeypatch(obj: any, key: string, make: (orig: any) => any) {
         const orig = obj[key];
         obj[key] = make(orig);

@@ -1,4 +1,3 @@
-// One selectable template in the New-Emote card grid.
 export interface Template {
     id: string;
     name: string;

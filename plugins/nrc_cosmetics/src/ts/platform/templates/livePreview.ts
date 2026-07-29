@@ -3,10 +3,6 @@ import { STEVE_GEO, buildBoneTree, parseGeo, parseEmoteFile, EmotePlayer, applyE
 import steveSkin from '../../assets/steveSkin';
 import { log } from '../../core/log';
 
-// Live animated card previews using the official @noriskclient/nrc-skin-renderer so the pose
-// math (negateX, rotation order, molang, locked bones) matches in-game 1:1. One shared THREE
-// renderer blits each emote's posed rig into per-card 2D canvases.
-
 const SIZE = 132;
 const FPS = 24;
 const NEGATE_X = true; // bedrock<->blockbench X convention used by the renderer lib
@@ -27,7 +23,6 @@ let raf = 0;
 let last = 0;
 let items: Item[] = [];
 
-// The lib's UVs assume flipY=false; matching that here is what makes the skin map correctly.
 function makeMaterial(dataUri: string): any {
     const img = new Image();
     const tex = new THREE.Texture(img);
@@ -104,7 +99,6 @@ export function addLivePreview(canvas: any, animationJson: any, propGeo?: any, p
     }
 }
 
-// Frees the GPU resources of one preview scene (geometries, materials, textures).
 function disposeScene(root: any) {
     root.traverse((o: any) => {
         if (o.geometry && o.geometry.dispose) o.geometry.dispose();

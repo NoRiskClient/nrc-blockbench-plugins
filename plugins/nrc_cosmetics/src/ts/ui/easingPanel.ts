@@ -78,7 +78,6 @@ function rebuild() {
     const cur = splitName(sel[0].easing || 'linear');
     const curName = sel[0].easing || 'linear';
 
-    // Easing type bar
     const bar = makeBar('nrc_easing_bar', 'Easing');
     for (const base of BASES) {
         const repName = combineName(base, cur.dir);
@@ -86,7 +85,6 @@ function rebuild() {
     }
     container.appendChild(bar);
 
-    // Direction bar (only for curves with a direction)
     if (cur.base !== 'linear' && cur.base !== 'step') {
         const tbar = makeBar('nrc_easing_type_bar', 'Type');
         for (const dir of ['in', 'out', 'inout']) {
@@ -95,7 +93,6 @@ function rebuild() {
         container.appendChild(tbar);
     }
 
-    // Argument input (back / elastic / bounce / step)
     if (isArgsEasing(curName) && sel.every((kf) => isArgsEasing(kf.easing))) {
         const abar = makeBar('nrc_easing_arg_bar', argLabel(curName));
         const input = document.createElement('input');
@@ -116,7 +113,6 @@ function onRenderFrame() {
             kf.easing = undefined;
             kf.easingArgs = undefined;
         }
-        // Visual marker on the timeline: eased / bezier keyframes get tinted.
         const el = document.getElementById(kf.uuid);
         if (el && el.classList) {
             el.classList.toggle('nrc_kf_eased', !!kf.easing);

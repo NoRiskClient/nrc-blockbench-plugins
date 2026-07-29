@@ -2,12 +2,11 @@ import { CosmeticType } from '../cosmetics/types';
 import { readFlag, buildLockMap } from '../domain/meta';
 import { mcId } from '../core/util';
 
-// Native Bedrock animation compile + NRC metadata injected per animation, driven by the
-// type's schema. Output keys match GeoEmoteParser exactly.
-export function buildAnimationJson(type: CosmeticType): object {
+export function buildAnimationJson(type: CosmeticType, only?: any[]): object {
     const animations: { [name: string]: any } = {};
+    const source = only ?? (Animation.all as any[]);
 
-    for (const anim of Animation.all as any[]) {
+    for (const anim of source) {
         const compiled: any = anim.compileBedrockAnimation();
 
         for (const f of type.metaFields) compiled[f.jsonKey] = readFlag(anim, f.key, f.default);

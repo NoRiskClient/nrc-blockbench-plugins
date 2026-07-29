@@ -1,7 +1,5 @@
 import { log } from '../../core/log';
 
-// Adds prop geometry (Bedrock .geo.json) onto the current rig by building Blockbench
-// Groups/Cubes directly, and applies the prop texture so it shows up UV-mapped.
 export function importGeometry(geoJson: any, textureDataUri?: string) {
     try {
         const geos = geoJson['minecraft:geometry'] || [];
@@ -46,7 +44,6 @@ export function importGeometry(geoJson: any, textureDataUri?: string) {
             }
         }
 
-        // Map the prop texture onto the prop cubes.
         if (tex) {
             for (const cube of propCubes) {
                 if (!cube.faces) continue;

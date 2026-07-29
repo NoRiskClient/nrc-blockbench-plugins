@@ -2,8 +2,6 @@ import playerRig from '../assets/playerRig.json';
 import steveSkin from '../assets/steveSkin';
 import { CosmeticType } from './types';
 
-// Player rig bones the runtime animates (gg.norisk.cosmetics...GeoEmote.PLAYER_BONES).
-// bipedRig is the whole-body root, the rest parent under it.
 export const PLAYER_BONES = [
     'bipedRig',
     'bipedHead',
@@ -14,7 +12,6 @@ export const PLAYER_BONES = [
     'bipedLeftLeg',
 ];
 
-// The emote cosmetic type. All emote-specific values live here and nowhere else.
 export const EMOTE: CosmeticType = {
     id: 'emote',
     formatId: 'nrc_emote',
@@ -25,7 +22,6 @@ export const EMOTE: CosmeticType = {
     defaultName: 'new_emote',
 
     bones: PLAYER_BONES,
-    // jsonKey + defaults mirror GeoEmoteParser.getBooleanOrDefault exactly.
     metaFields: [
         { key: 'nrc_disableOnMove', jsonKey: 'disableOnMove', label: 'Disable on move', description: 'Stop the emote when the player moves', default: false },
         { key: 'nrc_disableOnHit', jsonKey: 'disableOnHit', label: 'Disable on hit', description: 'Stop the emote when the player takes damage', default: true },

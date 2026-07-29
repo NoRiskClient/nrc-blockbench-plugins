@@ -7,6 +7,7 @@ import { loadRig } from '../platform/rig';
 import { importAnimation } from '../platform/import/animationImport';
 import { importGeometry } from '../platform/import/geometryImport';
 import { log } from '../core/log';
+import { promptName } from './nameDialog';
 
 const BLANK: Template = { id: 'blank', name: 'Blank Emote', kind: 'blank', hasProps: false };
 
@@ -20,6 +21,10 @@ const state: any = {
 };
 
 function applyTemplate(type: CosmeticType, t: Template) {
+    promptName(type, (id) => buildFromTemplate(type, t, id));
+}
+
+function buildFromTemplate(type: CosmeticType, t: Template, id: string) {
     try {
         if (t.kind === 'blank') {
             loadRig(type);
@@ -27,12 +32,23 @@ function applyTemplate(type: CosmeticType, t: Template) {
             loadRig(type, true);
             if (t.hasProps && t.geoJson) importGeometry(t.geoJson, t.previewDataUri);
             importAnimation(type, t.animationJson);
-            if (typeof Project !== 'undefined' && Project) Project.name = t.name;
             Canvas.updateAll();
         }
+        applyName(id);
         Blockbench.showQuickMessage('Loaded: ' + t.name, 1600);
     } catch (e: any) {
         log('applyTemplate ERROR: ' + (e && e.stack ? e.stack : String(e)));
+    }
+}
+
+function applyName(id: string) {
+    if (typeof Project !== 'undefined' && Project) Project.name = id;
+
+    const animations = (Animation.all || []) as any[];
+    const target = animations.length === 1 ? animations[0] : (Animation.selected as any) || animations[0];
+    if (target) {
+        target.name = id;
+        if (target.createUniqueName) target.createUniqueName(animations);
     }
 }
 

@@ -2,15 +2,10 @@ import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
 import { currentType, isCosmeticFormat } from './format';
 
-// Render-only skin preview: swaps each cube's THREE material between Blockbench's marker
-// color and a skin material built from the current cosmetic type's reference skin. Never
-// creates a Blockbench Texture, so nothing appears in the Textures panel.
-
 let skinMode = false;
 let playerBones = new Set<string>();
 const materials: { [uri: string]: any } = {};
 
-// True if the cube belongs to one of the player rig bones (not an imported prop).
 function isPlayerCube(cube: any): boolean {
     let p = cube.parent;
     while (p && p.name) {

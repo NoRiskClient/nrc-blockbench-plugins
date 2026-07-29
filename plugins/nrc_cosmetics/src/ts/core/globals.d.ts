@@ -1,6 +1,3 @@
-// Minimal ambient declarations for the Blockbench globals this plugin uses.
-// Kept loose on purpose — self-contained so the build does not depend on the exact
-// blockbench-types version (which clashes with the DOM `Animation` lib type).
 
 declare const console: { log(...args: any[]): void; warn(...args: any[]): void; error(...args: any[]): void };
 declare function require(module: string): any;
@@ -58,6 +55,8 @@ declare const Project: any;
 declare const Format: { id: string; [key: string]: any };
 declare const settings: { [key: string]: { value: any } };
 declare const Codecs: { [key: string]: any };
+declare const AnimationCodec: { new (id: string, opts: any): any; codecs: { [key: string]: any } };
+declare const BarItems: { [key: string]: any };
 
 declare class ModelFormat {
     constructor(options: any);

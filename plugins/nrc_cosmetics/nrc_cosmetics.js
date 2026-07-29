@@ -2766,8 +2766,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-// Default reference skin embedded as a data URI (from default_steve.png, RGBA).
-// Inlined as base64 so no webpack image loader is needed.
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ("data:image/png;base64,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");
 
 
@@ -2784,8 +2782,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   log: () => (/* binding */ log),
 /* harmony export */   logReset: () => (/* binding */ logReset)
 /* harmony export */ });
-// Dev logger. Writes to a file on disk so it can be inspected outside Blockbench.
-// Flip DEV to false for release builds to make it a no-op.
 const DEV = true;
 let fs;
 try {
@@ -2825,8 +2821,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Registry: () => (/* binding */ Registry)
 /* harmony export */ });
-// Tracks every Blockbench resource the plugin creates so onunload can dispose them all
-// generically. Adding a feature never means editing an onunload list again.
 class Registry {
     constructor() {
         this.disposers = [];
@@ -2851,7 +2845,6 @@ class Registry {
     }
     menu(action, path) {
         MenuBar.addAction(action, path);
-        // The action's own delete() (tracked above) removes it from the menu.
     }
     previewMenu(action) {
         if (typeof Preview !== 'undefined' && Preview.prototype && Preview.prototype.menu) {
@@ -2871,7 +2864,6 @@ class Registry {
         this.track(() => { if (Blockbench.removeListener)
             Blockbench.removeListener(name, cb); });
     }
-    // Reversibly replaces obj[key]. `make` receives the original to delegate to.
     monkeypatch(obj, key, make) {
         const orig = obj[key];
         obj[key] = make(orig);
@@ -2899,7 +2891,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   mcId: () => (/* binding */ mcId)
 /* harmony export */ });
-// Normalizes a name into a Minecraft-identifier-safe string: lowercase, only [a-z0-9_].
 function mcId(name) {
     return (name || '').toLowerCase().trim().replace(/[\s&-]+/g, '_').replace(/[^a-z0-9_]+/g, '');
 }
@@ -2922,8 +2913,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _assets_steveSkin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../assets/steveSkin */ "./ts/assets/steveSkin.ts");
 
 
-// Player rig bones the runtime animates (gg.norisk.cosmetics...GeoEmote.PLAYER_BONES).
-// bipedRig is the whole-body root, the rest parent under it.
 const PLAYER_BONES = [
     'bipedRig',
     'bipedHead',
@@ -2933,7 +2922,6 @@ const PLAYER_BONES = [
     'bipedRightLeg',
     'bipedLeftLeg',
 ];
-// The emote cosmetic type. All emote-specific values live here and nowhere else.
 const EMOTE = {
     id: 'emote',
     formatId: 'nrc_emote',
@@ -2943,7 +2931,6 @@ const EMOTE = {
     noriskType: 'EMOTES',
     defaultName: 'new_emote',
     bones: PLAYER_BONES,
-    // jsonKey + defaults mirror GeoEmoteParser.getBooleanOrDefault exactly.
     metaFields: [
         { key: 'nrc_disableOnMove', jsonKey: 'disableOnMove', label: 'Disable on move', description: 'Stop the emote when the player moves', default: false },
         { key: 'nrc_disableOnHit', jsonKey: 'disableOnHit', label: 'Disable on hit', description: 'Stop the emote when the player takes damage', default: true },
@@ -2999,7 +2986,6 @@ function initLocks(anim, type) {
 function anyLocked(anim, type) {
     return type.bones.some((b) => readFlag(anim, lockPropKey(b), false));
 }
-// Writes flag + lock values from a dialog back onto the animation.
 function writeMeta(anim, type, flags, locks) {
     for (const f of type.metaFields)
         anim[f.key] = !!flags[f.key];
@@ -3010,7 +2996,6 @@ function writeMeta(anim, type, flags, locks) {
     if (typeof Project !== 'undefined' && Project)
         Project.saved = false;
 }
-// The lockVanillaBones map written into the exported animation JSON.
 function buildLockMap(anim, type) {
     const m = {};
     for (const b of type.bones)
@@ -3043,11 +3028,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// Wires one cosmetic type into Blockbench. Everything is tracked by the registry, so a
-// single registry.disposeAll() in onunload tears it all down. New types = call this again.
 function registerCosmeticType(type, registry) {
     (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.registerFormat)(registry, type);
-    // File -> New tile opens the template card picker.
     (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_4__.ensureTemplateCss)(registry);
     (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type).new = function () { (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_4__.openTemplateDialog)(type); };
     const condition = { formats: [type.formatId] };
@@ -3062,9 +3044,11 @@ function registerCosmeticType(type, registry) {
     registry.menu((0,_ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__.createSettingsAction)(registry, type), 'animation');
     (0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.ensureExportCss)(registry);
     registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAction)(registry, type), 'file.export');
+    if (type.exportsAnimation) {
+        registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAnimationsAction)(registry, type), 'file.export');
+    }
     if (type.hasSkinPreview) {
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleSkinAction)(registry, type));
-        // Blockbench rebuilds cube meshes (resetting materials) on these events.
         registry.event('update_view', _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.reapplyIfActive);
         registry.event('finished_edit', _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.reapplyIfActive);
         registry.event('add_cube', _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.reapplyIfActive);
@@ -3094,10 +3078,8 @@ try {
     fs = __webpack_require__(/*! fs */ "fs");
 }
 catch (e) { /* not in electron */ }
-// Remembers the last export folder for convenient re-exports during a session.
 let lastDir;
 const sanitize = _core_util__WEBPACK_IMPORTED_MODULE_1__.mcId;
-// Writes all files into one chosen folder. Falls back to chained save dialogs.
 function writeFiles(base, files) {
     if (fs && Blockbench.pickDirectory) {
         const dir = Blockbench.pickDirectory({
@@ -3118,7 +3100,6 @@ function writeFiles(base, files) {
         Blockbench.showQuickMessage('Exported ' + files.length + ' file(s)', 1800);
         return;
     }
-    // Fallback: one save dialog per file.
     let i = 0;
     const next = () => {
         if (i >= files.length)
@@ -3133,6 +3114,152 @@ function writeFiles(base, files) {
         }, next);
     };
     next();
+}
+
+
+/***/ },
+
+/***/ "./ts/platform/animationCodec.ts"
+/*!***************************************!*\
+  !*** ./ts/platform/animationCodec.ts ***!
+  \***************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   nrcAnimationCodec: () => (/* binding */ nrcAnimationCodec)
+/* harmony export */ });
+/* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
+/* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
+
+const nrcAnimationCodec = new AnimationCodec('nrc_emote_animation', {
+    multiple_per_file: true,
+    compileFile(animations = Animation.all) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('compileFile: ' + (animations ? animations.length : 0) + ' animation(s)');
+        const type = (0,_format__WEBPACK_IMPORTED_MODULE_1__.currentType)();
+        if (!type)
+            return { format_version: '1.8.0', animations: {} };
+        return (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_0__.buildAnimationJson)(type, animations);
+    },
+    exportFile(path, save_as) {
+        const all = (Animation.all || []);
+        const forFile = path ? all.filter((a) => a.path === path) : all;
+        const animations = forFile.length ? forFile : all;
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('exportFile: path=' + path + ' save_as=' + !!save_as + ' animations=' + animations.length);
+        const content = JSON.stringify(this.compileFile(animations), null, 2);
+        const name = (animations[0] && animations[0].name) || 'emote';
+        const remember = (written) => {
+            if (!written)
+                return;
+            for (const anim of animations) {
+                anim.path = written;
+                anim.saved = true;
+            }
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('exportFile: wrote ' + written);
+        };
+        if (path && !save_as && Blockbench.writeFile) {
+            Blockbench.writeFile(path, { content }, remember);
+            return;
+        }
+        Blockbench.export({
+            resource_id: 'animation',
+            type: 'JSON Animation',
+            extensions: ['json'],
+            name: name + '.animation',
+            startpath: path,
+            content,
+        }, remember);
+    },
+});
+
+
+/***/ },
+
+/***/ "./ts/platform/animationPatches.ts"
+/*!*****************************************!*\
+  !*** ./ts/platform/animationPatches.ts ***!
+  \*****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   installAnimationPatches: () => (/* binding */ installAnimationPatches),
+/* harmony export */   removeAnimationPatches: () => (/* binding */ removeAnimationPatches)
+/* harmony export */ });
+/* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
+/* harmony import */ var _ui_animationExportDialog__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ui/animationExportDialog */ "./ts/ui/animationExportDialog.ts");
+/* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
+
+
+
+const patched = [];
+function patch(target, key, replacement) {
+    if (!target || typeof target[key] !== 'function') {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)(`animationPatches: cannot patch ${key}, not a function`);
+        return;
+    }
+    const original = target[key];
+    patched.push({ target, key, original });
+    target[key] = replacement(original);
+}
+function installAnimationPatches(type) {
+    if (patched.length)
+        return;
+    patch(BarItems['export_animation_file'], 'click', () => function () {
+        (0,_ui_animationExportDialog__WEBPACK_IMPORTED_MODULE_1__.openAnimationExportDialog)(type);
+    });
+    patch(Animator, 'loadFile', (original) => function (file, ...rest) {
+        var _a, _b;
+        const before = new Set((Animation.all || []).map((a) => a.uuid));
+        const result = original.apply(this, [file, ...rest]);
+        const type = (0,_format__WEBPACK_IMPORTED_MODULE_2__.currentType)();
+        if (!type)
+            return result;
+        const json = file && ((_a = file.json) !== null && _a !== void 0 ? _a : safeParse(file.content));
+        const animations = json && json.animations;
+        if (!animations)
+            return result;
+        const added = (Animation.all || []).filter((a) => !before.has(a.uuid));
+        for (const anim of added) {
+            const data = (_b = animations[anim.name]) !== null && _b !== void 0 ? _b : animations[(0,_core_util__WEBPACK_IMPORTED_MODULE_3__.mcId)(anim.name)];
+            if (!data)
+                continue;
+            for (const f of type.metaFields) {
+                if (data[f.jsonKey] !== undefined)
+                    anim[f.key] = !!data[f.jsonKey];
+            }
+            if (type.hasLockBones && data.lockVanillaBones) {
+                for (const b of type.bones) {
+                    if (data.lockVanillaBones[b] !== undefined) {
+                        anim[(0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.lockPropKey)(b)] = !!data.lockVanillaBones[b];
+                    }
+                }
+            }
+        }
+        return result;
+    });
+}
+function removeAnimationPatches() {
+    for (const { target, key, original } of patched)
+        target[key] = original;
+    patched.length = 0;
+}
+function safeParse(text) {
+    if (typeof text !== 'string')
+        return null;
+    try {
+        return JSON.parse(text);
+    }
+    catch (_a) {
+        return null;
+    }
 }
 
 
@@ -3157,12 +3284,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   reverseEasing: () => (/* binding */ reverseEasing),
 /* harmony export */   splitName: () => (/* binding */ splitName)
 /* harmony export */ });
-// Self-contained easing math (standard Penner-style curves), name helpers and curve-thumbnail
-// SVG generation. Names match what GeckoLib emits and what GeoEasingType.fromName accepts
-// (case/underscore-insensitive on the runtime side).
 const PI = Math.PI;
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-// Base curve types shown in the selector, in order.
 const BASES = ['linear', 'step', 'sine', 'quad', 'cubic', 'quart', 'quint', 'expo', 'circ', 'back', 'elastic', 'bounce'];
 function inPow(p) { return (t) => Math.pow(t, p); }
 function outPow(p) { return (t) => 1 - Math.pow(1 - t, p); }
@@ -3182,7 +3305,6 @@ function bounceOut(t) {
     t -= 2.625 / d1;
     return n1 * t * t + 0.984375;
 }
-// Map of full easing name -> function. Args-easings take (arg, t); the rest take (t).
 const FN = {
     linear: (t) => t,
     step: ((n, t) => { const s = Math.max(n || 5, 2); return Math.floor(t * s) / s; }),
@@ -3211,7 +3333,6 @@ const FN = {
     easeOutBounce: ((_b, t) => bounceOut(t)),
     easeInOutBounce: ((_b, t) => (t < 0.5 ? (1 - bounceOut(1 - 2 * t)) / 2 : (1 + bounceOut(2 * t - 1)) / 2)),
 };
-// Polynomial curves built generically.
 const POLY = { quad: 2, cubic: 3, quart: 4, quint: 5 };
 for (const base of Object.keys(POLY)) {
     const p = POLY[base];
@@ -3243,7 +3364,6 @@ function parseArg(name, value) {
         return Math.max(parseInt(value, 10) || 5, 2);
     return parseFloat(value);
 }
-// Evaluates an easing at t∈[0,1], passing the arg for args-easings.
 function evaluate(name, t, arg) {
     const f = FN[name] || FN.linear;
     if (isArgsEasing(name))
@@ -3256,7 +3376,6 @@ function combineName(base, dir) {
     const d = dir === 'out' ? 'Out' : dir === 'inout' ? 'InOut' : 'In';
     return 'ease' + d + cap(base);
 }
-// Swaps In<->Out (InOut/linear/step unchanged) — used when reversing a keyframe sequence.
 function reverseEasing(name) {
     if (!name)
         return name;
@@ -3273,7 +3392,6 @@ function splitName(name = 'linear') {
         return { base: 'linear', dir: 'in' };
     return { base: m[2].toLowerCase(), dir: m[1].toLowerCase() };
 }
-// Generates a small SVG curve thumbnail by sampling the easing function.
 function iconSvg(name, accent) {
     const W = 24, H = 24, pad = 3, n = 18;
     const pts = [];
@@ -3306,7 +3424,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ui_easingPanel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../ui/easingPanel */ "./ts/ui/easingPanel.ts");
 
 
-// Keyframe easing: prototype patches (preview + export) and the keyframe-panel selector UI.
 function installEasing(registry) {
     (0,_keyframePatches__WEBPACK_IMPORTED_MODULE_0__.installEasingPatches)(registry);
     (0,_ui_easingPanel__WEBPACK_IMPORTED_MODULE_1__.installEasingPanel)(registry);
@@ -3333,7 +3450,6 @@ const DEFAULT = 'linear';
 function lerp(a, b, t) {
     return a + (b - a) * t;
 }
-// When reversing keyframes, the easing of each segment flips In<->Out and shifts one frame.
 function rotateEasings() {
     const sel = (Timeline.selected || []);
     if (!sel.length)
@@ -3359,9 +3475,6 @@ function rotateEasings() {
     }
     Undo.finishEdit('Reverse keyframe easing');
 }
-// Patches Keyframe.prototype so easing affects both the live preview (getLerp) and the
-// exported JSON (compileBedrockKeyframe), and persists through undo / .bbmodel. All gated to
-// our format; other formats fall through to the original behaviour.
 function installEasingPatches(registry) {
     registry.monkeypatch(Keyframe.prototype, 'getLerp', (orig) => function (other, axis, amount) {
         if (!(0,_format__WEBPACK_IMPORTED_MODULE_0__.easingEnabled)())
@@ -3380,8 +3493,6 @@ function installEasingPatches(registry) {
         const result = orig.apply(this, arguments);
         if (!(0,_format__WEBPACK_IMPORTED_MODULE_0__.easingEnabled)())
             return result;
-        // Bezier: emit lerp_mode + handle arrays exactly as the runtime parser reads them,
-        // independent of whether Blockbench bakes bezier by default.
         if (this.interpolation === 'bezier') {
             const vec = Array.isArray(result) ? result : (result && result.vector) || result;
             return {
@@ -3423,13 +3534,11 @@ function installEasingPatches(registry) {
                 this.easing = src.easing;
             if (Array.isArray(src.easingArgs))
                 this.easingArgs = src.easingArgs;
-            // Normalize {vector,...} back to a plain array for the original extend.
             if (data.values && !Array.isArray(data.values) && Array.isArray(data.values.vector))
                 data.values = data.values.vector;
         }
         return orig.apply(this, arguments);
     });
-    // Reverse Keyframes button: also rotate the easings of the reversed keyframes.
     if (typeof BarItems !== 'undefined' && BarItems.reverse_keyframes) {
         registry.monkeypatch(BarItems.reverse_keyframes, 'click', (orig) => function () {
             orig.apply(this, arguments);
@@ -3462,9 +3571,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isCosmeticFormat: () => (/* binding */ isCosmeticFormat),
 /* harmony export */   registerFormat: () => (/* binding */ registerFormat)
 /* harmony export */ });
+/* harmony import */ var _animationCodec__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./animationCodec */ "./ts/platform/animationCodec.ts");
+
 const formatsById = {};
 const typesById = {};
-// Shared ModelFormat flags; per-type overrides are merged on top.
 function baseFormatOptions(type) {
     return {
         id: type.formatId,
@@ -3480,13 +3590,15 @@ function baseFormatOptions(type) {
         centered_grid: true,
         locators: true,
         animation_mode: true,
-        animation_files: false,
+        animation_files: true,
+        animation_codec: _animationCodec__WEBPACK_IMPORTED_MODULE_0__.nrcAnimationCodec,
         display_mode: false,
         codec: Codecs.project,
     };
 }
 function registerFormat(registry, type) {
-    const fmt = registry.format(Object.assign(baseFormatOptions(type), type.formatOverrides || {}));
+    const opts = Object.assign(baseFormatOptions(type), type.formatOverrides || {});
+    const fmt = registry.format(opts);
     formatsById[type.formatId] = fmt;
     typesById[type.formatId] = type;
     registry.track(() => { delete formatsById[type.formatId]; delete typesById[type.formatId]; });
@@ -3526,10 +3638,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
 
 
-// Imports a parsed <name>.animation.json onto the current rig using Blockbench's own
-// Animator.loadFile (it constructs the Animations correctly for the project), then writes our
-// NRC animation metadata onto each created animation. Per-keyframe easing is restored by our
-// Keyframe.prototype.extend patch during loadFile.
 function importAnimation(type, file) {
     const animations = (file && file.animations) || {};
     const before = new Set((Animation.all || []).map((a) => a.uuid));
@@ -3575,8 +3683,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
 
-// Adds prop geometry (Bedrock .geo.json) onto the current rig by building Blockbench
-// Groups/Cubes directly, and applies the prop texture so it shows up UV-mapped.
 function importGeometry(geoJson, textureDataUri) {
     try {
         const geos = geoJson['minecraft:geometry'] || [];
@@ -3623,7 +3729,6 @@ function importGeometry(geoJson, textureDataUri) {
                 }
             }
         }
-        // Map the prop texture onto the prop cubes.
         if (tex) {
             for (const cube of propCubes) {
                 if (!cube.faces)
@@ -3660,13 +3765,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// Creates a fresh project and loads the type's rig into it. Template imports pass
-// skipDefaultAnimation so they can add the template's own animations instead.
 function loadRig(type, skipDefaultAnimation = false) {
     (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.logReset)();
     (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('loadRig ' + type.id);
     try {
-        // Always start a fresh project so each New Emote is its own .bbmodel.
         newProject((0,_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type));
         Codecs.project.parse(JSON.parse(JSON.stringify(type.rig)), '');
         Project.name = type.defaultName;
@@ -3701,13 +3803,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
 
-// Render-only skin preview: swaps each cube's THREE material between Blockbench's marker
-// color and a skin material built from the current cosmetic type's reference skin. Never
-// creates a Blockbench Texture, so nothing appears in the Textures panel.
 let skinMode = false;
 let playerBones = new Set();
 const materials = {};
-// True if the cube belongs to one of the player rig bones (not an imported prop).
 function isPlayerCube(cube) {
     let p = cube.parent;
     while (p && p.name) {
@@ -3814,9 +3912,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// Live animated card previews using the official @noriskclient/nrc-skin-renderer so the pose
-// math (negateX, rotation order, molang, locked bones) matches in-game 1:1. One shared THREE
-// renderer blits each emote's posed rig into per-card 2D canvases.
 const SIZE = 132;
 const FPS = 24;
 const NEGATE_X = true; // bedrock<->blockbench X convention used by the renderer lib
@@ -3826,7 +3921,6 @@ let skinMaterial = null;
 let raf = 0;
 let last = 0;
 let items = [];
-// The lib's UVs assume flipY=false; matching that here is what makes the skin map correctly.
 function makeMaterial(dataUri) {
     const img = new Image();
     const tex = new three__WEBPACK_IMPORTED_MODULE_0__.Texture(img);
@@ -3905,7 +3999,6 @@ function addLivePreview(canvas, animationJson, propGeo, propTexUri) {
         (0,_core_log__WEBPACK_IMPORTED_MODULE_8__.log)('live preview add failed: ' + e);
     }
 }
-// Frees the GPU resources of one preview scene (geometries, materials, textures).
 function disposeScene(root) {
     root.traverse((o) => {
         if (o.geometry && o.geometry.dispose)
@@ -3965,9 +4058,6 @@ const REPO = 'NoRiskClient/nrc-designer-docs';
 const ASSET = 'nrc-cosmetics.zip';
 const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const ASSET_URL = `https://github.com/${REPO}/releases/latest/download/${ASSET}`;
-// Require each builtin independently with a STATIC require (so webpack externals apply) —
-// Blockbench's plugin require may reject some builtins, and a single combined try would
-// leave later vars undefined. Disk cache is best-effort.
 let fs, os, path, Buf;
 try {
     fs = __webpack_require__(/*! fs */ "fs");
@@ -4018,7 +4108,6 @@ async function latestTag() {
         return null;
     }
 }
-// Returns the zip bytes, using the on-disk cache when the release tag is unchanged.
 async function getZipBytes(force) {
     const dir = cacheDir();
     const zipPath = dir ? path.join(dir, ASSET) : null;
@@ -4061,7 +4150,6 @@ async function getZipBytes(force) {
         return null;
     }
 }
-// Downloads + extracts the latest nrc-cosmetics.zip and returns the emote templates.
 async function loadTemplates(force = false) {
     const bytes = await getZipBytes(force);
     if (!bytes)
@@ -4128,11 +4216,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
 
 
-// Native Bedrock animation compile + NRC metadata injected per animation, driven by the
-// type's schema. Output keys match GeoEmoteParser exactly.
-function buildAnimationJson(type) {
+function buildAnimationJson(type, only) {
     const animations = {};
-    for (const anim of Animation.all) {
+    const source = only !== null && only !== void 0 ? only : Animation.all;
+    for (const anim of source) {
         const compiled = anim.compileBedrockAnimation();
         for (const f of type.metaFields)
             compiled[f.jsonKey] = (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.readFlag)(anim, f.key, f.default);
@@ -4156,7 +4243,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   buildGeoJson: () => (/* binding */ buildGeoJson)
 /* harmony export */ });
-// Bedrock geometry (minecraft:geometry, format 1.12) for the model — matches GeoModelParser.
 function buildGeoJson() {
     const compiled = Codecs.bedrock.compile();
     return typeof compiled === 'string' ? compiled : JSON.stringify(compiled, null, 2);
@@ -4197,6 +4283,68 @@ function buildNoriskJson(type, meta) {
         features: [],
         compatibleCosmetics: [],
     };
+}
+
+
+/***/ },
+
+/***/ "./ts/ui/animationExportDialog.ts"
+/*!****************************************!*\
+  !*** ./ts/ui/animationExportDialog.ts ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   openAnimationExportDialog: () => (/* binding */ openAnimationExportDialog)
+/* harmony export */ });
+/* harmony import */ var _emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./emoteSettingsPanel */ "./ts/ui/emoteSettingsPanel.ts");
+/* harmony import */ var _platform_animationCodec__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/animationCodec */ "./ts/platform/animationCodec.ts");
+
+
+function openAnimationExportDialog(type) {
+    const animations = (Animation.all || []);
+    if (!animations.length)
+        return;
+    const initial = Animation.selected || animations[0];
+    const state = Object.assign(Object.assign({}, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.emoteSettingsState)(initial, type)), { animations: animations.map((a) => ({ name: a.name, uuid: a.uuid })), selectedUuid: initial.uuid, pick(uuid) {
+            if (this.selectedUuid === uuid)
+                return;
+            this.selectedUuid = uuid;
+            const anim = animations.find((a) => a.uuid === uuid);
+            if (anim)
+                Object.assign(this, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.emoteSettingsState)(anim, type));
+        } });
+    new Dialog('nrc_animation_export_' + type.id, {
+        title: 'Export ' + type.formatName + ' Animations',
+        width: 540,
+        component: {
+            data: () => state,
+            template: `
+                <div class="nrc-x">
+                    <div class="nrc-x-sec-h">Animation</div>
+                    <div class="nrc-x-chips">
+                        <span class="nrc-x-chip" v-for="a in animations" :key="a.uuid"
+                            :class="{on: selectedUuid === a.uuid}" @click="pick(a.uuid)">{{ a.name }}</span>
+                    </div>
+                    ${_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.EMOTE_SETTINGS_TEMPLATE}
+                </div>
+            `,
+        },
+        onConfirm() {
+            const target = animations.find((a) => a.uuid === state.selectedUuid);
+            if (!target)
+                return;
+            (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.applyEmoteSettings)(target, type, state);
+            Blockbench.export({
+                resource_id: 'animation',
+                type: 'JSON Animation',
+                extensions: ['json'],
+                name: target.name + '.animation',
+                content: JSON.stringify(_platform_animationCodec__WEBPACK_IMPORTED_MODULE_1__.nrcAnimationCodec.compileFile([target]), null, 2),
+            });
+        },
+    }).show();
 }
 
 
@@ -4290,14 +4438,12 @@ function rebuild() {
         return;
     const cur = (0,_platform_easing_functions__WEBPACK_IMPORTED_MODULE_1__.splitName)(sel[0].easing || 'linear');
     const curName = sel[0].easing || 'linear';
-    // Easing type bar
     const bar = makeBar('nrc_easing_bar', 'Easing');
     for (const base of _platform_easing_functions__WEBPACK_IMPORTED_MODULE_1__.BASES) {
         const repName = (0,_platform_easing_functions__WEBPACK_IMPORTED_MODULE_1__.combineName)(base, cur.dir);
         bar.appendChild(iconButton(repName, base === cur.base, base, () => applyEasing((0,_platform_easing_functions__WEBPACK_IMPORTED_MODULE_1__.combineName)(base, cur.dir))));
     }
     container.appendChild(bar);
-    // Direction bar (only for curves with a direction)
     if (cur.base !== 'linear' && cur.base !== 'step') {
         const tbar = makeBar('nrc_easing_type_bar', 'Type');
         for (const dir of ['in', 'out', 'inout']) {
@@ -4305,7 +4451,6 @@ function rebuild() {
         }
         container.appendChild(tbar);
     }
-    // Argument input (back / elastic / bounce / step)
     if ((0,_platform_easing_functions__WEBPACK_IMPORTED_MODULE_1__.isArgsEasing)(curName) && sel.every((kf) => (0,_platform_easing_functions__WEBPACK_IMPORTED_MODULE_1__.isArgsEasing)(kf.easing))) {
         const abar = makeBar('nrc_easing_arg_bar', (0,_platform_easing_functions__WEBPACK_IMPORTED_MODULE_1__.argLabel)(curName));
         const input = document.createElement('input');
@@ -4326,7 +4471,6 @@ function onRenderFrame() {
             kf.easing = undefined;
             kf.easingArgs = undefined;
         }
-        // Visual marker on the timeline: eased / bezier keyframes get tinted.
         const el = document.getElementById(kf.uuid);
         if (el && el.classList) {
             el.classList.toggle('nrc_kf_eased', !!kf.easing);
@@ -4353,6 +4497,59 @@ function installEasingPanel(registry) {
 
 /***/ },
 
+/***/ "./ts/ui/emoteSettingsPanel.ts"
+/*!*************************************!*\
+  !*** ./ts/ui/emoteSettingsPanel.ts ***!
+  \*************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EMOTE_SETTINGS_TEMPLATE: () => (/* binding */ EMOTE_SETTINGS_TEMPLATE),
+/* harmony export */   applyEmoteSettings: () => (/* binding */ applyEmoteSettings),
+/* harmony export */   emoteSettingsState: () => (/* binding */ emoteSettingsState)
+/* harmony export */ });
+/* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
+
+function emoteSettingsState(anim, type) {
+    return {
+        flags: (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.initFlags)(anim, type),
+        locks: (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.initLocks)(anim, type),
+        lockOpen: (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.anyLocked)(anim, type),
+        flagDefs: type.metaFields,
+        bones: type.bones,
+        hasLockBones: type.hasLockBones,
+    };
+}
+const EMOTE_SETTINGS_TEMPLATE = `
+    <div>
+        <div class="nrc-x-sec-h">Emote settings</div>
+        <div class="nrc-x-switches">
+            <label class="nrc-x-switch" v-for="f in flagDefs" :key="f.key">
+                <span class="txt"><div class="lbl">{{ f.label }}</div><div class="desc">{{ f.description }}</div></span>
+                <span class="nrc-x-toggle"><input type="checkbox" v-model="flags[f.key]"><span class="sl"></span></span>
+            </label>
+        </div>
+        <div class="nrc-x-locks" v-if="hasLockBones">
+            <label class="nrc-x-switch" style="cursor:pointer">
+                <span class="txt"><div class="lbl">Lock vanilla bones</div></span>
+                <span class="nrc-x-toggle"><input type="checkbox" v-model="lockOpen"><span class="sl"></span></span>
+            </label>
+            <div class="nrc-x-chips" v-if="lockOpen">
+                <span class="nrc-x-chip" v-for="b in bones" :key="b" :class="{on: locks[b]}" @click="locks[b] = !locks[b]">{{ b }}</span>
+            </div>
+        </div>
+    </div>
+`;
+function applyEmoteSettings(anim, type, state) {
+    if (!anim)
+        return;
+    (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.writeMeta)(anim, type, state.flags, state.lockOpen ? state.locks : {});
+}
+
+
+/***/ },
+
 /***/ "./ts/ui/exportDialog.ts"
 /*!*******************************!*\
   !*** ./ts/ui/exportDialog.ts ***!
@@ -4362,17 +4559,20 @@ function installEasingPanel(registry) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   createExportAction: () => (/* binding */ createExportAction),
+/* harmony export */   createExportAnimationsAction: () => (/* binding */ createExportAnimationsAction),
 /* harmony export */   ensureExportCss: () => (/* binding */ ensureExportCss)
 /* harmony export */ });
-/* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
-/* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
-/* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
-/* harmony import */ var _serialization_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../serialization/geometry */ "./ts/serialization/geometry.ts");
-/* harmony import */ var _serialization_norisk__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../serialization/norisk */ "./ts/serialization/norisk.ts");
-/* harmony import */ var _io_exportFiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../io/exportFiles */ "./ts/io/exportFiles.ts");
-/* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
-/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _animationExportDialog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./animationExportDialog */ "./ts/ui/animationExportDialog.ts");
+/* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
+/* harmony import */ var _emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./emoteSettingsPanel */ "./ts/ui/emoteSettingsPanel.ts");
+/* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
+/* harmony import */ var _serialization_geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../serialization/geometry */ "./ts/serialization/geometry.ts");
+/* harmony import */ var _serialization_norisk__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../serialization/norisk */ "./ts/serialization/norisk.ts");
+/* harmony import */ var _io_exportFiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../io/exportFiles */ "./ts/io/exportFiles.ts");
+/* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -4383,7 +4583,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const RARITIES = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
-// Official NRC rarity colors (RarityColors.kt baseColor).
 const RARITY_COLORS = {
     COMMON: '#757575',
     UNCOMMON: '#1c7c35',
@@ -4446,44 +4645,38 @@ function ensureExportCss(registry) {
         .nrc-x-foot b { color: var(--color-text); }
     `);
 }
+function createExportAnimationsAction(registry, type) {
+    return registry.action('nrc_export_animations_' + type.id, {
+        name: 'Export ' + type.formatName + ' Animations',
+        description: 'Save the animations as their own .animation.json',
+        icon: 'movie',
+        category: 'file',
+        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_1__.isCosmeticFormat)(type) && Animation.all.length > 0,
+        click() {
+            (0,_animationExportDialog__WEBPACK_IMPORTED_MODULE_0__.openAnimationExportDialog)(type);
+        },
+    });
+}
 function createExportAction(registry, type) {
     return registry.action('nrc_export_' + type.id, {
         name: 'Export NRC ' + type.formatName,
         description: 'Export the animation, model and cosmetic metadata',
         icon: 'archive',
         category: 'file',
-        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type) && Animation.all.length > 0,
+        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_1__.isCosmeticFormat)(type) && Animation.all.length > 0,
         click() {
             var _a;
             const metaAnim = Animation.selected || Animation.all[0];
-            const state = {
-                name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName),
-                exportAnimation: type.exportsAnimation,
-                exportNorisk: true,
-                exportModel: type.exportsModelDefault(),
-                flags: (0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.initFlags)(metaAnim, type),
-                locks: (0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.initLocks)(metaAnim, type),
-                lockOpen: (0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.anyLocked)(metaAnim, type),
-                creator: ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '',
-                price: 0,
-                rarity: 'COMMON',
-                flagDefs: type.metaFields,
-                bones: type.bones,
-                hasLockBones: type.hasLockBones,
-                rarities: RARITIES,
-                colors: RARITY_COLORS,
-                icon: type.icon,
-                typeName: type.formatName,
-            };
+            const state = Object.assign(Object.assign({ name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName), exportAnimation: type.exportsAnimation, exportNorisk: false, exportModel: type.exportsModelDefault() }, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__.emoteSettingsState)(metaAnim, type)), { creator: ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '', price: 0, rarity: 'COMMON', rarities: RARITIES, colors: RARITY_COLORS, icon: type.icon, typeName: type.formatName });
             new Dialog('nrc_export_' + type.id, {
                 id: 'nrc_export_' + type.id,
                 title: 'Export NRC ' + type.formatName,
                 width: 540,
-                onCancel() { (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_6__.clearLivePreviews)(); },
+                onCancel() { (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.clearLivePreviews)(); },
                 component: {
                     data() { return state; },
                     computed: {
-                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_7__.mcId)(this.name) || type.defaultName; },
+                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_8__.mcId)(this.name) || type.defaultName; },
                         outFiles() {
                             const f = [];
                             if (this.exportAnimation)
@@ -4500,7 +4693,7 @@ function createExportAction(registry, type) {
                             const cv = this.$refs.preview;
                             if (cv) {
                                 try {
-                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_6__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type));
+                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_3__.buildAnimationJson)(type));
                                 }
                                 catch (e) { /* ignore */ }
                             }
@@ -4544,24 +4737,7 @@ function createExportAction(registry, type) {
                                 </div>
                             </div>
 
-                            <div v-if="exportAnimation">
-                                <div class="nrc-x-sec-h">Emote settings</div>
-                                <div class="nrc-x-switches">
-                                    <label class="nrc-x-switch" v-for="f in flagDefs" :key="f.key">
-                                        <span class="txt"><div class="lbl">{{ f.label }}</div><div class="desc">{{ f.description }}</div></span>
-                                        <span class="nrc-x-toggle"><input type="checkbox" v-model="flags[f.key]"><span class="sl"></span></span>
-                                    </label>
-                                </div>
-                                <div class="nrc-x-locks" v-if="hasLockBones">
-                                    <label class="nrc-x-switch" style="cursor:pointer">
-                                        <span class="txt"><div class="lbl">Lock vanilla bones</div></span>
-                                        <span class="nrc-x-toggle"><input type="checkbox" v-model="lockOpen"><span class="sl"></span></span>
-                                    </label>
-                                    <div class="nrc-x-chips" v-if="lockOpen">
-                                        <span class="nrc-x-chip" v-for="b in bones" :key="b" :class="{on: locks[b]}" @click="locks[b] = !locks[b]">{{ b }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <div v-if="exportAnimation">${_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__.EMOTE_SETTINGS_TEMPLATE}</div>
 
                             <div v-if="exportNorisk">
                                 <div class="nrc-x-sec-h">Cosmetic metadata</div>
@@ -4582,24 +4758,22 @@ function createExportAction(registry, type) {
                     `,
                 },
                 onConfirm() {
-                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_6__.clearLivePreviews)();
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_8__.logReset)();
-                    const base = (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.sanitize)(state.name) || type.defaultName;
+                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.clearLivePreviews)();
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_9__.logReset)();
+                    const base = (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_6__.sanitize)(state.name) || type.defaultName;
                     const files = [];
-                    if (state.exportAnimation && metaAnim) {
-                        const locks = state.lockOpen ? state.locks : {};
-                        (0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.writeMeta)(metaAnim, type, state.flags, locks);
-                    }
+                    if (state.exportAnimation)
+                        (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__.applyEmoteSettings)(metaAnim, type, state);
                     if (state.exportAnimation) {
-                        files.push({ suffix: '.animation.json', content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type), null, 2) });
+                        files.push({ suffix: '.animation.json', content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_3__.buildAnimationJson)(type), null, 2) });
                     }
                     if (state.exportModel) {
-                        files.push({ suffix: '.geo.json', content: (0,_serialization_geometry__WEBPACK_IMPORTED_MODULE_3__.buildGeoJson)() });
+                        files.push({ suffix: '.geo.json', content: (0,_serialization_geometry__WEBPACK_IMPORTED_MODULE_4__.buildGeoJson)() });
                     }
                     if (state.exportNorisk) {
                         files.push({
                             suffix: '.norisk.json',
-                            content: JSON.stringify((0,_serialization_norisk__WEBPACK_IMPORTED_MODULE_4__.buildNoriskJson)(type, {
+                            content: JSON.stringify((0,_serialization_norisk__WEBPACK_IMPORTED_MODULE_5__.buildNoriskJson)(type, {
                                 name: state.name,
                                 creator: state.creator,
                                 price: Number(state.price) || 0,
@@ -4608,16 +4782,62 @@ function createExportAction(registry, type) {
                             }), null, 2),
                         });
                     }
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_8__.log)('export base=' + base + ' files=' + files.map((f) => f.suffix).join(','));
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_9__.log)('export base=' + base + ' files=' + files.map((f) => f.suffix).join(','));
                     if (!files.length) {
                         Blockbench.showQuickMessage('Nothing selected to export', 1800);
                         return;
                     }
-                    (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.writeFiles)(base, files);
+                    (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_6__.writeFiles)(base, files);
                 },
             }).show();
         },
     });
+}
+
+
+/***/ },
+
+/***/ "./ts/ui/nameDialog.ts"
+/*!*****************************!*\
+  !*** ./ts/ui/nameDialog.ts ***!
+  \*****************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   promptName: () => (/* binding */ promptName)
+/* harmony export */ });
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+
+function promptName(type, onConfirm) {
+    const dialog = new Dialog('nrc_name_' + type.id, {
+        title: 'Name your ' + type.formatName,
+        buttons: ['dialog.confirm', 'dialog.cancel'],
+        form: {
+            name: {
+                label: 'Name',
+                type: 'text',
+                value: '',
+                placeholder: type.defaultName,
+                description: 'Lowercase, no spaces. This becomes the file name.',
+            },
+        },
+        onFormChange(result) {
+            const normalised = (0,_core_util__WEBPACK_IMPORTED_MODULE_0__.mcId)(result.name);
+            if (normalised !== result.name)
+                dialog.setFormValues({ name: normalised }, false);
+        },
+        onConfirm(result) {
+            const named = (0,_core_util__WEBPACK_IMPORTED_MODULE_0__.mcId)(result.name);
+            if (!named) {
+                Blockbench.showQuickMessage('Please enter a name', 1600);
+                return;
+            }
+            dialog.hide();
+            onConfirm(named);
+        },
+    });
+    dialog.show();
 }
 
 
@@ -4631,13 +4851,13 @@ function createExportAction(registry, type) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   createSettingsAction: () => (/* binding */ createSettingsAction)
+/* harmony export */   createSettingsAction: () => (/* binding */ createSettingsAction),
+/* harmony export */   openSettingsDialog: () => (/* binding */ openSettingsDialog)
 /* harmony export */ });
 /* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
-/* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
+/* harmony import */ var _emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./emoteSettingsPanel */ "./ts/ui/emoteSettingsPanel.ts");
 
 
-// "Edit Settings" — edits the selected animation's metadata, driven by the type's schema.
 function createSettingsAction(registry, type) {
     return registry.action('nrc_edit_settings_' + type.id, {
         name: 'Edit ' + type.formatName + ' Settings',
@@ -4646,39 +4866,28 @@ function createSettingsAction(registry, type) {
         category: 'animation',
         condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type) && !!Animation.selected,
         click() {
-            const anim = Animation.selected;
-            if (!anim)
-                return;
-            const flags = (0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.initFlags)(anim, type);
-            const locks = (0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.initLocks)(anim, type);
-            const form = {};
-            for (const f of type.metaFields) {
-                form[f.key] = { label: f.label, description: f.description, type: 'checkbox', value: flags[f.key] };
-            }
-            if (type.hasLockBones) {
-                form._lock_divider = '_';
-                form._lock_label = { type: 'info', text: 'Lock vanilla bones (freeze the vanilla animation for that bone):' };
-                for (const bone of type.bones) {
-                    form[(0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.lockPropKey)(bone)] = { label: bone, type: 'checkbox', value: locks[bone] };
-                }
-            }
-            new Dialog('nrc_settings_' + type.id, {
-                id: 'nrc_settings_' + type.id,
-                title: 'NRC ' + type.formatName + ' Settings',
-                width: 480,
-                form,
-                onConfirm(result) {
-                    const newFlags = {};
-                    for (const f of type.metaFields)
-                        newFlags[f.key] = !!result[f.key];
-                    const newLocks = {};
-                    for (const bone of type.bones)
-                        newLocks[bone] = !!result[(0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.lockPropKey)(bone)];
-                    (0,_domain_meta__WEBPACK_IMPORTED_MODULE_1__.writeMeta)(anim, type, newFlags, newLocks);
-                },
-            }).show();
+            openSettingsDialog(type);
         },
     });
+}
+function openSettingsDialog(type, anim, onDone) {
+    const target = anim || Animation.selected;
+    if (!target)
+        return;
+    const state = (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.emoteSettingsState)(target, type);
+    new Dialog('nrc_settings_' + type.id, {
+        title: 'NRC ' + type.formatName + ' Settings',
+        width: 480,
+        component: {
+            data: () => state,
+            template: `<div class="nrc-x">${_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.EMOTE_SETTINGS_TEMPLATE}</div>`,
+        },
+        onConfirm() {
+            (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.applyEmoteSettings)(target, type, state);
+            if (onDone)
+                onDone();
+        },
+    }).show();
 }
 
 
@@ -4701,6 +4910,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_import_animationImport__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../platform/import/animationImport */ "./ts/platform/import/animationImport.ts");
 /* harmony import */ var _platform_import_geometryImport__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../platform/import/geometryImport */ "./ts/platform/import/geometryImport.ts");
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _nameDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./nameDialog */ "./ts/ui/nameDialog.ts");
+
 
 
 
@@ -4717,6 +4928,9 @@ const state = {
     templates: [BLANK],
 };
 function applyTemplate(type, t) {
+    (0,_nameDialog__WEBPACK_IMPORTED_MODULE_6__.promptName)(type, (id) => buildFromTemplate(type, t, id));
+}
+function buildFromTemplate(type, t, id) {
     try {
         if (t.kind === 'blank') {
             (0,_platform_rig__WEBPACK_IMPORTED_MODULE_2__.loadRig)(type);
@@ -4726,14 +4940,24 @@ function applyTemplate(type, t) {
             if (t.hasProps && t.geoJson)
                 (0,_platform_import_geometryImport__WEBPACK_IMPORTED_MODULE_4__.importGeometry)(t.geoJson, t.previewDataUri);
             (0,_platform_import_animationImport__WEBPACK_IMPORTED_MODULE_3__.importAnimation)(type, t.animationJson);
-            if (typeof Project !== 'undefined' && Project)
-                Project.name = t.name;
             Canvas.updateAll();
         }
+        applyName(id);
         Blockbench.showQuickMessage('Loaded: ' + t.name, 1600);
     }
     catch (e) {
         (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('applyTemplate ERROR: ' + (e && e.stack ? e.stack : String(e)));
+    }
+}
+function applyName(id) {
+    if (typeof Project !== 'undefined' && Project)
+        Project.name = id;
+    const animations = (Animation.all || []);
+    const target = animations.length === 1 ? animations[0] : Animation.selected || animations[0];
+    if (target) {
+        target.name = id;
+        if (target.createUniqueName)
+            target.createUniqueName(animations);
     }
 }
 async function fetchInto(force) {
@@ -60291,8 +60515,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../package.json */ "./package.json");
 /* harmony import */ var _core_registry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core/registry */ "./ts/core/registry.ts");
 /* harmony import */ var _feature__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./feature */ "./ts/feature.ts");
-/* harmony import */ var _platform_easing__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./platform/easing */ "./ts/platform/easing/index.ts");
-/* harmony import */ var _cosmetics_emote__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./cosmetics/emote */ "./ts/cosmetics/emote.ts");
+/* harmony import */ var _platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./platform/animationPatches */ "./ts/platform/animationPatches.ts");
+/* harmony import */ var _platform_easing__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./platform/easing */ "./ts/platform/easing/index.ts");
+/* harmony import */ var _cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cosmetics/emote */ "./ts/cosmetics/emote.ts");
+
 
 
 
@@ -60306,12 +60532,13 @@ const { version, blockbenchConfig } = _package_json__WEBPACK_IMPORTED_MODULE_0__
         version,
         await_loading: true,
         onload() {
-            (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_4__.EMOTE, registry);
-            // Future: registerCosmeticType(ACCESSORY, registry); etc.
-            (0,_platform_easing__WEBPACK_IMPORTED_MODULE_3__.installEasing)(registry);
+            (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__.EMOTE, registry);
+            (0,_platform_easing__WEBPACK_IMPORTED_MODULE_4__.installEasing)(registry);
+            (0,_platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__.installAnimationPatches)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__.EMOTE);
             console.log('Loaded NoRisk Client Cosmetics plugin');
         },
         onunload() {
+            (0,_platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__.removeAnimationPatches)();
             registry.disposeAll();
         },
     }));
