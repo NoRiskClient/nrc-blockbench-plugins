@@ -1,9 +1,12 @@
+import { CompanionFile } from '../effectFiles';
+
 export interface Template {
     id: string;
     name: string;
     kind: 'blank' | 'emote';
-    animationJson?: any;       // parsed <name>.animation.json
-    geoJson?: any;             // parsed <name>.geo.json (props), if any
-    previewDataUri?: string;   // <name>.png as data URI, if any
-    hasProps: boolean;
+    animationJson?: any;
+    geoJson?: any;
+    previewDataUri?: string;
+    effectFiles: CompanionFile[];
+    badges: string[];
 }

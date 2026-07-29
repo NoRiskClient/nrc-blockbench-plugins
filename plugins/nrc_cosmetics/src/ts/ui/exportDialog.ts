@@ -1,12 +1,12 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
-import { openAnimationExportDialog } from './animationExportDialog';
 import { isCosmeticFormat } from '../platform/format';
 import { emoteSettingsState, applyEmoteSettings, EMOTE_SETTINGS_TEMPLATE } from './emoteSettingsPanel';
 import { buildAnimationJson } from '../serialization/animation';
 import { buildGeoJson } from '../serialization/geometry';
 import { buildNoriskJson } from '../serialization/norisk';
 import { writeFiles, sanitize, OutFile } from '../io/exportFiles';
+import { collectEffectFiles } from '../platform/effectFiles';
 import { addLivePreview, clearLivePreviews } from '../platform/templates/livePreview';
 import { mcId } from '../core/util';
 import { log, logReset } from '../core/log';
@@ -77,22 +77,9 @@ export function ensureExportCss(registry: Registry) {
     `);
 }
 
-export function createExportAnimationsAction(registry: Registry, type: CosmeticType): any {
-    return registry.action('nrc_export_animations_' + type.id, {
-        name: 'Export ' + type.formatName + ' Animations',
-        description: 'Save the animations as their own .animation.json',
-        icon: 'movie',
-        category: 'file',
-        condition: () => isCosmeticFormat(type) && Animation.all.length > 0,
-        click() {
-            openAnimationExportDialog(type);
-        },
-    });
-}
-
 export function createExportAction(registry: Registry, type: CosmeticType): any {
     return registry.action('nrc_export_' + type.id, {
-        name: 'Export NRC ' + type.formatName,
+        name: 'Export ' + type.formatName,
         description: 'Export the animation, model and cosmetic metadata',
         icon: 'archive',
         category: 'file',
@@ -205,6 +192,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                     if (state.exportAnimation) applyEmoteSettings(metaAnim, type, state);
                     if (state.exportAnimation) {
                         files.push({ suffix: '.animation.json', content: JSON.stringify(buildAnimationJson(type), null, 2) });
+                        for (const effect of collectEffectFiles()) files.push(effect);
                     }
                     if (state.exportModel) {
                         files.push({ suffix: '.geo.json', content: buildGeoJson() });

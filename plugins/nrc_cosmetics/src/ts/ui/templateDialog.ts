@@ -6,10 +6,11 @@ import { addLivePreview, clearLivePreviews } from '../platform/templates/livePre
 import { loadRig } from '../platform/rig';
 import { importAnimation } from '../platform/import/animationImport';
 import { importGeometry } from '../platform/import/geometryImport';
+import { linkEffectFiles } from '../platform/effectFiles';
 import { log } from '../core/log';
 import { promptName } from './nameDialog';
 
-const BLANK: Template = { id: 'blank', name: 'Blank Emote', kind: 'blank', hasProps: false };
+const BLANK: Template = { id: 'blank', name: 'Blank Emote', kind: 'blank', effectFiles: [], badges: [] };
 
 let dialog: any = null;
 const state: any = {
@@ -30,8 +31,9 @@ function buildFromTemplate(type: CosmeticType, t: Template, id: string) {
             loadRig(type);
         } else {
             loadRig(type, true);
-            if (t.hasProps && t.geoJson) importGeometry(t.geoJson, t.previewDataUri);
+            if (t.geoJson) importGeometry(t.geoJson, t.previewDataUri);
             importAnimation(type, t.animationJson);
+            linkEffectFiles(t.name, t.effectFiles);
             Canvas.updateAll();
         }
         applyName(id);
@@ -75,7 +77,8 @@ export function ensureTemplateCss(registry: Registry) {
         .nrc-tpl-thumb canvas { width: 100%; height: 100%; }
         .nrc-tpl-noimg { font-size: 30px; color: var(--color-subtle_text); }
         .nrc-tpl-name { margin-top: 4px; font-size: 11px; word-break: break-word; }
-        .nrc-tpl-badge { position: absolute; top: 4px; right: 4px; font-size: 9px; background: var(--color-accent); color: var(--color-light); border-radius: 3px; padding: 0 3px; }
+        .nrc-tpl-badges { position: absolute; top: 4px; right: 4px; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .nrc-tpl-badge { font-size: 9px; background: var(--color-accent); color: var(--color-accent_text); border-radius: 3px; padding: 0 3px; }
     `);
 }
 
@@ -137,7 +140,9 @@ export function openTemplateDialog(type: CosmeticType) {
                                 <div v-else class="nrc-tpl-noimg">+</div>
                             </div>
                             <div class="nrc-tpl-name">{{ t.name }}</div>
-                            <div v-if="t.hasProps" class="nrc-tpl-badge">props</div>
+                            <div class="nrc-tpl-badges">
+                                <div v-for="b in t.badges" :key="b" class="nrc-tpl-badge">{{ b }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>

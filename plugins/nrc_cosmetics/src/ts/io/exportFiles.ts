@@ -1,14 +1,20 @@
 import { log } from '../core/log';
 import { mcId } from '../core/util';
-
-let fs: any;
-try { fs = require('fs'); } catch (e) { /* not in electron */ }
+import { fs } from '../core/node';
 
 let lastDir: string | undefined;
 
-export interface OutFile { suffix: string; content: string; }
+export interface OutFile {
+    content: string | Uint8Array;
+    suffix?: string;
+    name?: string;
+}
 
 export const sanitize = mcId;
+
+function fileName(base: string, file: OutFile): string {
+    return file.name || base + (file.suffix || '');
+}
 
 export function writeFiles(base: string, files: OutFile[]) {
     if (fs && Blockbench.pickDirectory) {
@@ -23,7 +29,7 @@ export function writeFiles(base: string, files: OutFile[]) {
         }
         lastDir = dir;
         for (const f of files) {
-            const full = dir + '/' + base + f.suffix;
+            const full = dir + '/' + fileName(base, f);
             fs.writeFileSync(full, f.content);
             log('wrote ' + full);
         }
@@ -35,11 +41,16 @@ export function writeFiles(base: string, files: OutFile[]) {
     const next = () => {
         if (i >= files.length) return;
         const f = files[i++];
+        if (typeof f.content !== 'string') {
+            log('skipping binary file ' + fileName(base, f) + ', needs the desktop app');
+            next();
+            return;
+        }
         Blockbench.export({
             resource_id: 'nrc_cosmetic_export',
             type: 'JSON',
             extensions: ['json'],
-            name: base + f.suffix,
+            name: fileName(base, f),
             content: f.content,
         }, next);
     };

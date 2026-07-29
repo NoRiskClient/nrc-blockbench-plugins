@@ -5,6 +5,7 @@ declare const Outliner: any;
 declare const Group: any;
 declare const Cube: any;
 declare const Keyframe: any;
+declare const Locator: any;
 declare const Timeline: any;
 declare const Animator: any;
 declare const BoneAnimator: any;

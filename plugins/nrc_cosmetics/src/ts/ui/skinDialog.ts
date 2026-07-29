@@ -3,6 +3,7 @@ import { Registry } from '../core/registry';
 import { isCosmeticFormat } from '../platform/format';
 import { setCustomSkin } from '../platform/skinPreview';
 import { ArmModel, setArmModel } from '../platform/playerModel';
+import { fs } from '../core/node';
 import { log } from '../core/log';
 
 const PROFILE_API = 'https://api.mojang.com/users/profiles/minecraft/';
@@ -56,8 +57,7 @@ async function fetchSkin(name: string): Promise<FetchedSkin> {
 
 function fileToDataUri(content: string): string {
     if (content.indexOf('data:') === 0) return content;
-    const buffer = require('fs').readFileSync(content);
-    return 'data:image/png;base64,' + buffer.toString('base64');
+    return 'data:image/png;base64,' + fs.readFileSync(content).toString('base64');
 }
 
 export function createSkinAction(registry: Registry, type: CosmeticType): any {

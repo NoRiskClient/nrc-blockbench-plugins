@@ -1,5 +1,7 @@
 import { unzipSync } from 'fflate';
 import { Template } from './model';
+import { CompanionFile, isCompanionFile } from '../effectFiles';
+import { fs, nodePath, tempDir, toBase64, toBuffer } from '../../core/node';
 import { log } from '../../core/log';
 
 const REPO = 'NoRiskClient/nrc-designer-docs';
@@ -7,22 +9,8 @@ const ASSET = 'nrc-cosmetics.zip';
 const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const ASSET_URL = `https://github.com/${REPO}/releases/latest/download/${ASSET}`;
 
-let fs: any, os: any, path: any, Buf: any;
-try { fs = require('fs'); } catch (e) { /* none */ }
-try { os = require('os'); } catch (e) { /* none */ }
-try { path = require('path'); } catch (e) { /* none */ }
-try { const b = require('buffer'); Buf = b && b.Buffer; } catch (e) { /* none */ }
-
-function toBase64(bytes: Uint8Array): string {
-    if (Buf) return Buf.from(bytes).toString('base64');
-    let s = '';
-    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-    return btoa(s);
-}
-
 function cacheDir(): string | null {
-    if (!fs || !os || !path) return null;
-    try { const d = path.join(os.tmpdir(), 'nrc_templates'); fs.mkdirSync(d, { recursive: true }); return d; } catch (e) { return null; }
+    return tempDir('nrc_templates');
 }
 
 async function latestTag(): Promise<string | null> {
@@ -36,8 +24,8 @@ async function latestTag(): Promise<string | null> {
 
 async function getZipBytes(force: boolean): Promise<Uint8Array | null> {
     const dir = cacheDir();
-    const zipPath = dir ? path.join(dir, ASSET) : null;
-    const tagPath = dir ? path.join(dir, 'tag.txt') : null;
+    const zipPath = dir ? nodePath.join(dir, ASSET) : null;
+    const tagPath = dir ? nodePath.join(dir, 'tag.txt') : null;
     const remoteTag = await latestTag();
 
     if (dir && !force) {
@@ -54,7 +42,7 @@ async function getZipBytes(force: boolean): Promise<Uint8Array | null> {
         if (!r.ok) throw new Error('http ' + r.status);
         const bytes = new Uint8Array(await r.arrayBuffer());
         if (dir) {
-            try { fs.writeFileSync(zipPath, Buf ? Buf.from(bytes) : bytes); if (remoteTag) fs.writeFileSync(tagPath, remoteTag); } catch (e) { /* ignore */ }
+            try { fs.writeFileSync(zipPath, toBuffer(bytes)); if (remoteTag) fs.writeFileSync(tagPath, remoteTag); } catch (e) { /* ignore */ }
         }
         return bytes;
     } catch (e) {
@@ -92,7 +80,22 @@ export async function loadTemplates(force = false): Promise<{ templates: Templat
         let previewDataUri: string | undefined;
         if (has(pngP)) { try { previewDataUri = 'data:image/png;base64,' + toBase64(files[pngP]); } catch (e) { /* ignore */ } }
 
-        templates.push({ id: p, name: base, kind: 'emote', animationJson, geoJson, previewDataUri, hasProps: !!geoJson });
+        const effectFiles: CompanionFile[] = [];
+        for (const other of Object.keys(files)) {
+            if (other.slice(0, slash + 1) !== dir || !isCompanionFile(other)) continue;
+            effectFiles.push({ name: other.slice(slash + 1), bytes: files[other] });
+        }
+
+        const clips: any[] = Object.values((animationJson && animationJson.animations) || {});
+        const badges: string[] = [];
+        if (geoJson) badges.push('props');
+        if (clips.some((c) => c && c.particle_effects)) badges.push('particles');
+        if (clips.some((c) => c && c.sound_effects)) badges.push('sound');
+
+        templates.push({
+            id: p, name: base, kind: 'emote',
+            animationJson, geoJson, previewDataUri, effectFiles, badges,
+        });
     }
 
     templates.sort((a, b) => a.name.localeCompare(b.name));

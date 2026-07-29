@@ -79,6 +79,26 @@ function buildCube(c: any, group: any, bone: any): any {
     return cube.addTo(group).init();
 }
 
+function buildLocators(b: any, group: any) {
+    if (!b.locators || typeof Locator === 'undefined') return;
+
+    for (const key of Object.keys(b.locators)) {
+        const raw = b.locators[key];
+        const coords = (Array.isArray(raw) ? raw : raw && raw.offset) || [0, 0, 0];
+        const rotation = Array.isArray(raw) ? undefined : raw && raw.rotation;
+
+        const position = [-coords[0], coords[1], coords[2]];
+        const turn = Array.isArray(rotation) ? [-rotation[0], -rotation[1], rotation[2]] : undefined;
+
+        new Locator({
+            name: key,
+            position,
+            rotation: turn,
+            ignore_inherited_scale: Array.isArray(raw) ? undefined : raw && raw.ignore_inherited_scale,
+        }).addTo(group).init();
+    }
+}
+
 function buildGroup(b: any): any {
     const group: any = new Group({
         name: b.name,
@@ -134,6 +154,7 @@ export function importGeometry(geoJson: any, textureDataUri?: string) {
                 if (!created.has(b.name)) continue;
                 const group = knownGroups[b.name];
                 for (const c of b.cubes || []) propCubes.push(buildCube(c, group, b));
+                buildLocators(b, group);
             }
         }
 

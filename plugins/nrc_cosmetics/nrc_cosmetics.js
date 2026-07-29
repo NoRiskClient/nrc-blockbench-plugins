@@ -2811,6 +2811,66 @@ function log(msg) {
 
 /***/ },
 
+/***/ "./ts/core/node.ts"
+/*!*************************!*\
+  !*** ./ts/core/node.ts ***!
+  \*************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Buf: () => (/* binding */ Buf),
+/* harmony export */   fs: () => (/* binding */ fs),
+/* harmony export */   hasFilesystem: () => (/* binding */ hasFilesystem),
+/* harmony export */   nodePath: () => (/* binding */ nodePath),
+/* harmony export */   os: () => (/* binding */ os),
+/* harmony export */   tempDir: () => (/* binding */ tempDir),
+/* harmony export */   toBase64: () => (/* binding */ toBase64),
+/* harmony export */   toBuffer: () => (/* binding */ toBuffer)
+/* harmony export */ });
+function optional(load) {
+    try {
+        return load();
+    }
+    catch (e) {
+        return null;
+    }
+}
+const fs = optional(() => __webpack_require__(/*! fs */ "fs"));
+const os = optional(() => __webpack_require__(/*! os */ "os"));
+const nodePath = optional(() => __webpack_require__(/*! path */ "path"));
+const bufferModule = optional(() => __webpack_require__(/*! buffer */ "buffer"));
+const Buf = bufferModule && bufferModule.Buffer;
+function hasFilesystem() {
+    return !!(fs && os && nodePath);
+}
+function tempDir(...segments) {
+    if (!hasFilesystem())
+        return null;
+    try {
+        const dir = nodePath.join(os.tmpdir(), ...segments);
+        fs.mkdirSync(dir, { recursive: true });
+        return dir;
+    }
+    catch (e) {
+        return null;
+    }
+}
+function toBase64(bytes) {
+    if (Buf)
+        return Buf.from(bytes).toString('base64');
+    let out = '';
+    for (let i = 0; i < bytes.length; i++)
+        out += String.fromCharCode(bytes[i]);
+    return btoa(out);
+}
+function toBuffer(bytes) {
+    return Buf ? Buf.from(bytes) : bytes;
+}
+
+
+/***/ },
+
 /***/ "./ts/core/registry.ts"
 /*!*****************************!*\
   !*** ./ts/core/registry.ts ***!
@@ -3048,9 +3108,6 @@ function registerCosmeticType(type, registry) {
     registry.menu((0,_ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__.createSettingsAction)(registry, type), 'animation');
     (0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.ensureExportCss)(registry);
     registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAction)(registry, type), 'file.export');
-    if (type.exportsAnimation) {
-        registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAnimationsAction)(registry, type), 'file.export');
-    }
     if (type.hasSkinPreview) {
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleSkinAction)(registry, type));
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleLayerAction)(registry, type));
@@ -3078,17 +3135,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
 /* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
 
 
-let fs;
-try {
-    fs = __webpack_require__(/*! fs */ "fs");
-}
-catch (e) { /* not in electron */ }
+
 let lastDir;
 const sanitize = _core_util__WEBPACK_IMPORTED_MODULE_1__.mcId;
+function fileName(base, file) {
+    return file.name || base + (file.suffix || '');
+}
 function writeFiles(base, files) {
-    if (fs && Blockbench.pickDirectory) {
+    if (_core_node__WEBPACK_IMPORTED_MODULE_2__.fs && Blockbench.pickDirectory) {
         const dir = Blockbench.pickDirectory({
             title: 'Export NRC Cosmetic',
             startpath: lastDir,
@@ -3100,8 +3157,8 @@ function writeFiles(base, files) {
         }
         lastDir = dir;
         for (const f of files) {
-            const full = dir + '/' + base + f.suffix;
-            fs.writeFileSync(full, f.content);
+            const full = dir + '/' + fileName(base, f);
+            _core_node__WEBPACK_IMPORTED_MODULE_2__.fs.writeFileSync(full, f.content);
             (0,_core_log__WEBPACK_IMPORTED_MODULE_0__.log)('wrote ' + full);
         }
         Blockbench.showQuickMessage('Exported ' + files.length + ' file(s)', 1800);
@@ -3112,11 +3169,16 @@ function writeFiles(base, files) {
         if (i >= files.length)
             return;
         const f = files[i++];
+        if (typeof f.content !== 'string') {
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_0__.log)('skipping binary file ' + fileName(base, f) + ', needs the desktop app');
+            next();
+            return;
+        }
         Blockbench.export({
             resource_id: 'nrc_cosmetic_export',
             type: 'JSON',
             extensions: ['json'],
-            name: base + f.suffix,
+            name: fileName(base, f),
             content: f.content,
         }, next);
     };
@@ -3564,6 +3626,115 @@ function installEasingPatches(registry) {
 
 /***/ },
 
+/***/ "./ts/platform/effectFiles.ts"
+/*!************************************!*\
+  !*** ./ts/platform/effectFiles.ts ***!
+  \************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   collectEffectFiles: () => (/* binding */ collectEffectFiles),
+/* harmony export */   isCompanionFile: () => (/* binding */ isCompanionFile),
+/* harmony export */   linkEffectFiles: () => (/* binding */ linkEffectFiles)
+/* harmony export */ });
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
+const CHANNEL_SUFFIX = {
+    particle: '.particle.json',
+    sound: '.ogg',
+};
+const SUFFIX_PATTERN = /\.particle\.json$|\.ogg$/i;
+function isCompanionFile(name) {
+    return SUFFIX_PATTERN.test(name);
+}
+function effectKey(effect) {
+    const tail = String(effect || '').split(':').pop() || '';
+    return (tail.split('/').pop() || '').toLowerCase();
+}
+function baseName(name) {
+    return name.replace(SUFFIX_PATTERN, '').toLowerCase();
+}
+function effectKeyframes() {
+    const out = [];
+    for (const animation of (Animation.all || [])) {
+        const animator = animation.animators && animation.animators.effects;
+        if (!animator)
+            continue;
+        for (const channel of Object.keys(CHANNEL_SUFFIX)) {
+            for (const keyframe of (animator[channel] || []))
+                out.push(keyframe);
+        }
+    }
+    return out;
+}
+function linkEffectFiles(scope, files) {
+    if (!files.length)
+        return;
+    const dir = (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.tempDir)('nrc_effects', scope || 'shared');
+    if (!dir) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: no writable temp dir, skipping');
+        return;
+    }
+    const byKey = {};
+    for (const file of files) {
+        const key = baseName(file.name);
+        if (!key)
+            continue;
+        const full = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, file.name);
+        try {
+            _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.writeFileSync(full, (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.toBuffer)(file.bytes));
+            byKey[key] = full;
+        }
+        catch (e) {
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: could not write ' + file.name + ': ' + e);
+        }
+    }
+    let linked = 0;
+    for (const keyframe of effectKeyframes()) {
+        for (const point of (keyframe.data_points || [])) {
+            if (point.file)
+                continue;
+            const key = effectKey(point.effect);
+            if (!key || !byKey[key])
+                continue;
+            point.extend({ file: byKey[key] });
+            linked++;
+        }
+    }
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: wrote ' + Object.keys(byKey).length + ', linked ' + linked + ' keyframe(s)');
+}
+function collectEffectFiles() {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
+        return [];
+    const seen = new Set();
+    const out = [];
+    for (const keyframe of effectKeyframes()) {
+        const suffix = CHANNEL_SUFFIX[keyframe.channel];
+        for (const point of (keyframe.data_points || [])) {
+            const full = point.file;
+            if (!full || seen.has(full))
+                continue;
+            seen.add(full);
+            let name = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(full);
+            if (suffix && !isCompanionFile(name))
+                name = baseName(name) + suffix;
+            try {
+                out.push({ name, content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(full) });
+            }
+            catch (e) {
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: could not read ' + full + ': ' + e);
+            }
+        }
+    }
+    return out;
+}
+
+
+/***/ },
+
 /***/ "./ts/platform/format.ts"
 /*!*******************************!*\
   !*** ./ts/platform/format.ts ***!
@@ -3760,6 +3931,23 @@ function buildCube(c, group, bone) {
     cube.mirror_uv = c.mirror === undefined ? group.mirror_uv === true : c.mirror === true;
     return cube.addTo(group).init();
 }
+function buildLocators(b, group) {
+    if (!b.locators || typeof Locator === 'undefined')
+        return;
+    for (const key of Object.keys(b.locators)) {
+        const raw = b.locators[key];
+        const coords = (Array.isArray(raw) ? raw : raw && raw.offset) || [0, 0, 0];
+        const rotation = Array.isArray(raw) ? undefined : raw && raw.rotation;
+        const position = [-coords[0], coords[1], coords[2]];
+        const turn = Array.isArray(rotation) ? [-rotation[0], -rotation[1], rotation[2]] : undefined;
+        new Locator({
+            name: key,
+            position,
+            rotation: turn,
+            ignore_inherited_scale: Array.isArray(raw) ? undefined : raw && raw.ignore_inherited_scale,
+        }).addTo(group).init();
+    }
+}
 function buildGroup(b) {
     const group = new Group({
         name: b.name,
@@ -3815,6 +4003,7 @@ function importGeometry(geoJson, textureDataUri) {
                 const group = knownGroups[b.name];
                 for (const c of b.cubes || [])
                     propCubes.push(buildCube(c, group, b));
+                buildLocators(b, group);
             }
         }
         if (tex) {
@@ -4472,50 +4661,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   loadTemplates: () => (/* binding */ loadTemplates)
 /* harmony export */ });
 /* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _effectFiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../effectFiles */ "./ts/platform/effectFiles.ts");
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
+
+
 
 
 const REPO = 'NoRiskClient/nrc-designer-docs';
 const ASSET = 'nrc-cosmetics.zip';
 const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const ASSET_URL = `https://github.com/${REPO}/releases/latest/download/${ASSET}`;
-let fs, os, path, Buf;
-try {
-    fs = __webpack_require__(/*! fs */ "fs");
-}
-catch (e) { /* none */ }
-try {
-    os = __webpack_require__(/*! os */ "os");
-}
-catch (e) { /* none */ }
-try {
-    path = __webpack_require__(/*! path */ "path");
-}
-catch (e) { /* none */ }
-try {
-    const b = __webpack_require__(/*! buffer */ "buffer");
-    Buf = b && b.Buffer;
-}
-catch (e) { /* none */ }
-function toBase64(bytes) {
-    if (Buf)
-        return Buf.from(bytes).toString('base64');
-    let s = '';
-    for (let i = 0; i < bytes.length; i++)
-        s += String.fromCharCode(bytes[i]);
-    return btoa(s);
-}
 function cacheDir() {
-    if (!fs || !os || !path)
-        return null;
-    try {
-        const d = path.join(os.tmpdir(), 'nrc_templates');
-        fs.mkdirSync(d, { recursive: true });
-        return d;
-    }
-    catch (e) {
-        return null;
-    }
+    return (0,_core_node__WEBPACK_IMPORTED_MODULE_2__.tempDir)('nrc_templates');
 }
 async function latestTag() {
     try {
@@ -4531,15 +4689,15 @@ async function latestTag() {
 }
 async function getZipBytes(force) {
     const dir = cacheDir();
-    const zipPath = dir ? path.join(dir, ASSET) : null;
-    const tagPath = dir ? path.join(dir, 'tag.txt') : null;
+    const zipPath = dir ? _core_node__WEBPACK_IMPORTED_MODULE_2__.nodePath.join(dir, ASSET) : null;
+    const tagPath = dir ? _core_node__WEBPACK_IMPORTED_MODULE_2__.nodePath.join(dir, 'tag.txt') : null;
     const remoteTag = await latestTag();
     if (dir && !force) {
         try {
-            if (fs.existsSync(zipPath)) {
-                const cachedTag = fs.existsSync(tagPath) ? fs.readFileSync(tagPath, 'utf8') : null;
+            if (_core_node__WEBPACK_IMPORTED_MODULE_2__.fs.existsSync(zipPath)) {
+                const cachedTag = _core_node__WEBPACK_IMPORTED_MODULE_2__.fs.existsSync(tagPath) ? _core_node__WEBPACK_IMPORTED_MODULE_2__.fs.readFileSync(tagPath, 'utf8') : null;
                 if (!remoteTag || cachedTag === remoteTag)
-                    return new Uint8Array(fs.readFileSync(zipPath));
+                    return new Uint8Array(_core_node__WEBPACK_IMPORTED_MODULE_2__.fs.readFileSync(zipPath));
             }
         }
         catch (e) { /* ignore, fall through to download */ }
@@ -4551,20 +4709,20 @@ async function getZipBytes(force) {
         const bytes = new Uint8Array(await r.arrayBuffer());
         if (dir) {
             try {
-                fs.writeFileSync(zipPath, Buf ? Buf.from(bytes) : bytes);
+                _core_node__WEBPACK_IMPORTED_MODULE_2__.fs.writeFileSync(zipPath, (0,_core_node__WEBPACK_IMPORTED_MODULE_2__.toBuffer)(bytes));
                 if (remoteTag)
-                    fs.writeFileSync(tagPath, remoteTag);
+                    _core_node__WEBPACK_IMPORTED_MODULE_2__.fs.writeFileSync(tagPath, remoteTag);
             }
             catch (e) { /* ignore */ }
         }
         return bytes;
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('template download failed: ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('template download failed: ' + e);
         if (dir) {
             try {
-                if (fs.existsSync(zipPath))
-                    return new Uint8Array(fs.readFileSync(zipPath));
+                if (_core_node__WEBPACK_IMPORTED_MODULE_2__.fs.existsSync(zipPath))
+                    return new Uint8Array(_core_node__WEBPACK_IMPORTED_MODULE_2__.fs.readFileSync(zipPath));
             }
             catch (e2) { /* ignore */ }
         }
@@ -4610,11 +4768,28 @@ async function loadTemplates(force = false) {
         let previewDataUri;
         if (has(pngP)) {
             try {
-                previewDataUri = 'data:image/png;base64,' + toBase64(files[pngP]);
+                previewDataUri = 'data:image/png;base64,' + (0,_core_node__WEBPACK_IMPORTED_MODULE_2__.toBase64)(files[pngP]);
             }
             catch (e) { /* ignore */ }
         }
-        templates.push({ id: p, name: base, kind: 'emote', animationJson, geoJson, previewDataUri, hasProps: !!geoJson });
+        const effectFiles = [];
+        for (const other of Object.keys(files)) {
+            if (other.slice(0, slash + 1) !== dir || !(0,_effectFiles__WEBPACK_IMPORTED_MODULE_1__.isCompanionFile)(other))
+                continue;
+            effectFiles.push({ name: other.slice(slash + 1), bytes: files[other] });
+        }
+        const clips = Object.values((animationJson && animationJson.animations) || {});
+        const badges = [];
+        if (geoJson)
+            badges.push('props');
+        if (clips.some((c) => c && c.particle_effects))
+            badges.push('particles');
+        if (clips.some((c) => c && c.sound_effects))
+            badges.push('sound');
+        templates.push({
+            id: p, name: base, kind: 'emote',
+            animationJson, geoJson, previewDataUri, effectFiles, badges,
+        });
     }
     templates.sort((a, b) => a.name.localeCompare(b.name));
     return { templates };
@@ -4980,16 +5155,15 @@ function applyEmoteSettings(anim, type, state) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   createExportAction: () => (/* binding */ createExportAction),
-/* harmony export */   createExportAnimationsAction: () => (/* binding */ createExportAnimationsAction),
 /* harmony export */   ensureExportCss: () => (/* binding */ ensureExportCss)
 /* harmony export */ });
-/* harmony import */ var _animationExportDialog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./animationExportDialog */ "./ts/ui/animationExportDialog.ts");
-/* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
-/* harmony import */ var _emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./emoteSettingsPanel */ "./ts/ui/emoteSettingsPanel.ts");
-/* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
-/* harmony import */ var _serialization_geometry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../serialization/geometry */ "./ts/serialization/geometry.ts");
-/* harmony import */ var _serialization_norisk__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../serialization/norisk */ "./ts/serialization/norisk.ts");
-/* harmony import */ var _io_exportFiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../io/exportFiles */ "./ts/io/exportFiles.ts");
+/* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
+/* harmony import */ var _emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./emoteSettingsPanel */ "./ts/ui/emoteSettingsPanel.ts");
+/* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
+/* harmony import */ var _serialization_geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../serialization/geometry */ "./ts/serialization/geometry.ts");
+/* harmony import */ var _serialization_norisk__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../serialization/norisk */ "./ts/serialization/norisk.ts");
+/* harmony import */ var _io_exportFiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../io/exportFiles */ "./ts/io/exportFiles.ts");
+/* harmony import */ var _platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../platform/effectFiles */ "./ts/platform/effectFiles.ts");
 /* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
 /* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
@@ -5066,29 +5240,17 @@ function ensureExportCss(registry) {
         .nrc-x-foot b { color: var(--color-text); }
     `);
 }
-function createExportAnimationsAction(registry, type) {
-    return registry.action('nrc_export_animations_' + type.id, {
-        name: 'Export ' + type.formatName + ' Animations',
-        description: 'Save the animations as their own .animation.json',
-        icon: 'movie',
-        category: 'file',
-        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_1__.isCosmeticFormat)(type) && Animation.all.length > 0,
-        click() {
-            (0,_animationExportDialog__WEBPACK_IMPORTED_MODULE_0__.openAnimationExportDialog)(type);
-        },
-    });
-}
 function createExportAction(registry, type) {
     return registry.action('nrc_export_' + type.id, {
-        name: 'Export NRC ' + type.formatName,
+        name: 'Export ' + type.formatName,
         description: 'Export the animation, model and cosmetic metadata',
         icon: 'archive',
         category: 'file',
-        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_1__.isCosmeticFormat)(type) && Animation.all.length > 0,
+        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type) && Animation.all.length > 0,
         click() {
             var _a;
             const metaAnim = Animation.selected || Animation.all[0];
-            const state = Object.assign(Object.assign({ name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName), exportAnimation: type.exportsAnimation, exportNorisk: false, exportModel: type.exportsModelDefault() }, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__.emoteSettingsState)(metaAnim, type)), { creator: ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '', price: 0, rarity: 'COMMON', rarities: RARITIES, colors: RARITY_COLORS, icon: type.icon, typeName: type.formatName });
+            const state = Object.assign(Object.assign({ name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName), exportAnimation: type.exportsAnimation, exportNorisk: false, exportModel: type.exportsModelDefault() }, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.emoteSettingsState)(metaAnim, type)), { creator: ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '', price: 0, rarity: 'COMMON', rarities: RARITIES, colors: RARITY_COLORS, icon: type.icon, typeName: type.formatName });
             new Dialog('nrc_export_' + type.id, {
                 id: 'nrc_export_' + type.id,
                 title: 'Export NRC ' + type.formatName,
@@ -5114,7 +5276,7 @@ function createExportAction(registry, type) {
                             const cv = this.$refs.preview;
                             if (cv) {
                                 try {
-                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_3__.buildAnimationJson)(type));
+                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type));
                                 }
                                 catch (e) { /* ignore */ }
                             }
@@ -5158,7 +5320,7 @@ function createExportAction(registry, type) {
                                 </div>
                             </div>
 
-                            <div v-if="exportAnimation">${_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__.EMOTE_SETTINGS_TEMPLATE}</div>
+                            <div v-if="exportAnimation">${_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.EMOTE_SETTINGS_TEMPLATE}</div>
 
                             <div v-if="exportNorisk">
                                 <div class="nrc-x-sec-h">Cosmetic metadata</div>
@@ -5181,20 +5343,22 @@ function createExportAction(registry, type) {
                 onConfirm() {
                     (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.clearLivePreviews)();
                     (0,_core_log__WEBPACK_IMPORTED_MODULE_9__.logReset)();
-                    const base = (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_6__.sanitize)(state.name) || type.defaultName;
+                    const base = (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.sanitize)(state.name) || type.defaultName;
                     const files = [];
                     if (state.exportAnimation)
-                        (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_2__.applyEmoteSettings)(metaAnim, type, state);
+                        (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.applyEmoteSettings)(metaAnim, type, state);
                     if (state.exportAnimation) {
-                        files.push({ suffix: '.animation.json', content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_3__.buildAnimationJson)(type), null, 2) });
+                        files.push({ suffix: '.animation.json', content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type), null, 2) });
+                        for (const effect of (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__.collectEffectFiles)())
+                            files.push(effect);
                     }
                     if (state.exportModel) {
-                        files.push({ suffix: '.geo.json', content: (0,_serialization_geometry__WEBPACK_IMPORTED_MODULE_4__.buildGeoJson)() });
+                        files.push({ suffix: '.geo.json', content: (0,_serialization_geometry__WEBPACK_IMPORTED_MODULE_3__.buildGeoJson)() });
                     }
                     if (state.exportNorisk) {
                         files.push({
                             suffix: '.norisk.json',
-                            content: JSON.stringify((0,_serialization_norisk__WEBPACK_IMPORTED_MODULE_5__.buildNoriskJson)(type, {
+                            content: JSON.stringify((0,_serialization_norisk__WEBPACK_IMPORTED_MODULE_4__.buildNoriskJson)(type, {
                                 name: state.name,
                                 creator: state.creator,
                                 price: Number(state.price) || 0,
@@ -5208,7 +5372,7 @@ function createExportAction(registry, type) {
                         Blockbench.showQuickMessage('Nothing selected to export', 1800);
                         return;
                     }
-                    (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_6__.writeFiles)(base, files);
+                    (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.writeFiles)(base, files);
                 },
             }).show();
         },
@@ -5328,7 +5492,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
 /* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/skinPreview */ "./ts/platform/skinPreview.ts");
 /* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/playerModel */ "./ts/platform/playerModel.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -5374,15 +5540,14 @@ async function fetchSkin(name) {
         return { uri: await toDataUri(found.url), arms: found.arms };
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('mojang skin lookup failed, falling back: ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('mojang skin lookup failed, falling back: ' + e);
         return { uri: await toDataUri(FALLBACK_API + encodeURIComponent(name)), arms: null };
     }
 }
 function fileToDataUri(content) {
     if (content.indexOf('data:') === 0)
         return content;
-    const buffer = (__webpack_require__(/*! fs */ "fs").readFileSync)(content);
-    return 'data:image/png;base64,' + buffer.toString('base64');
+    return 'data:image/png;base64,' + _core_node__WEBPACK_IMPORTED_MODULE_3__.fs.readFileSync(content).toString('base64');
 }
 function createSkinAction(registry, type) {
     return registry.action('nrc_set_skin_' + type.id, {
@@ -5445,7 +5610,7 @@ function openSkinDialog(type) {
                     Blockbench.showQuickMessage('Preview skin loaded', 1600);
                 }
                 catch (e) {
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('skin file read failed: ' + e);
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('skin file read failed: ' + e);
                     Blockbench.showQuickMessage('Could not read that file', 2400);
                 }
                 return;
@@ -5462,7 +5627,7 @@ function openSkinDialog(type) {
                 (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_1__.setCustomSkin)(found.uri);
                 Blockbench.showQuickMessage('Preview skin set to ' + name + (found.arms === 'slim' ? ' (slim)' : ''), 1600);
             }, (e) => {
-                (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('skin fetch failed: ' + e);
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('skin fetch failed: ' + e);
                 Blockbench.showQuickMessage('Could not load a skin for ' + name, 2400);
             });
         },
@@ -5488,8 +5653,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_rig__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/rig */ "./ts/platform/rig.ts");
 /* harmony import */ var _platform_import_animationImport__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../platform/import/animationImport */ "./ts/platform/import/animationImport.ts");
 /* harmony import */ var _platform_import_geometryImport__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../platform/import/geometryImport */ "./ts/platform/import/geometryImport.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
-/* harmony import */ var _nameDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./nameDialog */ "./ts/ui/nameDialog.ts");
+/* harmony import */ var _platform_effectFiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../platform/effectFiles */ "./ts/platform/effectFiles.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _nameDialog__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./nameDialog */ "./ts/ui/nameDialog.ts");
 
 
 
@@ -5497,7 +5663,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const BLANK = { id: 'blank', name: 'Blank Emote', kind: 'blank', hasProps: false };
+
+const BLANK = { id: 'blank', name: 'Blank Emote', kind: 'blank', effectFiles: [], badges: [] };
 let dialog = null;
 const state = {
     type: null,
@@ -5507,7 +5674,7 @@ const state = {
     templates: [BLANK],
 };
 function applyTemplate(type, t) {
-    (0,_nameDialog__WEBPACK_IMPORTED_MODULE_6__.promptName)(type, (id) => buildFromTemplate(type, t, id));
+    (0,_nameDialog__WEBPACK_IMPORTED_MODULE_7__.promptName)(type, (id) => buildFromTemplate(type, t, id));
 }
 function buildFromTemplate(type, t, id) {
     try {
@@ -5516,16 +5683,17 @@ function buildFromTemplate(type, t, id) {
         }
         else {
             (0,_platform_rig__WEBPACK_IMPORTED_MODULE_2__.loadRig)(type, true);
-            if (t.hasProps && t.geoJson)
+            if (t.geoJson)
                 (0,_platform_import_geometryImport__WEBPACK_IMPORTED_MODULE_4__.importGeometry)(t.geoJson, t.previewDataUri);
             (0,_platform_import_animationImport__WEBPACK_IMPORTED_MODULE_3__.importAnimation)(type, t.animationJson);
+            (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_5__.linkEffectFiles)(t.name, t.effectFiles);
             Canvas.updateAll();
         }
         applyName(id);
         Blockbench.showQuickMessage('Loaded: ' + t.name, 1600);
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('applyTemplate ERROR: ' + (e && e.stack ? e.stack : String(e)));
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_6__.log)('applyTemplate ERROR: ' + (e && e.stack ? e.stack : String(e)));
     }
 }
 function applyName(id) {
@@ -5561,7 +5729,8 @@ function ensureTemplateCss(registry) {
         .nrc-tpl-thumb canvas { width: 100%; height: 100%; }
         .nrc-tpl-noimg { font-size: 30px; color: var(--color-subtle_text); }
         .nrc-tpl-name { margin-top: 4px; font-size: 11px; word-break: break-word; }
-        .nrc-tpl-badge { position: absolute; top: 4px; right: 4px; font-size: 9px; background: var(--color-accent); color: var(--color-light); border-radius: 3px; padding: 0 3px; }
+        .nrc-tpl-badges { position: absolute; top: 4px; right: 4px; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .nrc-tpl-badge { font-size: 9px; background: var(--color-accent); color: var(--color-accent_text); border-radius: 3px; padding: 0 3px; }
     `);
 }
 function openTemplateDialog(type) {
@@ -5624,7 +5793,9 @@ function openTemplateDialog(type) {
                                 <div v-else class="nrc-tpl-noimg">+</div>
                             </div>
                             <div class="nrc-tpl-name">{{ t.name }}</div>
-                            <div v-if="t.hasProps" class="nrc-tpl-badge">props</div>
+                            <div class="nrc-tpl-badges">
+                                <div v-for="b in t.badges" :key="b" class="nrc-tpl-badge">{{ b }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
