@@ -6,7 +6,9 @@ import { buildAnimationJson } from '../serialization/animation';
 import { buildGeoJson } from '../serialization/geometry';
 import { buildNoriskJson } from '../serialization/norisk';
 import { writeFiles, sanitize, OutFile } from '../io/exportFiles';
-import { collectEffectFiles } from '../platform/effectFiles';
+import { collectEffectFiles, listEffectFiles } from '../platform/effectFiles';
+import { countEffectKeyframes } from '../platform/effectKeyframes';
+import { dataUriToBytes } from '../core/node';
 import { addLivePreview, clearLivePreviews } from '../platform/templates/livePreview';
 import { mcId } from '../core/util';
 import { log, logReset } from '../core/log';
@@ -47,6 +49,8 @@ export function ensureExportCss(registry: Registry) {
         .nrc-x-card .f { font-family: monospace; font-size: 9px; color: var(--color-subtle_text); word-break: break-all; }
         .nrc-x-card .tick { position: absolute; top: 4px; right: 5px; font-size: 14px; color: var(--color-accent); display: none; }
         .nrc-x-card.on .tick { display: block; }
+        .nrc-x-card.off { opacity: .4; cursor: default; }
+        .nrc-x-card.off:hover { background: none; }
 
         .nrc-x-switches { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
         .nrc-x-switch { display: flex; align-items: center; gap: 8px; }
@@ -77,6 +81,24 @@ export function ensureExportCss(registry: Registry) {
     `);
 }
 
+function propTexture(): Uint8Array | null {
+    const texture: any = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
+    if (!texture || !texture.getDataURL) return null;
+    try {
+        return dataUriToBytes(texture.getDataURL());
+    } catch (e) {
+        log('export: could not read project texture: ' + e);
+        return null;
+    }
+}
+
+function selectedChannels(state: any): string[] {
+    const channels: string[] = [];
+    if (state.exportParticles) channels.push('particle');
+    if (state.exportSounds) channels.push('sound');
+    return channels;
+}
+
 export function createExportAction(registry: Registry, type: CosmeticType): any {
     return registry.action('nrc_export_' + type.id, {
         name: 'Export ' + type.formatName,
@@ -86,12 +108,21 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
         condition: () => isCosmeticFormat(type) && Animation.all.length > 0,
         click() {
             const metaAnim: any = Animation.selected || Animation.all[0];
+            const texture = propTexture();
+            const particleCount = countEffectKeyframes('particle');
+            const soundCount = countEffectKeyframes('sound');
 
             const state = {
                 name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName),
                 exportAnimation: type.exportsAnimation,
                 exportNorisk: false,
                 exportModel: type.exportsModelDefault(),
+                exportTexture: !!texture,
+                exportParticles: particleCount > 0,
+                exportSounds: soundCount > 0,
+                hasTexture: !!texture,
+                particleCount,
+                soundCount,
                 ...emoteSettingsState(metaAnim, type),
                 creator: settings.credit?.value || '',
                 price: 0,
@@ -104,7 +135,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
 
             new Dialog('nrc_export_' + type.id, {
                 id: 'nrc_export_' + type.id,
-                title: 'Export NRC ' + type.formatName,
+                title: 'Export ' + type.formatName,
                 width: 540,
                 onCancel() { clearLivePreviews(); },
                 component: {
@@ -115,7 +146,9 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                             const f: string[] = [];
                             if (this.exportAnimation) f.push(this.base + '.animation.json');
                             if (this.exportModel) f.push(this.base + '.geo.json');
+                            if (this.exportTexture && this.hasTexture) f.push(this.base + '.png');
                             if (this.exportNorisk) f.push(this.base + '.norisk.json');
+                            for (const ref of listEffectFiles(selectedChannels(this))) f.push(ref.name);
                             return f;
                         },
                     },
@@ -155,6 +188,24 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                                         <i class="material-icons">view_in_ar</i>
                                         <div class="t">Model</div><div class="f">.geo.json</div>
                                     </div>
+                                    <div class="nrc-x-card" :class="{on: exportTexture && hasTexture, off: !hasTexture}"
+                                        @click="hasTexture && (exportTexture = !exportTexture)">
+                                        <i class="material-icons tick">check_circle</i>
+                                        <i class="material-icons">image</i>
+                                        <div class="t">Texture</div><div class="f">.png</div>
+                                    </div>
+                                    <div class="nrc-x-card" :class="{on: exportParticles && particleCount, off: !particleCount}"
+                                        @click="particleCount && (exportParticles = !exportParticles)">
+                                        <i class="material-icons tick">check_circle</i>
+                                        <i class="material-icons">flare</i>
+                                        <div class="t">Particles</div><div class="f">{{ particleCount }} effect(s)</div>
+                                    </div>
+                                    <div class="nrc-x-card" :class="{on: exportSounds && soundCount, off: !soundCount}"
+                                        @click="soundCount && (exportSounds = !exportSounds)">
+                                        <i class="material-icons tick">check_circle</i>
+                                        <i class="material-icons">volume_up</i>
+                                        <div class="t">Sounds</div><div class="f">{{ soundCount }} effect(s)</div>
+                                    </div>
                                     <div class="nrc-x-card" :class="{on: exportNorisk}" @click="exportNorisk = !exportNorisk">
                                         <i class="material-icons tick">check_circle</i>
                                         <i class="material-icons">sell</i>
@@ -192,10 +243,15 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                     if (state.exportAnimation) applyEmoteSettings(metaAnim, type, state);
                     if (state.exportAnimation) {
                         files.push({ suffix: '.animation.json', content: JSON.stringify(buildAnimationJson(type), null, 2) });
-                        for (const effect of collectEffectFiles()) files.push(effect);
                     }
                     if (state.exportModel) {
                         files.push({ suffix: '.geo.json', content: buildGeoJson() });
+                    }
+                    if (state.exportTexture && texture) {
+                        files.push({ suffix: '.png', content: texture });
+                    }
+                    for (const effect of collectEffectFiles(selectedChannels(state))) {
+                        files.push(effect);
                     }
                     if (state.exportNorisk) {
                         files.push({
@@ -210,7 +266,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                         });
                     }
 
-                    log('export base=' + base + ' files=' + files.map((f) => f.suffix).join(','));
+                    log('export base=' + base + ' files=' + files.map((f) => f.name || f.suffix).join(','));
                     if (!files.length) {
                         Blockbench.showQuickMessage('Nothing selected to export', 1800);
                         return;

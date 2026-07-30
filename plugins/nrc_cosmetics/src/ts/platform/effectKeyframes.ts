@@ -53,3 +53,11 @@ export function findEffectKeyframe(uuid: string): any {
 export function firstDataPoint(keyframe: any): any {
     return (keyframe && (keyframe.data_points || [])[0]) || {};
 }
+
+export function countEffectKeyframes(channel: string): number {
+    let total = 0;
+    for (const keyframe of allEffectKeyframes()) {
+        if (keyframe.channel === channel) total++;
+    }
+    return total;
+}

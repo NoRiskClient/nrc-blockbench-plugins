@@ -2820,6 +2820,7 @@ function log(msg) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Buf: () => (/* binding */ Buf),
+/* harmony export */   dataUriToBytes: () => (/* binding */ dataUriToBytes),
 /* harmony export */   fs: () => (/* binding */ fs),
 /* harmony export */   hasFilesystem: () => (/* binding */ hasFilesystem),
 /* harmony export */   nodePath: () => (/* binding */ nodePath),
@@ -2866,6 +2867,14 @@ function toBase64(bytes) {
 }
 function toBuffer(bytes) {
     return Buf ? Buf.from(bytes) : bytes;
+}
+function dataUriToBytes(uri) {
+    const base64 = uri.slice(uri.indexOf(',') + 1);
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++)
+        bytes[i] = binary.charCodeAt(i);
+    return bytes;
 }
 
 
@@ -3660,6 +3669,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   collectEffectFiles: () => (/* binding */ collectEffectFiles),
 /* harmony export */   effectStatus: () => (/* binding */ effectStatus),
 /* harmony export */   linkEffectFiles: () => (/* binding */ linkEffectFiles),
+/* harmony export */   listEffectFiles: () => (/* binding */ listEffectFiles),
 /* harmony export */   particleEffectId: () => (/* binding */ particleEffectId),
 /* harmony export */   registerStagedEffect: () => (/* binding */ registerStagedEffect),
 /* harmony export */   registerStagedPath: () => (/* binding */ registerStagedPath),
@@ -3808,40 +3818,46 @@ function linkEffectFiles(scope, files) {
     }
     (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: staged ' + Object.keys(staged).length + ', linked ' + linked + ' keyframe(s)');
 }
-function collectEffectFiles() {
+function listEffectFiles(channels) {
     if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
         return [];
     const seen = new Set();
-    const out = [];
+    const refs = [];
+    const add = (path, name) => {
+        if (seen.has(path))
+            return;
+        seen.add(path);
+        refs.push({ path, name });
+    };
     for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.allEffectKeyframes)()) {
+        if (channels && channels.indexOf(keyframe.channel) === -1)
+            continue;
         const suffix = _effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.CHANNEL_SUFFIX[keyframe.channel];
         for (const point of (keyframe.data_points || [])) {
             const full = point.file;
-            if (!full || seen.has(full))
+            if (!full)
                 continue;
-            seen.add(full);
             let name = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(full);
             if (suffix && !(0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.isCompanionFile)(name))
                 name = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.withoutSuffix)(name) + suffix;
-            try {
-                out.push({ name, content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(full) });
-            }
-            catch (e) {
-                (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read ' + full + ': ' + e);
-                continue;
-            }
+            add(full, name);
             if (keyframe.channel !== 'particle')
                 continue;
             const texture = (0,_particleTexture__WEBPACK_IMPORTED_MODULE_1__.particleTextureOf)(full);
-            if (!texture || seen.has(texture))
-                continue;
-            seen.add(texture);
-            try {
-                out.push({ name: _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(texture), content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(texture) });
-            }
-            catch (e) {
-                (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read texture ' + texture + ': ' + e);
-            }
+            if (texture)
+                add(texture, _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(texture));
+        }
+    }
+    return refs;
+}
+function collectEffectFiles(channels) {
+    const out = [];
+    for (const ref of listEffectFiles(channels)) {
+        try {
+            out.push({ name: ref.name, content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(ref.path) });
+        }
+        catch (e) {
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read ' + ref.path + ': ' + e);
         }
     }
     return out;
@@ -3861,6 +3877,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CHANNEL_SUFFIX: () => (/* binding */ CHANNEL_SUFFIX),
 /* harmony export */   EFFECT_CHANNELS: () => (/* binding */ EFFECT_CHANNELS),
 /* harmony export */   allEffectKeyframes: () => (/* binding */ allEffectKeyframes),
+/* harmony export */   countEffectKeyframes: () => (/* binding */ countEffectKeyframes),
 /* harmony export */   effectsAnimator: () => (/* binding */ effectsAnimator),
 /* harmony export */   findEffectKeyframe: () => (/* binding */ findEffectKeyframe),
 /* harmony export */   firstDataPoint: () => (/* binding */ firstDataPoint),
@@ -3917,6 +3934,14 @@ function findEffectKeyframe(uuid) {
 }
 function firstDataPoint(keyframe) {
     return (keyframe && (keyframe.data_points || [])[0]) || {};
+}
+function countEffectKeyframes(channel) {
+    let total = 0;
+    for (const keyframe of allEffectKeyframes()) {
+        if (keyframe.channel === channel)
+            total++;
+    }
+    return total;
 }
 
 
@@ -5812,9 +5837,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _serialization_norisk__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../serialization/norisk */ "./ts/serialization/norisk.ts");
 /* harmony import */ var _io_exportFiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../io/exportFiles */ "./ts/io/exportFiles.ts");
 /* harmony import */ var _platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../platform/effectFiles */ "./ts/platform/effectFiles.ts");
-/* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
-/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../platform/effectKeyframes */ "./ts/platform/effectKeyframes.ts");
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
 
 
 
@@ -5859,6 +5888,8 @@ function ensureExportCss(registry) {
         .nrc-x-card .f { font-family: monospace; font-size: 9px; color: var(--color-subtle_text); word-break: break-all; }
         .nrc-x-card .tick { position: absolute; top: 4px; right: 5px; font-size: 14px; color: var(--color-accent); display: none; }
         .nrc-x-card.on .tick { display: block; }
+        .nrc-x-card.off { opacity: .4; cursor: default; }
+        .nrc-x-card.off:hover { background: none; }
 
         .nrc-x-switches { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
         .nrc-x-switch { display: flex; align-items: center; gap: 8px; }
@@ -5888,6 +5919,26 @@ function ensureExportCss(registry) {
         .nrc-x-foot b { color: var(--color-text); }
     `);
 }
+function propTexture() {
+    const texture = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
+    if (!texture || !texture.getDataURL)
+        return null;
+    try {
+        return (0,_core_node__WEBPACK_IMPORTED_MODULE_8__.dataUriToBytes)(texture.getDataURL());
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_11__.log)('export: could not read project texture: ' + e);
+        return null;
+    }
+}
+function selectedChannels(state) {
+    const channels = [];
+    if (state.exportParticles)
+        channels.push('particle');
+    if (state.exportSounds)
+        channels.push('sound');
+    return channels;
+}
 function createExportAction(registry, type) {
     return registry.action('nrc_export_' + type.id, {
         name: 'Export ' + type.formatName,
@@ -5898,24 +5949,32 @@ function createExportAction(registry, type) {
         click() {
             var _a;
             const metaAnim = Animation.selected || Animation.all[0];
-            const state = Object.assign(Object.assign({ name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName), exportAnimation: type.exportsAnimation, exportNorisk: false, exportModel: type.exportsModelDefault() }, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.emoteSettingsState)(metaAnim, type)), { creator: ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '', price: 0, rarity: 'COMMON', rarities: RARITIES, colors: RARITY_COLORS, icon: type.icon, typeName: type.formatName });
+            const texture = propTexture();
+            const particleCount = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_7__.countEffectKeyframes)('particle');
+            const soundCount = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_7__.countEffectKeyframes)('sound');
+            const state = Object.assign(Object.assign({ name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName), exportAnimation: type.exportsAnimation, exportNorisk: false, exportModel: type.exportsModelDefault(), exportTexture: !!texture, exportParticles: particleCount > 0, exportSounds: soundCount > 0, hasTexture: !!texture, particleCount,
+                soundCount }, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.emoteSettingsState)(metaAnim, type)), { creator: ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '', price: 0, rarity: 'COMMON', rarities: RARITIES, colors: RARITY_COLORS, icon: type.icon, typeName: type.formatName });
             new Dialog('nrc_export_' + type.id, {
                 id: 'nrc_export_' + type.id,
-                title: 'Export NRC ' + type.formatName,
+                title: 'Export ' + type.formatName,
                 width: 540,
-                onCancel() { (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.clearLivePreviews)(); },
+                onCancel() { (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_9__.clearLivePreviews)(); },
                 component: {
                     data() { return state; },
                     computed: {
-                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_8__.mcId)(this.name) || type.defaultName; },
+                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_10__.mcId)(this.name) || type.defaultName; },
                         outFiles() {
                             const f = [];
                             if (this.exportAnimation)
                                 f.push(this.base + '.animation.json');
                             if (this.exportModel)
                                 f.push(this.base + '.geo.json');
+                            if (this.exportTexture && this.hasTexture)
+                                f.push(this.base + '.png');
                             if (this.exportNorisk)
                                 f.push(this.base + '.norisk.json');
+                            for (const ref of (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__.listEffectFiles)(selectedChannels(this)))
+                                f.push(ref.name);
                             return f;
                         },
                     },
@@ -5924,7 +5983,7 @@ function createExportAction(registry, type) {
                             const cv = this.$refs.preview;
                             if (cv) {
                                 try {
-                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type));
+                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_9__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type));
                                 }
                                 catch (e) { /* ignore */ }
                             }
@@ -5960,6 +6019,24 @@ function createExportAction(registry, type) {
                                         <i class="material-icons">view_in_ar</i>
                                         <div class="t">Model</div><div class="f">.geo.json</div>
                                     </div>
+                                    <div class="nrc-x-card" :class="{on: exportTexture && hasTexture, off: !hasTexture}"
+                                        @click="hasTexture && (exportTexture = !exportTexture)">
+                                        <i class="material-icons tick">check_circle</i>
+                                        <i class="material-icons">image</i>
+                                        <div class="t">Texture</div><div class="f">.png</div>
+                                    </div>
+                                    <div class="nrc-x-card" :class="{on: exportParticles && particleCount, off: !particleCount}"
+                                        @click="particleCount && (exportParticles = !exportParticles)">
+                                        <i class="material-icons tick">check_circle</i>
+                                        <i class="material-icons">flare</i>
+                                        <div class="t">Particles</div><div class="f">{{ particleCount }} effect(s)</div>
+                                    </div>
+                                    <div class="nrc-x-card" :class="{on: exportSounds && soundCount, off: !soundCount}"
+                                        @click="soundCount && (exportSounds = !exportSounds)">
+                                        <i class="material-icons tick">check_circle</i>
+                                        <i class="material-icons">volume_up</i>
+                                        <div class="t">Sounds</div><div class="f">{{ soundCount }} effect(s)</div>
+                                    </div>
                                     <div class="nrc-x-card" :class="{on: exportNorisk}" @click="exportNorisk = !exportNorisk">
                                         <i class="material-icons tick">check_circle</i>
                                         <i class="material-icons">sell</i>
@@ -5989,19 +6066,23 @@ function createExportAction(registry, type) {
                     `,
                 },
                 onConfirm() {
-                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_7__.clearLivePreviews)();
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_9__.logReset)();
+                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_9__.clearLivePreviews)();
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_11__.logReset)();
                     const base = (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.sanitize)(state.name) || type.defaultName;
                     const files = [];
                     if (state.exportAnimation)
                         (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.applyEmoteSettings)(metaAnim, type, state);
                     if (state.exportAnimation) {
                         files.push({ suffix: '.animation.json', content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type), null, 2) });
-                        for (const effect of (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__.collectEffectFiles)())
-                            files.push(effect);
                     }
                     if (state.exportModel) {
                         files.push({ suffix: '.geo.json', content: (0,_serialization_geometry__WEBPACK_IMPORTED_MODULE_3__.buildGeoJson)() });
+                    }
+                    if (state.exportTexture && texture) {
+                        files.push({ suffix: '.png', content: texture });
+                    }
+                    for (const effect of (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__.collectEffectFiles)(selectedChannels(state))) {
+                        files.push(effect);
                     }
                     if (state.exportNorisk) {
                         files.push({
@@ -6015,7 +6096,7 @@ function createExportAction(registry, type) {
                             }), null, 2),
                         });
                     }
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_9__.log)('export base=' + base + ' files=' + files.map((f) => f.suffix).join(','));
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_11__.log)('export base=' + base + ' files=' + files.map((f) => f.name || f.suffix).join(','));
                     if (!files.length) {
                         Blockbench.showQuickMessage('Nothing selected to export', 1800);
                         return;

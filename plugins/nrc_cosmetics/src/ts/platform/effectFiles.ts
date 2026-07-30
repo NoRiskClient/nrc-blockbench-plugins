@@ -140,38 +140,49 @@ export function linkEffectFiles(scope: string, files: CompanionFile[]) {
     log('effect files: staged ' + Object.keys(staged).length + ', linked ' + linked + ' keyframe(s)');
 }
 
-export function collectEffectFiles(): OutFile[] {
+export interface EffectFileRef {
+    name: string;
+    path: string;
+}
+
+export function listEffectFiles(channels?: string[]): EffectFileRef[] {
     if (!fs || !nodePath) return [];
 
     const seen = new Set<string>();
-    const out: OutFile[] = [];
+    const refs: EffectFileRef[] = [];
+    const add = (path: string, name: string) => {
+        if (seen.has(path)) return;
+        seen.add(path);
+        refs.push({ path, name });
+    };
 
     for (const keyframe of allEffectKeyframes()) {
+        if (channels && channels.indexOf(keyframe.channel) === -1) continue;
         const suffix = CHANNEL_SUFFIX[keyframe.channel];
+
         for (const point of (keyframe.data_points || []) as any[]) {
             const full = point.file;
-            if (!full || seen.has(full)) continue;
-            seen.add(full);
+            if (!full) continue;
 
             let name = nodePath.basename(full);
             if (suffix && !isCompanionFile(name)) name = withoutSuffix(name) + suffix;
-
-            try {
-                out.push({ name, content: fs.readFileSync(full) });
-            } catch (e) {
-                log('effect files: could not read ' + full + ': ' + e);
-                continue;
-            }
+            add(full, name);
 
             if (keyframe.channel !== 'particle') continue;
             const texture = particleTextureOf(full);
-            if (!texture || seen.has(texture)) continue;
-            seen.add(texture);
-            try {
-                out.push({ name: nodePath.basename(texture), content: fs.readFileSync(texture) });
-            } catch (e) {
-                log('effect files: could not read texture ' + texture + ': ' + e);
-            }
+            if (texture) add(texture, nodePath.basename(texture));
+        }
+    }
+    return refs;
+}
+
+export function collectEffectFiles(channels?: string[]): OutFile[] {
+    const out: OutFile[] = [];
+    for (const ref of listEffectFiles(channels)) {
+        try {
+            out.push({ name: ref.name, content: fs.readFileSync(ref.path) });
+        } catch (e) {
+            log('effect files: could not read ' + ref.path + ': ' + e);
         }
     }
     return out;

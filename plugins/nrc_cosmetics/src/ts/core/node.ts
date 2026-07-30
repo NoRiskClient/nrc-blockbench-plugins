@@ -38,3 +38,11 @@ export function toBase64(bytes: Uint8Array): string {
 export function toBuffer(bytes: Uint8Array): any {
     return Buf ? Buf.from(bytes) : bytes;
 }
+
+export function dataUriToBytes(uri: string): Uint8Array {
+    const base64 = uri.slice(uri.indexOf(',') + 1);
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+}

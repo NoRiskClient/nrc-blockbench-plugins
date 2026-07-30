@@ -23,6 +23,7 @@ declare class TextDecoder { constructor(label?: string); decode(input?: any): st
 declare class Texture {
     constructor(data?: any, uuid?: string);
     static all: any[];
+    static getDefault(): any;
     fromDataURL(url: string): this;
     add(undo?: boolean): this;
     remove(undo?: boolean): void;
