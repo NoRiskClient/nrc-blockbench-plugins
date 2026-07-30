@@ -3100,13 +3100,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./domain/meta */ "./ts/domain/meta.ts");
 /* harmony import */ var _ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ui/settingsDialog */ "./ts/ui/settingsDialog.ts");
 /* harmony import */ var _ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ui/exportDialog */ "./ts/ui/exportDialog.ts");
-/* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
-/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
-/* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
-/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
-/* harmony import */ var _ui_effectsPanel__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/effectsPanel */ "./ts/ui/effectsPanel.ts");
-/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
-/* harmony import */ var _ui_nameDialog__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./ui/nameDialog */ "./ts/ui/nameDialog.ts");
+/* harmony import */ var _ui_dialogStyles__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ui/dialogStyles */ "./ts/ui/dialogStyles.ts");
+/* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
+/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
+/* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _ui_effectsPanel__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./ui/effectsPanel */ "./ts/ui/effectsPanel.ts");
+/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
 
 
 
@@ -3120,8 +3120,8 @@ __webpack_require__.r(__webpack_exports__);
 
 function registerCosmeticType(type, registry) {
     (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.registerFormat)(registry, type);
-    (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_4__.ensureTemplateCss)(registry);
-    (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type).new = function () { (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_4__.openTemplateDialog)(type); };
+    (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_5__.ensureTemplateCss)(registry);
+    (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type).new = function () { (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_5__.openTemplateDialog)(type); };
     const condition = { formats: [type.formatId] };
     for (const f of type.metaFields) {
         registry.property(Animation, 'boolean', f.key, { default: f.default, exposed: false, condition });
@@ -3132,21 +3132,18 @@ function registerCosmeticType(type, registry) {
         }
     }
     registry.menu((0,_ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__.createSettingsAction)(registry, type), 'animation');
-    (0,_ui_effectsPanel__WEBPACK_IMPORTED_MODULE_8__.installEffectsPanel)(registry, type);
-    (0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.ensureExportCss)(registry);
-    registry.menu((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_9__.createRenameAction)(registry, type, (apply) => (0,_ui_nameDialog__WEBPACK_IMPORTED_MODULE_10__.promptName)(type, apply, {
-        title: 'Rename ' + type.formatName,
-        value: (0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_9__.currentEmoteId)(type),
-    })), 'file');
+    (0,_ui_effectsPanel__WEBPACK_IMPORTED_MODULE_9__.installEffectsPanel)(registry, type);
+    (0,_ui_dialogStyles__WEBPACK_IMPORTED_MODULE_4__.ensureDialogCss)(registry);
+    registry.menu((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_10__.createRenameAction)(registry, type), 'file');
     registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAction)(registry, type), 'file.export');
     if (type.hasSkinPreview) {
-        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleSkinAction)(registry, type));
-        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleLayerAction)(registry, type));
-        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.makeToggleArmModelAction)(registry, type));
-        registry.menu((0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_7__.makeToggleRigLockAction)(registry, type), 'edit');
-        (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_7__.installPlayerModel)(registry);
-        registry.previewMenu((0,_ui_skinDialog__WEBPACK_IMPORTED_MODULE_6__.createSkinAction)(registry, type));
-        (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__.installSkinPreview)(registry);
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_6__.makeToggleSkinAction)(registry, type));
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_6__.makeToggleLayerAction)(registry, type));
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_6__.makeToggleArmModelAction)(registry, type));
+        registry.menu((0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_8__.makeToggleRigLockAction)(registry, type), 'edit');
+        (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_8__.installPlayerModel)(registry);
+        registry.previewMenu((0,_ui_skinDialog__WEBPACK_IMPORTED_MODULE_7__.createSkinAction)(registry, type));
+        (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_6__.installSkinPreview)(registry);
     }
 }
 
@@ -3985,7 +3982,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
 /* harmony import */ var _effectFiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./effectFiles */ "./ts/platform/effectFiles.ts");
 /* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./effectKeyframes */ "./ts/platform/effectKeyframes.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _ui_nameDialog__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../ui/nameDialog */ "./ts/ui/nameDialog.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -4044,10 +4043,10 @@ function renameEmote(type, newId) {
         }
     }
     Undo.finishEdit('Rename emote');
-    (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('renameEmote: ' + previous + ' -> ' + newId + ', ' + updated + ' sound id(s) updated');
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_6__.log)('renameEmote: ' + previous + ' -> ' + newId + ', ' + updated + ' sound id(s) updated');
     return updated;
 }
-function createRenameAction(registry, type, ask) {
+function createRenameAction(registry, type) {
     return registry.action('nrc_rename_' + type.id, {
         name: 'Rename ' + type.formatName,
         description: 'Rename the project, its animation and every sound identifier at once',
@@ -4055,11 +4054,11 @@ function createRenameAction(registry, type, ask) {
         category: 'file',
         condition: () => (0,_format__WEBPACK_IMPORTED_MODULE_2__.isCosmeticFormat)(type),
         click() {
-            ask((id) => {
+            (0,_ui_nameDialog__WEBPACK_IMPORTED_MODULE_5__.promptName)(type, (id) => {
                 const updated = renameEmote(type, id);
                 Blockbench.showQuickMessage('Renamed to ' + id
                     + (updated ? ', ' + updated + ' sound id(s) updated' : ''), 2200);
-            });
+            }, { title: 'Rename ' + type.formatName, value: currentEmoteId(type) });
         },
     });
 }
@@ -4739,6 +4738,100 @@ function loadRig(type, skipDefaultAnimation = false) {
 
 /***/ },
 
+/***/ "./ts/platform/skinLayers.ts"
+/*!***********************************!*\
+  !*** ./ts/platform/skinLayers.ts ***!
+  \***********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SKIN_UV: () => (/* binding */ SKIN_UV),
+/* harmony export */   buildLayer: () => (/* binding */ buildLayer),
+/* harmony export */   removeLayer: () => (/* binding */ removeLayer),
+/* harmony export */   secondLayerEnabled: () => (/* binding */ secondLayerEnabled),
+/* harmony export */   setSecondLayerEnabled: () => (/* binding */ setSecondLayerEnabled)
+/* harmony export */ });
+/* harmony import */ var _playerModel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./playerModel */ "./ts/platform/playerModel.ts");
+
+const LAYER_TAG = 'nrc_skin_layer';
+const SKIN_UV = 64;
+const LAYERS = {
+    bipedHead: { du: 32, dv: 0, inflate: 0.5, needsTallSkin: false },
+    bipedBody: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
+    bipedRightArm: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
+    bipedLeftArm: { du: 16, dv: 0, inflate: 0.25, needsTallSkin: true },
+    bipedRightLeg: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
+    bipedLeftLeg: { du: -16, dv: 0, inflate: 0.25, needsTallSkin: true },
+};
+let enabled = true;
+function secondLayerEnabled() {
+    return enabled;
+}
+function setSecondLayerEnabled(on) {
+    enabled = on;
+}
+function removeLayer(cube) {
+    const mesh = cube.mesh;
+    if (!mesh || !mesh.children)
+        return;
+    for (const layer of mesh.children.filter((c) => c[LAYER_TAG])) {
+        mesh.remove(layer);
+        if (layer.geometry && layer.geometry.dispose)
+            layer.geometry.dispose();
+    }
+}
+function inflateOutwards(geometry, inflate) {
+    geometry.computeBoundingBox();
+    const box = geometry.boundingBox;
+    const centre = [
+        (box.min.x + box.max.x) / 2,
+        (box.min.y + box.max.y) / 2,
+        (box.min.z + box.max.z) / 2,
+    ];
+    const position = geometry.attributes.position;
+    for (let i = 0; i < position.count; i++) {
+        for (let axis = 0; axis < 3; axis++) {
+            const at = i * 3 + axis;
+            const value = position.array[at];
+            position.array[at] = value >= centre[axis] ? value + inflate : value - inflate;
+        }
+    }
+    position.needsUpdate = true;
+}
+function shiftUv(geometry, du, dv) {
+    const uv = geometry.attributes.uv;
+    for (let i = 0; i < uv.count; i++) {
+        uv.array[i * 2] += du / SKIN_UV;
+        uv.array[i * 2 + 1] -= dv / SKIN_UV;
+    }
+    uv.needsUpdate = true;
+}
+function buildLayer(cube, material, skinHeight) {
+    removeLayer(cube);
+    if (!enabled || !material)
+        return;
+    const def = LAYERS[(0,_playerModel__WEBPACK_IMPORTED_MODULE_0__.rigBoneName)(cube)];
+    if (!def)
+        return;
+    if (def.needsTallSkin && skinHeight < SKIN_UV)
+        return;
+    const source = cube.mesh && cube.mesh.geometry;
+    if (!source || !source.attributes || !source.attributes.uv)
+        return;
+    const geometry = source.clone();
+    inflateOutwards(geometry, def.inflate);
+    shiftUv(geometry, def.du, def.dv);
+    const layer = new THREE.Mesh(geometry, material);
+    layer[LAYER_TAG] = true;
+    layer.no_export = true;
+    layer.renderOrder = 1;
+    cube.mesh.add(layer);
+}
+
+
+/***/ },
+
 /***/ "./ts/platform/skinPreview.ts"
 /*!************************************!*\
   !*** ./ts/platform/skinPreview.ts ***!
@@ -4756,21 +4849,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
 /* harmony import */ var _playerModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _skinLayers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./skinLayers */ "./ts/platform/skinLayers.ts");
+
 
 
 const MAX_MATERIALS = 8;
-const LAYER_TAG = 'nrc_skin_layer';
-const SKIN_UV = 64;
-const LAYERS = {
-    bipedHead: { du: 32, dv: 0, inflate: 0.5, needsTallSkin: false },
-    bipedBody: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
-    bipedRightArm: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
-    bipedLeftArm: { du: 16, dv: 0, inflate: 0.25, needsTallSkin: true },
-    bipedRightLeg: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
-    bipedLeftLeg: { du: -16, dv: 0, inflate: 0.25, needsTallSkin: true },
-};
 let skinMode = false;
-let secondLayer = true;
 let customSkin = null;
 const materials = {};
 const materialOrder = [];
@@ -4816,73 +4900,13 @@ function materialFor(uri) {
     }
     return mat;
 }
-function layerDef(cube) {
-    return LAYERS[(0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.rigBoneName)(cube)] || null;
-}
-function removeLayer(cube) {
-    const mesh = cube.mesh;
-    if (!mesh || !mesh.children)
-        return;
-    const existing = mesh.children.filter((c) => c[LAYER_TAG]);
-    for (const layer of existing) {
-        mesh.remove(layer);
-        if (layer.geometry && layer.geometry.dispose)
-            layer.geometry.dispose();
-    }
-}
-function buildLayer(cube) {
-    removeLayer(cube);
-    if (!secondLayer)
-        return;
-    const def = layerDef(cube);
-    if (!def)
-        return;
-    const uri = skinUri();
-    if (!uri)
-        return;
-    if (def.needsTallSkin && (skinHeights[uri] || 64) < 64)
-        return;
-    const source = cube.mesh && cube.mesh.geometry;
-    if (!source || !source.attributes || !source.attributes.uv)
-        return;
-    const geometry = source.clone();
-    geometry.computeBoundingBox();
-    const box = geometry.boundingBox;
-    const centre = [
-        (box.min.x + box.max.x) / 2,
-        (box.min.y + box.max.y) / 2,
-        (box.min.z + box.max.z) / 2,
-    ];
-    const position = geometry.attributes.position;
-    for (let i = 0; i < position.count; i++) {
-        for (let axis = 0; axis < 3; axis++) {
-            const at = i * 3 + axis;
-            const value = position.array[at];
-            position.array[at] = value >= centre[axis] ? value + def.inflate : value - def.inflate;
-        }
-    }
-    position.needsUpdate = true;
-    const uv = geometry.attributes.uv;
-    const du = def.du / SKIN_UV;
-    const dv = def.dv / SKIN_UV;
-    for (let i = 0; i < uv.count; i++) {
-        uv.array[i * 2] += du;
-        uv.array[i * 2 + 1] -= dv;
-    }
-    uv.needsUpdate = true;
-    const layer = new THREE.Mesh(geometry, materialFor(uri));
-    layer[LAYER_TAG] = true;
-    layer.no_export = true;
-    layer.renderOrder = 1;
-    cube.mesh.add(layer);
-}
 function rescaleToSkinUv(cube) {
     const geometry = cube.mesh && cube.mesh.geometry;
     const uv = geometry && geometry.attributes && geometry.attributes.uv;
     if (!uv)
         return;
-    const sx = (Project.texture_width || SKIN_UV) / SKIN_UV;
-    const sy = (Project.texture_height || SKIN_UV) / SKIN_UV;
+    const sx = (Project.texture_width || _skinLayers__WEBPACK_IMPORTED_MODULE_2__.SKIN_UV) / _skinLayers__WEBPACK_IMPORTED_MODULE_2__.SKIN_UV;
+    const sy = (Project.texture_height || _skinLayers__WEBPACK_IMPORTED_MODULE_2__.SKIN_UV) / _skinLayers__WEBPACK_IMPORTED_MODULE_2__.SKIN_UV;
     if (sx === 1 && sy === 1)
         return;
     for (let i = 0; i < uv.count; i++) {
@@ -4895,8 +4919,9 @@ function applyToCube(cube) {
     const uri = skinUri();
     if (!uri || !cube.mesh)
         return;
-    cube.mesh.material = materialFor(uri);
-    buildLayer(cube);
+    const material = materialFor(uri);
+    cube.mesh.material = material;
+    (0,_skinLayers__WEBPACK_IMPORTED_MODULE_2__.buildLayer)(cube, material, skinHeights[uri] || _skinLayers__WEBPACK_IMPORTED_MODULE_2__.SKIN_UV);
 }
 function applySkin() {
     (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.resolveRigCubes)();
@@ -4908,7 +4933,7 @@ function applySkin() {
 }
 function restoreCubes() {
     for (const cube of (0,_playerModel__WEBPACK_IMPORTED_MODULE_1__.rigCubes)()) {
-        removeLayer(cube);
+        (0,_skinLayers__WEBPACK_IMPORTED_MODULE_2__.removeLayer)(cube);
         if (!cube.preview_controller)
             continue;
         cube.preview_controller.updateFaces(cube);
@@ -4956,10 +4981,10 @@ function makeToggleLayerAction(registry, type) {
         category: 'view',
         condition: () => (0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type),
         click() {
-            secondLayer = !secondLayer;
+            (0,_skinLayers__WEBPACK_IMPORTED_MODULE_2__.setSecondLayerEnabled)(!(0,_skinLayers__WEBPACK_IMPORTED_MODULE_2__.secondLayerEnabled)());
             if (skinMode)
                 applySkin();
-            Blockbench.showQuickMessage('Second layer ' + (secondLayer ? 'on' : 'off'), 1200);
+            Blockbench.showQuickMessage('Second layer ' + ((0,_skinLayers__WEBPACK_IMPORTED_MODULE_2__.secondLayerEnabled)() ? 'on' : 'off'), 1200);
         },
     });
 }
@@ -5475,6 +5500,77 @@ function openAnimationExportDialog(type) {
 
 /***/ },
 
+/***/ "./ts/ui/dialogStyles.ts"
+/*!*******************************!*\
+  !*** ./ts/ui/dialogStyles.ts ***!
+  \*******************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ensureDialogCss: () => (/* binding */ ensureDialogCss)
+/* harmony export */ });
+function ensureDialogCss(registry) {
+    registry.css(`
+        .nrc-x { display: flex; flex-direction: column; gap: 12px; padding: 2px; }
+        .nrc-x-head { display: flex; align-items: center; gap: 8px; }
+        .nrc-x-head .material-icons { font-size: 22px; color: var(--color-accent); }
+        .nrc-x-head h2 { margin: 0; font-size: 15px; flex: 1; }
+        .nrc-x-base { font-family: monospace; color: var(--color-subtle_text); font-size: 11px; }
+
+        .nrc-x-preview { display: flex; justify-content: center; background: var(--color-dark); border-radius: 6px; padding: 4px; }
+        .nrc-x-preview canvas { width: 140px; height: 140px; }
+
+        .nrc-x-name input { width: 100%; box-sizing: border-box; font-size: 13px; padding: 5px 8px; }
+        .nrc-x-files { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+        .nrc-x-files .chip { font-family: monospace; font-size: 10px; background: var(--color-button); border-radius: 10px; padding: 2px 8px; color: var(--color-subtle_text); }
+
+        .nrc-x-sec-h { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--color-subtle_text); margin-bottom: 5px; }
+
+        .nrc-x-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .nrc-x-card { position: relative; border: 1.5px solid var(--color-border); border-radius: 6px; padding: 8px; cursor: pointer; text-align: center; transition: border-color .1s, background .1s; }
+        .nrc-x-card:hover { background: var(--color-button); }
+        .nrc-x-card.on { border-color: var(--color-accent); background: var(--color-selected); }
+        .nrc-x-card .material-icons { font-size: 22px; }
+        .nrc-x-card .t { font-size: 12px; font-weight: 600; margin-top: 2px; }
+        .nrc-x-card .f { font-family: monospace; font-size: 9px; color: var(--color-subtle_text); word-break: break-all; }
+        .nrc-x-card .tick { position: absolute; top: 4px; right: 5px; font-size: 14px; color: var(--color-accent); display: none; }
+        .nrc-x-card.on .tick { display: block; }
+        .nrc-x-card.off { opacity: .4; cursor: default; }
+        .nrc-x-card.off:hover { background: none; }
+
+        .nrc-x-switches { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+        .nrc-x-switch { display: flex; align-items: center; gap: 8px; }
+        .nrc-x-switch .txt { flex: 1; }
+        .nrc-x-switch .lbl { font-size: 12px; }
+        .nrc-x-switch .desc { font-size: 10px; color: var(--color-subtle_text); }
+        .nrc-x-toggle { position: relative; width: 32px; height: 17px; flex: none; cursor: pointer; }
+        .nrc-x-toggle input { display: none; }
+        .nrc-x-toggle .sl { position: absolute; inset: 0; background: var(--color-button); border-radius: 9px; transition: background .12s; }
+        .nrc-x-toggle .sl::before { content: ''; position: absolute; width: 13px; height: 13px; left: 2px; top: 2px; background: var(--color-text); border-radius: 50%; transition: transform .12s; }
+        .nrc-x-toggle input:checked + .sl { background: var(--color-accent); }
+        .nrc-x-toggle input:checked + .sl::before { transform: translateX(15px); }
+
+        .nrc-x-locks { margin-top: 8px; }
+        .nrc-x-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .nrc-x-chip { font-size: 11px; padding: 3px 9px; border-radius: 12px; border: 1px solid var(--color-border); cursor: pointer; user-select: none; color: var(--color-subtle_text); }
+        .nrc-x-chip:hover { background: var(--color-button); }
+        .nrc-x-chip.on { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-light); }
+
+        .nrc-x-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .nrc-x-row > label { width: 64px; color: var(--color-subtle_text); font-size: 12px; }
+        .nrc-x-row input { flex: 1; padding: 4px 7px; }
+        .nrc-x-pills { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+        .nrc-x-pill { font-size: 11px; font-weight: 600; padding: 3px 11px; border-radius: 12px; border: 1.5px solid; cursor: pointer; user-select: none; }
+
+        .nrc-x-foot { font-size: 12px; color: var(--color-subtle_text); text-align: center; padding-top: 2px; }
+        .nrc-x-foot b { color: var(--color-text); }
+    `);
+}
+
+
+/***/ },
+
 /***/ "./ts/ui/easingPanel.ts"
 /*!******************************!*\
   !*** ./ts/ui/easingPanel.ts ***!
@@ -5947,8 +6043,7 @@ function applyEmoteSettings(anim, type, state) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   createExportAction: () => (/* binding */ createExportAction),
-/* harmony export */   ensureExportCss: () => (/* binding */ ensureExportCss)
+/* harmony export */   createExportAction: () => (/* binding */ createExportAction)
 /* harmony export */ });
 /* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
 /* harmony import */ var _emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./emoteSettingsPanel */ "./ts/ui/emoteSettingsPanel.ts");
@@ -5982,63 +6077,6 @@ const RARITY_COLORS = {
     EPIC: '#7b25a4',
     LEGENDARY: '#a46823',
 };
-function ensureExportCss(registry) {
-    registry.css(`
-        .nrc-x { display: flex; flex-direction: column; gap: 12px; padding: 2px; }
-        .nrc-x-head { display: flex; align-items: center; gap: 8px; }
-        .nrc-x-head .material-icons { font-size: 22px; color: var(--color-accent); }
-        .nrc-x-head h2 { margin: 0; font-size: 15px; flex: 1; }
-        .nrc-x-base { font-family: monospace; color: var(--color-subtle_text); font-size: 11px; }
-
-        .nrc-x-preview { display: flex; justify-content: center; background: var(--color-dark); border-radius: 6px; padding: 4px; }
-        .nrc-x-preview canvas { width: 140px; height: 140px; }
-
-        .nrc-x-name input { width: 100%; box-sizing: border-box; font-size: 13px; padding: 5px 8px; }
-        .nrc-x-files { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-        .nrc-x-files .chip { font-family: monospace; font-size: 10px; background: var(--color-button); border-radius: 10px; padding: 2px 8px; color: var(--color-subtle_text); }
-
-        .nrc-x-sec-h { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--color-subtle_text); margin-bottom: 5px; }
-
-        .nrc-x-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .nrc-x-card { position: relative; border: 1.5px solid var(--color-border); border-radius: 6px; padding: 8px; cursor: pointer; text-align: center; transition: border-color .1s, background .1s; }
-        .nrc-x-card:hover { background: var(--color-button); }
-        .nrc-x-card.on { border-color: var(--color-accent); background: var(--color-selected); }
-        .nrc-x-card .material-icons { font-size: 22px; }
-        .nrc-x-card .t { font-size: 12px; font-weight: 600; margin-top: 2px; }
-        .nrc-x-card .f { font-family: monospace; font-size: 9px; color: var(--color-subtle_text); word-break: break-all; }
-        .nrc-x-card .tick { position: absolute; top: 4px; right: 5px; font-size: 14px; color: var(--color-accent); display: none; }
-        .nrc-x-card.on .tick { display: block; }
-        .nrc-x-card.off { opacity: .4; cursor: default; }
-        .nrc-x-card.off:hover { background: none; }
-
-        .nrc-x-switches { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
-        .nrc-x-switch { display: flex; align-items: center; gap: 8px; }
-        .nrc-x-switch .txt { flex: 1; }
-        .nrc-x-switch .lbl { font-size: 12px; }
-        .nrc-x-switch .desc { font-size: 10px; color: var(--color-subtle_text); }
-        .nrc-x-toggle { position: relative; width: 32px; height: 17px; flex: none; cursor: pointer; }
-        .nrc-x-toggle input { display: none; }
-        .nrc-x-toggle .sl { position: absolute; inset: 0; background: var(--color-button); border-radius: 9px; transition: background .12s; }
-        .nrc-x-toggle .sl::before { content: ''; position: absolute; width: 13px; height: 13px; left: 2px; top: 2px; background: var(--color-text); border-radius: 50%; transition: transform .12s; }
-        .nrc-x-toggle input:checked + .sl { background: var(--color-accent); }
-        .nrc-x-toggle input:checked + .sl::before { transform: translateX(15px); }
-
-        .nrc-x-locks { margin-top: 8px; }
-        .nrc-x-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
-        .nrc-x-chip { font-size: 11px; padding: 3px 9px; border-radius: 12px; border: 1px solid var(--color-border); cursor: pointer; user-select: none; color: var(--color-subtle_text); }
-        .nrc-x-chip:hover { background: var(--color-button); }
-        .nrc-x-chip.on { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-light); }
-
-        .nrc-x-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-        .nrc-x-row > label { width: 64px; color: var(--color-subtle_text); font-size: 12px; }
-        .nrc-x-row input { flex: 1; padding: 4px 7px; }
-        .nrc-x-pills { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
-        .nrc-x-pill { font-size: 11px; font-weight: 600; padding: 3px 11px; border-radius: 12px; border: 1.5px solid; cursor: pointer; user-select: none; }
-
-        .nrc-x-foot { font-size: 12px; color: var(--color-subtle_text); text-align: center; padding-top: 2px; }
-        .nrc-x-foot b { color: var(--color-text); }
-    `);
-}
 function propTexture() {
     const texture = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
     if (!texture || !texture.getDataURL)

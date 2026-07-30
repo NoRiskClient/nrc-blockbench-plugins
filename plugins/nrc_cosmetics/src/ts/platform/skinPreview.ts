@@ -1,30 +1,12 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
 import { currentType, isCosmeticFormat } from './format';
-import { applyArmModel, currentArmModel, isRigCube, refreshTemplate, resolveRigCubes, rigBoneName, rigCubes, rigResolved, setArmModel } from './playerModel';
+import { applyArmModel, currentArmModel, isRigCube, refreshTemplate, resolveRigCubes, rigCubes, rigResolved, setArmModel } from './playerModel';
+import { SKIN_UV, buildLayer, removeLayer, secondLayerEnabled, setSecondLayerEnabled } from './skinLayers';
 
 const MAX_MATERIALS = 8;
-const LAYER_TAG = 'nrc_skin_layer';
-const SKIN_UV = 64;
-
-interface LayerDef {
-    du: number;
-    dv: number;
-    inflate: number;
-    needsTallSkin: boolean;
-}
-
-const LAYERS: { [bone: string]: LayerDef } = {
-    bipedHead: { du: 32, dv: 0, inflate: 0.5, needsTallSkin: false },
-    bipedBody: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
-    bipedRightArm: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
-    bipedLeftArm: { du: 16, dv: 0, inflate: 0.25, needsTallSkin: true },
-    bipedRightLeg: { du: 0, dv: 16, inflate: 0.25, needsTallSkin: true },
-    bipedLeftLeg: { du: -16, dv: 0, inflate: 0.25, needsTallSkin: true },
-};
 
 let skinMode = false;
-let secondLayer = true;
 let customSkin: string | null = null;
 const materials: { [uri: string]: any } = {};
 const materialOrder: string[] = [];
@@ -71,69 +53,6 @@ function materialFor(uri: string): any {
     return mat;
 }
 
-function layerDef(cube: any): LayerDef | null {
-    return LAYERS[rigBoneName(cube)] || null;
-}
-
-function removeLayer(cube: any) {
-    const mesh = cube.mesh;
-    if (!mesh || !mesh.children) return;
-    const existing = mesh.children.filter((c: any) => c[LAYER_TAG]);
-    for (const layer of existing) {
-        mesh.remove(layer);
-        if (layer.geometry && layer.geometry.dispose) layer.geometry.dispose();
-    }
-}
-
-function buildLayer(cube: any) {
-    removeLayer(cube);
-    if (!secondLayer) return;
-
-    const def = layerDef(cube);
-    if (!def) return;
-
-    const uri = skinUri();
-    if (!uri) return;
-    if (def.needsTallSkin && (skinHeights[uri] || 64) < 64) return;
-
-    const source = cube.mesh && cube.mesh.geometry;
-    if (!source || !source.attributes || !source.attributes.uv) return;
-
-    const geometry = source.clone();
-    geometry.computeBoundingBox();
-    const box = geometry.boundingBox;
-    const centre = [
-        (box.min.x + box.max.x) / 2,
-        (box.min.y + box.max.y) / 2,
-        (box.min.z + box.max.z) / 2,
-    ];
-
-    const position = geometry.attributes.position;
-    for (let i = 0; i < position.count; i++) {
-        for (let axis = 0; axis < 3; axis++) {
-            const at = i * 3 + axis;
-            const value = position.array[at];
-            position.array[at] = value >= centre[axis] ? value + def.inflate : value - def.inflate;
-        }
-    }
-    position.needsUpdate = true;
-
-    const uv = geometry.attributes.uv;
-    const du = def.du / SKIN_UV;
-    const dv = def.dv / SKIN_UV;
-    for (let i = 0; i < uv.count; i++) {
-        uv.array[i * 2] += du;
-        uv.array[i * 2 + 1] -= dv;
-    }
-    uv.needsUpdate = true;
-
-    const layer: any = new THREE.Mesh(geometry, materialFor(uri));
-    layer[LAYER_TAG] = true;
-    layer.no_export = true;
-    layer.renderOrder = 1;
-    cube.mesh.add(layer);
-}
-
 function rescaleToSkinUv(cube: any) {
     const geometry = cube.mesh && cube.mesh.geometry;
     const uv = geometry && geometry.attributes && geometry.attributes.uv;
@@ -153,8 +72,9 @@ function rescaleToSkinUv(cube: any) {
 function applyToCube(cube: any) {
     const uri = skinUri();
     if (!uri || !cube.mesh) return;
-    cube.mesh.material = materialFor(uri);
-    buildLayer(cube);
+    const material = materialFor(uri);
+    cube.mesh.material = material;
+    buildLayer(cube, material, skinHeights[uri] || SKIN_UV);
 }
 
 function applySkin() {
@@ -215,9 +135,9 @@ export function makeToggleLayerAction(registry: Registry, type: CosmeticType): a
         category: 'view',
         condition: () => isCosmeticFormat(type),
         click() {
-            secondLayer = !secondLayer;
+            setSecondLayerEnabled(!secondLayerEnabled());
             if (skinMode) applySkin();
-            Blockbench.showQuickMessage('Second layer ' + (secondLayer ? 'on' : 'off'), 1200);
+            Blockbench.showQuickMessage('Second layer ' + (secondLayerEnabled() ? 'on' : 'off'), 1200);
         },
     });
 }

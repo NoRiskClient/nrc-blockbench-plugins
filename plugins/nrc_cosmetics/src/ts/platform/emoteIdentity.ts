@@ -5,6 +5,7 @@ import { mcId } from '../core/util';
 import { isCosmeticFormat } from './format';
 import { soundEffectId } from './effectFiles';
 import { effectsAnimator, firstDataPoint } from './effectKeyframes';
+import { promptName } from '../ui/nameDialog';
 import { log } from '../core/log';
 
 export function currentEmoteId(type: CosmeticType): string {
@@ -65,7 +66,7 @@ export function renameEmote(type: CosmeticType, newId: string) {
     return updated;
 }
 
-export function createRenameAction(registry: Registry, type: CosmeticType, ask: (apply: (id: string) => void) => void): any {
+export function createRenameAction(registry: Registry, type: CosmeticType): any {
     return registry.action('nrc_rename_' + type.id, {
         name: 'Rename ' + type.formatName,
         description: 'Rename the project, its animation and every sound identifier at once',
@@ -73,11 +74,11 @@ export function createRenameAction(registry: Registry, type: CosmeticType, ask: 
         category: 'file',
         condition: () => isCosmeticFormat(type),
         click() {
-            ask((id: string) => {
+            promptName(type, (id: string) => {
                 const updated = renameEmote(type, id);
                 Blockbench.showQuickMessage('Renamed to ' + id
                     + (updated ? ', ' + updated + ' sound id(s) updated' : ''), 2200);
-            });
+            }, { title: 'Rename ' + type.formatName, value: currentEmoteId(type) });
         },
     });
 }

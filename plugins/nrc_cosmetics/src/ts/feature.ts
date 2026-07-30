@@ -3,14 +3,14 @@ import { Registry } from './core/registry';
 import { registerFormat, getFormat } from './platform/format';
 import { lockPropKey } from './domain/meta';
 import { createSettingsAction } from './ui/settingsDialog';
-import { createExportAction, ensureExportCss } from './ui/exportDialog';
+import { createExportAction } from './ui/exportDialog';
+import { ensureDialogCss } from './ui/dialogStyles';
 import { ensureTemplateCss, openTemplateDialog } from './ui/templateDialog';
 import { makeToggleSkinAction, makeToggleLayerAction, makeToggleArmModelAction, installSkinPreview } from './platform/skinPreview';
 import { createSkinAction } from './ui/skinDialog';
 import { makeToggleRigLockAction, installPlayerModel } from './platform/playerModel';
 import { installEffectsPanel } from './ui/effectsPanel';
-import { createRenameAction, currentEmoteId } from './platform/emoteIdentity';
-import { promptName } from './ui/nameDialog';
+import { createRenameAction } from './platform/emoteIdentity';
 
 export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     registerFormat(registry, type);
@@ -31,11 +31,8 @@ export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     registry.menu(createSettingsAction(registry, type), 'animation');
     installEffectsPanel(registry, type);
 
-    ensureExportCss(registry);
-    registry.menu(createRenameAction(registry, type, (apply) => promptName(type, apply, {
-        title: 'Rename ' + type.formatName,
-        value: currentEmoteId(type),
-    })), 'file');
+    ensureDialogCss(registry);
+    registry.menu(createRenameAction(registry, type), 'file');
     registry.menu(createExportAction(registry, type), 'file.export');
 
     if (type.hasSkinPreview) {
