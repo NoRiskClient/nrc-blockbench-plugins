@@ -1,15 +1,20 @@
 import { CosmeticType } from '../cosmetics/types';
 import { mcId, mcIdDraft } from '../core/util';
 
-export function promptName(type: CosmeticType, onConfirm: (id: string) => void) {
+export interface NamePromptOptions {
+    title?: string;
+    value?: string;
+}
+
+export function promptName(type: CosmeticType, onConfirm: (id: string) => void, options: NamePromptOptions = {}) {
     const dialog = new Dialog('nrc_name_' + type.id, {
-        title: 'Name your ' + type.formatName,
+        title: options.title || 'Name your ' + type.formatName,
         buttons: ['dialog.confirm', 'dialog.cancel'],
         form: {
             name: {
                 label: 'Name',
                 type: 'text',
-                value: '',
+                value: options.value || '',
                 placeholder: type.defaultName,
                 description: 'Lowercase, no spaces. This becomes the file name.',
             },

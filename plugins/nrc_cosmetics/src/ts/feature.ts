@@ -9,6 +9,8 @@ import { makeToggleSkinAction, makeToggleLayerAction, makeToggleArmModelAction, 
 import { createSkinAction } from './ui/skinDialog';
 import { makeToggleRigLockAction, installPlayerModel } from './platform/playerModel';
 import { installEffectsPanel } from './ui/effectsPanel';
+import { createRenameAction, currentEmoteId } from './platform/emoteIdentity';
+import { promptName } from './ui/nameDialog';
 
 export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     registerFormat(registry, type);
@@ -30,6 +32,10 @@ export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     installEffectsPanel(registry, type);
 
     ensureExportCss(registry);
+    registry.menu(createRenameAction(registry, type, (apply) => promptName(type, apply, {
+        title: 'Rename ' + type.formatName,
+        value: currentEmoteId(type),
+    })), 'file');
     registry.menu(createExportAction(registry, type), 'file.export');
 
     if (type.hasSkinPreview) {

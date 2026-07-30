@@ -1,7 +1,6 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
-import { nodePath } from '../core/node';
-import { mcId } from '../core/util';
+import { fs, nodePath } from '../core/node';
 import {
     effectStatus, particleEffectId, registerStagedPath, soundEffectId, stageEffectPath,
 } from '../platform/effectFiles';
@@ -9,7 +8,7 @@ import {
     effectsAnimator, findEffectKeyframe, firstDataPoint, selectedEffectKeyframes,
 } from '../platform/effectKeyframes';
 import { forgetParticleTexture, particleTextureOf, setParticleTexture } from '../platform/particleTexture';
-import { fs } from '../core/node';
+import { currentEmoteId } from '../platform/emoteIdentity';
 
 interface EffectRow {
     uuid: string;
@@ -29,10 +28,6 @@ const CHANNEL_ICONS: { [channel: string]: string } = {
 };
 
 const NEW_LOCATOR = '__new__';
-
-function emoteId(type: CosmeticType): string {
-    return mcId(Project && Project.name) || type.defaultName;
-}
 
 function locatorNames(): string[] {
     if (typeof Locator === 'undefined' || !Locator.all) return [];
@@ -84,14 +79,14 @@ function addEffect(type: CosmeticType, channel: string, done: () => void) {
             return;
         }
 
-        const staged = stageEffectPath(emoteId(type), picked.path);
+        const staged = stageEffectPath(currentEmoteId(type), picked.path);
         if (!staged) {
             Blockbench.showQuickMessage('Could not stage that file', 2400);
             return;
         }
 
         const effect = sound
-            ? soundEffectId(type.assetNamespace, emoteId(type), nodePath.basename(staged))
+            ? soundEffectId(type.assetNamespace, currentEmoteId(type), nodePath.basename(staged))
             : particleEffectId(type.assetNamespace, readText(staged));
         if (!effect) {
             Blockbench.showQuickMessage('That file has no particle identifier', 2400);

@@ -229,7 +229,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                                 </div>
                             </div>
 
-                            <div class="nrc-x-foot" v-if="outFiles.length">Exports <b>{{ outFiles.length }}</b> file(s) into one folder</div>
+                            <div class="nrc-x-foot" v-if="outFiles.length">Exports <b>{{ outFiles.length }}</b> file(s) into <b>{{ base }}/</b></div>
                             <div class="nrc-x-foot" v-else>Nothing selected</div>
                         </div>
                     `,
@@ -242,7 +242,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
 
                     if (state.exportAnimation) applyEmoteSettings(metaAnim, type, state);
                     if (state.exportAnimation) {
-                        files.push({ suffix: '.animation.json', content: JSON.stringify(buildAnimationJson(type), null, 2) });
+                        files.push({ suffix: '.animation.json', content: JSON.stringify(buildAnimationJson(type, undefined, base), null, 2) });
                     }
                     if (state.exportModel) {
                         files.push({ suffix: '.geo.json', content: buildGeoJson() });

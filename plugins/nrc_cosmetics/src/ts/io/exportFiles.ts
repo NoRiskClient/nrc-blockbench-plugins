@@ -18,22 +18,32 @@ function fileName(base: string, file: OutFile): string {
 
 export function writeFiles(base: string, files: OutFile[]) {
     if (fs && Blockbench.pickDirectory) {
-        const dir = Blockbench.pickDirectory({
+        const parent = Blockbench.pickDirectory({
             title: 'Export NRC Cosmetic',
             startpath: lastDir,
             resource_id: 'nrc_cosmetic_export',
         });
-        if (!dir) {
+        if (!parent) {
             log('export cancelled (no directory)');
             return;
         }
-        lastDir = dir;
+        lastDir = parent;
+
+        const dir = parent + '/' + base;
+        try {
+            fs.mkdirSync(dir, { recursive: true });
+        } catch (e) {
+            log('export: could not create ' + dir + ': ' + e);
+            Blockbench.showQuickMessage('Could not create the emote folder', 2400);
+            return;
+        }
+
         for (const f of files) {
             const full = dir + '/' + fileName(base, f);
             fs.writeFileSync(full, f.content);
             log('wrote ' + full);
         }
-        Blockbench.showQuickMessage('Exported ' + files.length + ' file(s)', 1800);
+        Blockbench.showQuickMessage('Exported ' + files.length + ' file(s) to ' + base + '/', 2200);
         return;
     }
 

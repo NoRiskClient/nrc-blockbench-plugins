@@ -1,4 +1,5 @@
 import { buildAnimationJson } from '../serialization/animation';
+import { currentEmoteId } from './emoteIdentity';
 import { currentType } from './format';
 import { log } from '../core/log';
 
@@ -9,7 +10,7 @@ export const nrcAnimationCodec = new AnimationCodec('nrc_emote_animation', {
         log('compileFile: ' + (animations ? animations.length : 0) + ' animation(s)');
         const type = currentType();
         if (!type) return { format_version: '1.8.0', animations: {} };
-        return buildAnimationJson(type, animations);
+        return buildAnimationJson(type, animations, currentEmoteId(type));
     },
 
     exportFile(path: string, save_as?: boolean) {
