@@ -2,6 +2,7 @@ import { lockPropKey } from '../domain/meta';
 import { CosmeticType } from '../cosmetics/types';
 import { openAnimationExportDialog } from '../ui/animationExportDialog';
 import { currentType } from './format';
+import { resolveParticleTexture } from './particleTexture';
 import { mcId } from '../core/util';
 import { log } from '../core/log';
 
@@ -15,6 +16,7 @@ function patch(target: any, key: string, replacement: (original: any) => any) {
     const original = target[key];
     patched.push({ target, key, original });
     target[key] = replacement(original);
+    log('animationPatches: patched ' + key);
 }
 
 export function installAnimationPatches(type: CosmeticType) {
@@ -23,6 +25,15 @@ export function installAnimationPatches(type: CosmeticType) {
     patch(BarItems['export_animation_file'], 'click', () =>
         function () {
             openAnimationExportDialog(type);
+        }
+    );
+
+    patch(Animator, 'loadParticleEmitter', (original) =>
+        function (this: any, path: string, content: string) {
+            log('loadParticleEmitter: ' + path + ' (' + (content ? content.length : 0) + ' bytes)');
+            const result = original.apply(this, [path, content]);
+            resolveParticleTexture(path, content);
+            return result;
         }
     );
 

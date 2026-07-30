@@ -1,6 +1,7 @@
 import { unzipSync } from 'fflate';
 import { Template } from './model';
-import { CompanionFile, isCompanionFile } from '../effectFiles';
+import { CompanionFile } from '../effectFiles';
+import { isCompanionFile } from '../effectKeyframes';
 import { fs, nodePath, tempDir, toBase64, toBuffer } from '../../core/node';
 import { log } from '../../core/log';
 
@@ -82,8 +83,10 @@ export async function loadTemplates(force = false): Promise<{ templates: Templat
 
         const effectFiles: CompanionFile[] = [];
         for (const other of Object.keys(files)) {
-            if (other.slice(0, slash + 1) !== dir || !isCompanionFile(other)) continue;
-            effectFiles.push({ name: other.slice(slash + 1), bytes: files[other] });
+            if (!isCompanionFile(other)) continue;
+            const otherSlash = other.lastIndexOf('/');
+            if (other.slice(0, otherSlash + 1) !== dir) continue;
+            effectFiles.push({ name: other.slice(otherSlash + 1), bytes: files[other] });
         }
 
         const clips: any[] = Object.values((animationJson && animationJson.animations) || {});

@@ -8,6 +8,7 @@ import { ensureTemplateCss, openTemplateDialog } from './ui/templateDialog';
 import { makeToggleSkinAction, makeToggleLayerAction, makeToggleArmModelAction, installSkinPreview } from './platform/skinPreview';
 import { createSkinAction } from './ui/skinDialog';
 import { makeToggleRigLockAction, installPlayerModel } from './platform/playerModel';
+import { installEffectsPanel } from './ui/effectsPanel';
 
 export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     registerFormat(registry, type);
@@ -26,6 +27,7 @@ export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     }
 
     registry.menu(createSettingsAction(registry, type), 'animation');
+    installEffectsPanel(registry, type);
 
     ensureExportCss(registry);
     registry.menu(createExportAction(registry, type), 'file.export');

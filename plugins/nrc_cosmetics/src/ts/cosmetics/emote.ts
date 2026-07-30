@@ -19,6 +19,7 @@ export const EMOTE: CosmeticType = {
     formatDescription: 'Author NoRisk Client emotes against the player rig',
     icon: 'directions_run',
     noriskType: 'EMOTES',
+    assetNamespace: 'noriskclient-cosmetics',
     defaultName: 'new_emote',
 
     bones: PLAYER_BONES,

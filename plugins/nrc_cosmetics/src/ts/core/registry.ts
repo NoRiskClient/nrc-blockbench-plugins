@@ -27,6 +27,12 @@ export class Registry {
         MenuBar.addAction(action, path);
     }
 
+    panel(id: string, opts: any): any {
+        const p = new Panel(id, opts);
+        this.track(() => { if (p && p.delete) p.delete(); });
+        return p;
+    }
+
     previewMenu(action: any) {
         if (typeof Preview !== 'undefined' && Preview.prototype && Preview.prototype.menu) {
             Preview.prototype.menu.addAction(action);

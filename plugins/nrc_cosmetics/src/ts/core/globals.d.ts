@@ -17,6 +17,7 @@ declare function atob(data: string): string;
 declare function requestAnimationFrame(cb: (t: number) => void): number;
 declare function cancelAnimationFrame(id: number): void;
 declare const performance: { now(): number };
+declare class AudioContext { decodeAudioData(buffer: any): Promise<any>; }
 declare class TextDecoder { constructor(label?: string); decode(input?: any): string; }
 
 declare class Texture {
@@ -75,6 +76,11 @@ declare class Action {
 declare class Dialog {
     constructor(id: string, options: any);
     show(): this;
+    [key: string]: any;
+}
+declare class Panel {
+    constructor(id: string, options: any);
+    delete(): void;
     [key: string]: any;
 }
 declare class Property {

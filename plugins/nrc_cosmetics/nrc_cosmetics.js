@@ -2906,6 +2906,12 @@ class Registry {
     menu(action, path) {
         MenuBar.addAction(action, path);
     }
+    panel(id, opts) {
+        const p = new Panel(id, opts);
+        this.track(() => { if (p && p.delete)
+            p.delete(); });
+        return p;
+    }
     previewMenu(action) {
         if (typeof Preview !== 'undefined' && Preview.prototype && Preview.prototype.menu) {
             Preview.prototype.menu.addAction(action);
@@ -2949,10 +2955,14 @@ class Registry {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   mcId: () => (/* binding */ mcId)
+/* harmony export */   mcId: () => (/* binding */ mcId),
+/* harmony export */   mcIdDraft: () => (/* binding */ mcIdDraft)
 /* harmony export */ });
+function mcIdDraft(name) {
+    return (name || '').toLowerCase().replace(/[\s&-]+/g, '_').replace(/[^a-z0-9_]+/g, '');
+}
 function mcId(name) {
-    return (name || '').toLowerCase().trim().replace(/[\s&-]+/g, '_').replace(/[^a-z0-9_]+/g, '');
+    return mcIdDraft(name).replace(/^_+|_+$/g, '');
 }
 
 
@@ -2989,6 +2999,7 @@ const EMOTE = {
     formatDescription: 'Author NoRisk Client emotes against the player rig',
     icon: 'directions_run',
     noriskType: 'EMOTES',
+    assetNamespace: 'noriskclient-cosmetics',
     defaultName: 'new_emote',
     bones: PLAYER_BONES,
     metaFields: [
@@ -3084,6 +3095,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
 /* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
 /* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _ui_effectsPanel__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/effectsPanel */ "./ts/ui/effectsPanel.ts");
+
 
 
 
@@ -3106,6 +3119,7 @@ function registerCosmeticType(type, registry) {
         }
     }
     registry.menu((0,_ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__.createSettingsAction)(registry, type), 'animation');
+    (0,_ui_effectsPanel__WEBPACK_IMPORTED_MODULE_8__.installEffectsPanel)(registry, type);
     (0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.ensureExportCss)(registry);
     registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAction)(registry, type), 'file.export');
     if (type.hasSkinPreview) {
@@ -3261,8 +3275,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
 /* harmony import */ var _ui_animationExportDialog__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ui/animationExportDialog */ "./ts/ui/animationExportDialog.ts");
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
-/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _particleTexture__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./particleTexture */ "./ts/platform/particleTexture.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -3271,18 +3287,25 @@ __webpack_require__.r(__webpack_exports__);
 const patched = [];
 function patch(target, key, replacement) {
     if (!target || typeof target[key] !== 'function') {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)(`animationPatches: cannot patch ${key}, not a function`);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)(`animationPatches: cannot patch ${key}, not a function`);
         return;
     }
     const original = target[key];
     patched.push({ target, key, original });
     target[key] = replacement(original);
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('animationPatches: patched ' + key);
 }
 function installAnimationPatches(type) {
     if (patched.length)
         return;
     patch(BarItems['export_animation_file'], 'click', () => function () {
         (0,_ui_animationExportDialog__WEBPACK_IMPORTED_MODULE_1__.openAnimationExportDialog)(type);
+    });
+    patch(Animator, 'loadParticleEmitter', (original) => function (path, content) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('loadParticleEmitter: ' + path + ' (' + (content ? content.length : 0) + ' bytes)');
+        const result = original.apply(this, [path, content]);
+        (0,_particleTexture__WEBPACK_IMPORTED_MODULE_3__.resolveParticleTexture)(path, content);
+        return result;
     });
     patch(Animator, 'loadFile', (original) => function (file, ...rest) {
         var _a, _b;
@@ -3297,7 +3320,7 @@ function installAnimationPatches(type) {
             return result;
         const added = (Animation.all || []).filter((a) => !before.has(a.uuid));
         for (const anim of added) {
-            const data = (_b = animations[anim.name]) !== null && _b !== void 0 ? _b : animations[(0,_core_util__WEBPACK_IMPORTED_MODULE_3__.mcId)(anim.name)];
+            const data = (_b = animations[anim.name]) !== null && _b !== void 0 ? _b : animations[(0,_core_util__WEBPACK_IMPORTED_MODULE_4__.mcId)(anim.name)];
             if (!data)
                 continue;
             for (const f of type.metaFields) {
@@ -3635,101 +3658,265 @@ function installEasingPatches(registry) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   collectEffectFiles: () => (/* binding */ collectEffectFiles),
-/* harmony export */   isCompanionFile: () => (/* binding */ isCompanionFile),
-/* harmony export */   linkEffectFiles: () => (/* binding */ linkEffectFiles)
+/* harmony export */   effectStatus: () => (/* binding */ effectStatus),
+/* harmony export */   linkEffectFiles: () => (/* binding */ linkEffectFiles),
+/* harmony export */   particleEffectId: () => (/* binding */ particleEffectId),
+/* harmony export */   registerStagedEffect: () => (/* binding */ registerStagedEffect),
+/* harmony export */   registerStagedPath: () => (/* binding */ registerStagedPath),
+/* harmony export */   soundEffectId: () => (/* binding */ soundEffectId),
+/* harmony export */   stageEffectFile: () => (/* binding */ stageEffectFile),
+/* harmony export */   stageEffectPath: () => (/* binding */ stageEffectPath)
 /* harmony export */ });
 /* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _particleTexture__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./particleTexture */ "./ts/platform/particleTexture.ts");
+/* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./effectKeyframes */ "./ts/platform/effectKeyframes.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
 
 
-const CHANNEL_SUFFIX = {
-    particle: '.particle.json',
-    sound: '.ogg',
-};
-const SUFFIX_PATTERN = /\.particle\.json$|\.ogg$/i;
-function isCompanionFile(name) {
-    return SUFFIX_PATTERN.test(name);
+
+
+function soundEffectId(namespace, emoteId, fileName) {
+    return namespace + ':emotes/' + emoteId + '/' + (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.withoutSuffix)(fileName);
+}
+function particleEffectId(namespace, particleJson) {
+    const meta = (0,_particleTexture__WEBPACK_IMPORTED_MODULE_1__.readParticleMeta)(particleJson);
+    if (!meta || !meta.identifier)
+        return null;
+    const short = meta.identifier.split(':').pop();
+    return short ? namespace + ':' + short : null;
+}
+function effectStatus(point) {
+    if (!point || !point.effect)
+        return 'unresolved';
+    if (!point.file)
+        return 'missing';
+    try {
+        return _core_node__WEBPACK_IMPORTED_MODULE_0__.fs && _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(point.file) ? 'ok' : 'missing';
+    }
+    catch (e) {
+        return 'missing';
+    }
+}
+function stageEffectFile(scope, name, bytes) {
+    const dir = (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.tempDir)('nrc_effects', scope || 'shared');
+    if (!dir || !_core_node__WEBPACK_IMPORTED_MODULE_0__.fs)
+        return null;
+    const full = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, name);
+    try {
+        _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.writeFileSync(full, (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.toBuffer)(bytes));
+        return full;
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not stage ' + name + ': ' + e);
+        return null;
+    }
+}
+function stageEffectPath(scope, sourcePath) {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
+        return null;
+    try {
+        return stageEffectFile(scope, _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(sourcePath), new Uint8Array(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(sourcePath)));
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read ' + sourcePath + ': ' + e);
+        return null;
+    }
+}
+let audioContext = null;
+function sharedAudioContext() {
+    if (typeof AudioContext === 'undefined')
+        return null;
+    if (!audioContext)
+        audioContext = new AudioContext();
+    return audioContext;
+}
+async function visualizeFromBytes(key, bytes) {
+    const context = sharedAudioContext();
+    if (!context || !Timeline || !Timeline.waveforms)
+        return;
+    if (Timeline.waveforms[key] && Timeline.waveforms[key].duration)
+        return;
+    try {
+        const owned = new Uint8Array(bytes.length);
+        owned.set(bytes);
+        const buffer = await context.decodeAudioData(owned.buffer);
+        const channel = buffer.getChannelData(0);
+        const count = Math.ceil(buffer.duration * (Timeline.waveform_sample_rate || 60));
+        const samples = new Array(count).fill(0);
+        for (let i = 0; i < channel.length; i++) {
+            samples[Math.floor((i / channel.length) * count)] += Math.abs(channel[i]);
+        }
+        let peak = 0;
+        for (const sample of samples)
+            if (sample > peak)
+                peak = sample;
+        if (!peak)
+            peak = 1;
+        Timeline.waveforms[key] = { samples: samples.map((v) => v / peak), duration: buffer.duration };
+        if (Timeline.vue && Timeline.vue.$forceUpdate)
+            Timeline.vue.$forceUpdate();
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not build waveform for ' + key + ': ' + e);
+    }
+}
+function registerStagedEffect(channel, full, bytes) {
+    if (channel === 'sound') {
+        visualizeFromBytes(full, bytes);
+        return;
+    }
+    Animator.loadParticleEmitter(full, new TextDecoder().decode(bytes));
+}
+function registerStagedPath(channel, full) {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs)
+        return;
+    try {
+        registerStagedEffect(channel, full, new Uint8Array(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(full)));
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not register ' + full + ': ' + e);
+    }
 }
 function effectKey(effect) {
     const tail = String(effect || '').split(':').pop() || '';
     return (tail.split('/').pop() || '').toLowerCase();
 }
-function baseName(name) {
-    return name.replace(SUFFIX_PATTERN, '').toLowerCase();
-}
-function effectKeyframes() {
-    const out = [];
-    for (const animation of (Animation.all || [])) {
-        const animator = animation.animators && animation.animators.effects;
-        if (!animator)
-            continue;
-        for (const channel of Object.keys(CHANNEL_SUFFIX)) {
-            for (const keyframe of (animator[channel] || []))
-                out.push(keyframe);
-        }
-    }
-    return out;
-}
 function linkEffectFiles(scope, files) {
     if (!files.length)
         return;
-    const dir = (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.tempDir)('nrc_effects', scope || 'shared');
-    if (!dir) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: no writable temp dir, skipping');
-        return;
-    }
-    const byKey = {};
+    const staged = {};
     for (const file of files) {
-        const key = baseName(file.name);
+        const key = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.withoutSuffix)(file.name);
         if (!key)
             continue;
-        const full = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, file.name);
-        try {
-            _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.writeFileSync(full, (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.toBuffer)(file.bytes));
-            byKey[key] = full;
-        }
-        catch (e) {
-            (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: could not write ' + file.name + ': ' + e);
-        }
+        const path = stageEffectFile(scope, file.name, file.bytes);
+        if (path)
+            staged[key] = { path, bytes: file.bytes };
     }
     let linked = 0;
-    for (const keyframe of effectKeyframes()) {
+    for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.allEffectKeyframes)()) {
         for (const point of (keyframe.data_points || [])) {
             if (point.file)
                 continue;
-            const key = effectKey(point.effect);
-            if (!key || !byKey[key])
+            const entry = staged[effectKey(point.effect)];
+            if (!entry)
                 continue;
-            point.extend({ file: byKey[key] });
+            point.extend({ file: entry.path });
+            registerStagedEffect(keyframe.channel, entry.path, entry.bytes);
             linked++;
         }
     }
-    (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: wrote ' + Object.keys(byKey).length + ', linked ' + linked + ' keyframe(s)');
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: staged ' + Object.keys(staged).length + ', linked ' + linked + ' keyframe(s)');
 }
 function collectEffectFiles() {
     if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
         return [];
     const seen = new Set();
     const out = [];
-    for (const keyframe of effectKeyframes()) {
-        const suffix = CHANNEL_SUFFIX[keyframe.channel];
+    for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.allEffectKeyframes)()) {
+        const suffix = _effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.CHANNEL_SUFFIX[keyframe.channel];
         for (const point of (keyframe.data_points || [])) {
             const full = point.file;
             if (!full || seen.has(full))
                 continue;
             seen.add(full);
             let name = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(full);
-            if (suffix && !isCompanionFile(name))
-                name = baseName(name) + suffix;
+            if (suffix && !(0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.isCompanionFile)(name))
+                name = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.withoutSuffix)(name) + suffix;
             try {
                 out.push({ name, content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(full) });
             }
             catch (e) {
-                (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('effect files: could not read ' + full + ': ' + e);
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read ' + full + ': ' + e);
+                continue;
+            }
+            if (keyframe.channel !== 'particle')
+                continue;
+            const texture = (0,_particleTexture__WEBPACK_IMPORTED_MODULE_1__.particleTextureOf)(full);
+            if (!texture || seen.has(texture))
+                continue;
+            seen.add(texture);
+            try {
+                out.push({ name: _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(texture), content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(texture) });
+            }
+            catch (e) {
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read texture ' + texture + ': ' + e);
             }
         }
     }
     return out;
+}
+
+
+/***/ },
+
+/***/ "./ts/platform/effectKeyframes.ts"
+/*!****************************************!*\
+  !*** ./ts/platform/effectKeyframes.ts ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CHANNEL_SUFFIX: () => (/* binding */ CHANNEL_SUFFIX),
+/* harmony export */   EFFECT_CHANNELS: () => (/* binding */ EFFECT_CHANNELS),
+/* harmony export */   allEffectKeyframes: () => (/* binding */ allEffectKeyframes),
+/* harmony export */   effectsAnimator: () => (/* binding */ effectsAnimator),
+/* harmony export */   findEffectKeyframe: () => (/* binding */ findEffectKeyframe),
+/* harmony export */   firstDataPoint: () => (/* binding */ firstDataPoint),
+/* harmony export */   isCompanionFile: () => (/* binding */ isCompanionFile),
+/* harmony export */   selectedEffectKeyframes: () => (/* binding */ selectedEffectKeyframes),
+/* harmony export */   withoutSuffix: () => (/* binding */ withoutSuffix)
+/* harmony export */ });
+const CHANNEL_SUFFIX = {
+    particle: '.particle.json',
+    sound: '.ogg',
+};
+const EFFECT_CHANNELS = Object.keys(CHANNEL_SUFFIX);
+const SUFFIX_PATTERN = /\.particle\.json$|\.ogg$/i;
+function isCompanionFile(name) {
+    return SUFFIX_PATTERN.test(name);
+}
+function withoutSuffix(name) {
+    return name.replace(SUFFIX_PATTERN, '').toLowerCase();
+}
+function effectsAnimator(animation, create = false) {
+    if (!animation || !animation.animators)
+        return null;
+    if (!animation.animators.effects && create) {
+        animation.animators.effects = new EffectAnimator(animation);
+    }
+    return animation.animators.effects || null;
+}
+function collect(animation, out) {
+    const animator = effectsAnimator(animation);
+    if (!animator)
+        return;
+    for (const channel of EFFECT_CHANNELS) {
+        for (const keyframe of (animator[channel] || []))
+            out.push(keyframe);
+    }
+}
+function allEffectKeyframes() {
+    const out = [];
+    for (const animation of (Animation.all || []))
+        collect(animation, out);
+    return out;
+}
+function selectedEffectKeyframes() {
+    const out = [];
+    collect(Animation.selected, out);
+    return out.sort((a, b) => a.time - b.time);
+}
+function findEffectKeyframe(uuid) {
+    for (const keyframe of selectedEffectKeyframes()) {
+        if (keyframe.uuid === uuid)
+            return keyframe;
+    }
+    return null;
+}
+function firstDataPoint(keyframe) {
+    return (keyframe && (keyframe.data_points || [])[0]) || {};
 }
 
 
@@ -4024,6 +4211,196 @@ function importGeometry(geoJson, textureDataUri) {
     }
     catch (e) {
         (0,_core_log__WEBPACK_IMPORTED_MODULE_0__.log)('geometry import failed: ' + e);
+    }
+}
+
+
+/***/ },
+
+/***/ "./ts/platform/particleTexture.ts"
+/*!****************************************!*\
+  !*** ./ts/platform/particleTexture.ts ***!
+  \****************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   forgetParticleTexture: () => (/* binding */ forgetParticleTexture),
+/* harmony export */   particleTextureOf: () => (/* binding */ particleTextureOf),
+/* harmony export */   readParticleMeta: () => (/* binding */ readParticleMeta),
+/* harmony export */   resolveParticleTexture: () => (/* binding */ resolveParticleTexture),
+/* harmony export */   setParticleTexture: () => (/* binding */ setParticleTexture)
+/* harmony export */ });
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
+const PLACEHOLDER_NAME = 'missing_particle.png';
+const PLACEHOLDER_SIZE = 128;
+const PLACEHOLDER_TILE = 8;
+let placeholderPath;
+const textureCache = {};
+function readParticleMeta(particleJson) {
+    try {
+        const description = JSON.parse(particleJson).particle_effect.description;
+        return {
+            identifier: description.identifier || '',
+            texture: (description.basic_render_parameters || {}).texture || '',
+        };
+    }
+    catch (e) {
+        return null;
+    }
+}
+function readMetaOf(particleFile) {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs)
+        return null;
+    try {
+        return readParticleMeta(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(particleFile, 'utf8'));
+    }
+    catch (e) {
+        return null;
+    }
+}
+function drawPlaceholder() {
+    const canvas = document.createElement('canvas');
+    canvas.width = PLACEHOLDER_SIZE;
+    canvas.height = PLACEHOLDER_SIZE;
+    const ctx = canvas.getContext('2d');
+    if (!ctx)
+        return null;
+    for (let y = 0; y < PLACEHOLDER_SIZE; y += PLACEHOLDER_TILE) {
+        for (let x = 0; x < PLACEHOLDER_SIZE; x += PLACEHOLDER_TILE) {
+            const odd = ((x / PLACEHOLDER_TILE) + (y / PLACEHOLDER_TILE)) % 2 === 1;
+            ctx.fillStyle = odd ? '#000000' : '#f800f8';
+            ctx.fillRect(x, y, PLACEHOLDER_TILE, PLACEHOLDER_TILE);
+        }
+    }
+    return canvas.toDataURL('image/png');
+}
+function placeholderTexture() {
+    if (placeholderPath !== undefined)
+        return placeholderPath;
+    placeholderPath = null;
+    const dir = (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.tempDir)('nrc_effects', '_missing');
+    if (!dir || !_core_node__WEBPACK_IMPORTED_MODULE_0__.fs)
+        return placeholderPath;
+    const target = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, PLACEHOLDER_NAME);
+    try {
+        if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(target)) {
+            const dataUri = drawPlaceholder();
+            if (!dataUri)
+                return placeholderPath;
+            const base64 = dataUri.slice(dataUri.indexOf(',') + 1);
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++)
+                bytes[i] = binary.charCodeAt(i);
+            _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.writeFileSync(target, (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.toBuffer)(bytes));
+        }
+        placeholderPath = target;
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('particle placeholder failed: ' + e);
+    }
+    return placeholderPath;
+}
+function findSibling(particleFile, texture) {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
+        return null;
+    const name = String(texture || '').replace(/\.png$/i, '').split('/').pop();
+    if (!name)
+        return null;
+    const dir = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.dirname(particleFile);
+    const candidates = [_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, 'particle', name + '.png'), _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, name + '.png')];
+    return candidates.find(exists) || null;
+}
+function exists(path) {
+    try {
+        return !!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs && _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(path);
+    }
+    catch (e) {
+        return false;
+    }
+}
+function particleTextureOf(particleFile) {
+    if (!particleFile)
+        return null;
+    if (particleFile in textureCache)
+        return textureCache[particleFile];
+    const meta = readMetaOf(particleFile);
+    const found = meta ? findSibling(particleFile, meta.texture) : null;
+    textureCache[particleFile] = found;
+    return found;
+}
+function forgetParticleTexture(particleFile) {
+    if (particleFile)
+        delete textureCache[particleFile];
+    else
+        for (const key in textureCache)
+            delete textureCache[key];
+}
+function applyTexture(particleFile, texture) {
+    const effect = Animator.particle_effects && Animator.particle_effects[particleFile];
+    if (!effect || !effect.config) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('applyTexture: no config for ' + particleFile
+            + ' (known: ' + Object.keys(Animator.particle_effects || {}).length + ')');
+        return;
+    }
+    effect.config.preview_texture = texture;
+    for (const uuid in effect.emitters || {}) {
+        const emitter = effect.emitters[uuid];
+        if (emitter && emitter.updateConfig)
+            emitter.updateConfig();
+    }
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('applyTexture: ' + _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(texture) + ' on ' + _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(particleFile)
+        + ' emitters=' + Object.keys(effect.emitters || {}).length);
+}
+function resolveParticleTexture(particleFile, particleJson) {
+    const meta = readParticleMeta(particleJson);
+    if (!meta || !meta.texture) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('resolveParticleTexture: no texture declared in ' + particleFile);
+        return;
+    }
+    forgetParticleTexture(particleFile);
+    const sibling = particleTextureOf(particleFile);
+    if (sibling) {
+        applyTexture(particleFile, sibling);
+        return;
+    }
+    const placeholder = placeholderTexture();
+    if (placeholder)
+        applyTexture(particleFile, placeholder);
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('particle texture missing for ' + _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(particleFile)
+        + ' (' + meta.texture + '), showing placeholder');
+}
+function setParticleTexture(particleFile, pngPath) {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
+        return false;
+    let json;
+    try {
+        json = JSON.parse(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(particleFile, 'utf8'));
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('setParticleTexture: could not read ' + particleFile + ': ' + e);
+        return false;
+    }
+    const name = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(pngPath).replace(/\.png$/i, '');
+    const target = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.dirname(particleFile), name + '.png');
+    try {
+        if (_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.resolve(pngPath) !== _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.resolve(target)) {
+            _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.writeFileSync(target, _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(pngPath));
+        }
+        json.particle_effect.description.basic_render_parameters.texture = name;
+        const updated = JSON.stringify(json, null, 2);
+        _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.writeFileSync(particleFile, updated);
+        forgetParticleTexture(particleFile);
+        Animator.loadParticleEmitter(particleFile, updated);
+        return true;
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('setParticleTexture: could not attach ' + pngPath + ': ' + e);
+        return false;
     }
 }
 
@@ -4661,7 +5038,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   loadTemplates: () => (/* binding */ loadTemplates)
 /* harmony export */ });
 /* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
-/* harmony import */ var _effectFiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../effectFiles */ "./ts/platform/effectFiles.ts");
+/* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../effectKeyframes */ "./ts/platform/effectKeyframes.ts");
 /* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../core/node */ "./ts/core/node.ts");
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
 
@@ -4774,9 +5151,12 @@ async function loadTemplates(force = false) {
         }
         const effectFiles = [];
         for (const other of Object.keys(files)) {
-            if (other.slice(0, slash + 1) !== dir || !(0,_effectFiles__WEBPACK_IMPORTED_MODULE_1__.isCompanionFile)(other))
+            if (!(0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_1__.isCompanionFile)(other))
                 continue;
-            effectFiles.push({ name: other.slice(slash + 1), bytes: files[other] });
+            const otherSlash = other.lastIndexOf('/');
+            if (other.slice(0, otherSlash + 1) !== dir)
+                continue;
+            effectFiles.push({ name: other.slice(otherSlash + 1), bytes: files[other] });
         }
         const clips = Object.values((animationJson && animationJson.animations) || {});
         const badges = [];
@@ -5088,6 +5468,274 @@ function installEasingPanel(registry) {
     registry.event('update_keyframe_selection', rebuild);
     registry.event('render_frame', onRenderFrame);
     registry.track(removeBars);
+}
+
+
+/***/ },
+
+/***/ "./ts/ui/effectsPanel.ts"
+/*!*******************************!*\
+  !*** ./ts/ui/effectsPanel.ts ***!
+  \*******************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   installEffectsPanel: () => (/* binding */ installEffectsPanel)
+/* harmony export */ });
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _platform_effectFiles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/effectFiles */ "./ts/platform/effectFiles.ts");
+/* harmony import */ var _platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../platform/effectKeyframes */ "./ts/platform/effectKeyframes.ts");
+/* harmony import */ var _platform_particleTexture__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../platform/particleTexture */ "./ts/platform/particleTexture.ts");
+
+
+
+
+
+
+const CHANNEL_ICONS = {
+    sound: 'volume_up',
+    particle: 'flare',
+};
+const NEW_LOCATOR = '__new__';
+function emoteId(type) {
+    return (0,_core_util__WEBPACK_IMPORTED_MODULE_1__.mcId)(Project && Project.name) || type.defaultName;
+}
+function locatorNames() {
+    if (typeof Locator === 'undefined' || !Locator.all)
+        return [];
+    return Locator.all.map((l) => l.name).filter(Boolean);
+}
+function buildRows() {
+    return (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.selectedEffectKeyframes)().map((keyframe) => {
+        const point = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.firstDataPoint)(keyframe);
+        const file = point.file || '';
+        return {
+            uuid: keyframe.uuid,
+            channel: keyframe.channel,
+            time: keyframe.time,
+            label: file ? _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(file) : (point.effect || '(empty)'),
+            effect: point.effect || '',
+            locator: point.locator || '',
+            status: (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_2__.effectStatus)(point),
+            file,
+            textured: keyframe.channel === 'particle' && !!(0,_platform_particleTexture__WEBPACK_IMPORTED_MODULE_4__.particleTextureOf)(file),
+        };
+    });
+}
+function readText(path) {
+    try {
+        return _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(path, 'utf8');
+    }
+    catch (e) {
+        return '';
+    }
+}
+function addEffect(type, channel, done) {
+    const animation = Animation.selected;
+    if (!animation) {
+        Blockbench.showQuickMessage('Select an animation first', 1600);
+        return;
+    }
+    const sound = channel === 'sound';
+    Blockbench.import({
+        resource_id: 'nrc_effect_' + channel,
+        extensions: sound ? ['ogg'] : ['json'],
+        type: sound ? 'Audio File' : 'Particle Effect',
+    }, function (files) {
+        const picked = files && files[0];
+        if (!picked || !picked.path) {
+            Blockbench.showQuickMessage('That needs the desktop app', 2000);
+            return;
+        }
+        const staged = (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_2__.stageEffectPath)(emoteId(type), picked.path);
+        if (!staged) {
+            Blockbench.showQuickMessage('Could not stage that file', 2400);
+            return;
+        }
+        const effect = sound
+            ? (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_2__.soundEffectId)(type.assetNamespace, emoteId(type), _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(staged))
+            : (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_2__.particleEffectId)(type.assetNamespace, readText(staged));
+        if (!effect) {
+            Blockbench.showQuickMessage('That file has no particle identifier', 2400);
+            return;
+        }
+        const animator = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.effectsAnimator)(animation, true);
+        if (!animator)
+            return;
+        Undo.initEdit({ animations: [animation] });
+        animator.createKeyframe({ effect, file: staged }, Timeline.time, channel, false, false);
+        Undo.finishEdit('Add ' + channel + ' effect');
+        (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_2__.registerStagedPath)(channel, staged);
+        done();
+        Blockbench.showQuickMessage(effect, 2200);
+    });
+}
+function installEffectsPanel(registry, type) {
+    const state = {
+        rows: [],
+        locators: [],
+        icons: CHANNEL_ICONS,
+        refresh() {
+            state.rows = buildRows();
+            state.locators = locatorNames();
+        },
+        addSound() {
+            addEffect(type, 'sound', state.refresh);
+        },
+        addParticle() {
+            addEffect(type, 'particle', state.refresh);
+        },
+        seek(row) {
+            const keyframe = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.findEffectKeyframe)(row.uuid);
+            if (!keyframe)
+                return;
+            Timeline.setTime(row.time);
+            for (const other of (Timeline.selected || []).slice())
+                other.selected = false;
+            if (Timeline.selected && Timeline.selected.empty)
+                Timeline.selected.empty();
+            keyframe.select();
+        },
+        createLocator(row) {
+            const parent = Group.first_selected || (Group.all || [])[0];
+            if (!parent) {
+                Blockbench.showQuickMessage('Select a bone first', 1800);
+                return;
+            }
+            const name = 'locator_' + ((Locator.all || []).length + 1);
+            Undo.initEdit({ outliner: true, elements: [] });
+            const locator = new Locator({ name, position: parent.origin.slice() }).addTo(parent).init();
+            Undo.finishEdit('Add effect locator');
+            state.setLocator(row, locator.name);
+            Blockbench.showQuickMessage('Added ' + locator.name + ' on ' + parent.name, 2200);
+        },
+        setLocator(row, value) {
+            if (value === NEW_LOCATOR) {
+                state.createLocator(row);
+                return;
+            }
+            const keyframe = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.findEffectKeyframe)(row.uuid);
+            const point = keyframe && (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.firstDataPoint)(keyframe);
+            if (!point)
+                return;
+            Undo.initEdit({ keyframes: [keyframe] });
+            point.locator = value;
+            Undo.finishEdit('Change effect locator');
+            state.refresh();
+        },
+        remove(row) {
+            const keyframe = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.findEffectKeyframe)(row.uuid);
+            if (!keyframe)
+                return;
+            Undo.initEdit({ animations: [Animation.selected] });
+            keyframe.remove();
+            Undo.finishEdit('Remove effect');
+            state.refresh();
+        },
+        pickTexture(row) {
+            if (!row.file)
+                return;
+            Blockbench.import({
+                resource_id: 'nrc_particle_texture',
+                extensions: ['png'],
+                type: 'Particle Texture',
+            }, function (files) {
+                const png = files && files[0];
+                if (!png || !png.path) {
+                    Blockbench.showQuickMessage('That needs the desktop app', 2000);
+                    return;
+                }
+                if ((0,_platform_particleTexture__WEBPACK_IMPORTED_MODULE_4__.setParticleTexture)(row.file, png.path)) {
+                    state.refresh();
+                    Blockbench.showQuickMessage('Texture attached', 1800);
+                }
+                else {
+                    Blockbench.showQuickMessage('Could not attach that texture', 2400);
+                }
+            });
+        },
+        timeLabel(row) {
+            return row.time.toFixed(2) + 's';
+        },
+    };
+    registry.css(`
+        .nrc-fx { display: flex; flex-direction: column; gap: 4px; padding: 4px; }
+        .nrc-fx-bar { display: flex; gap: 4px; }
+        .nrc-fx-bar button { flex: 1; }
+        .nrc-fx-empty { color: var(--color-subtle_text); font-size: 11px; padding: 6px 2px; }
+        .nrc-fx-row { display: flex; align-items: center; gap: 5px; padding: 2px 3px; border-radius: 3px; cursor: pointer; }
+        .nrc-fx-row:hover { background: var(--color-selected); }
+        .nrc-fx-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .nrc-fx-dot.ok { background: var(--color-accent); }
+        .nrc-fx-dot.missing { background: var(--color-subtle_text); }
+        .nrc-fx-dot.unresolved { background: #d94a4a; }
+        .nrc-fx-time { font-size: 10px; color: var(--color-subtle_text); min-width: 38px; }
+        .nrc-fx-name { flex: 1; overflow: hidden; }
+        .nrc-fx-name > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .nrc-fx-id { font-size: 9px; color: var(--color-subtle_text); }
+        .nrc-fx-loc { max-width: 96px; }
+        .nrc-fx-tex.off { color: #d94a4a; }
+    `);
+    registry.panel('nrc_effects_' + type.id, {
+        name: 'Emote Effects',
+        icon: 'graphic_eq',
+        growable: true,
+        resizable: true,
+        condition: { modes: ['animate'], formats: [type.formatId] },
+        default_position: {
+            slot: 'right_bar',
+            height: 180,
+            sidebar_index: 4,
+            float_position: [0, 0],
+            float_size: [320, 220],
+        },
+        component: {
+            data: () => state,
+            template: `
+                <div class="nrc-fx">
+                    <div class="nrc-fx-bar">
+                        <button type="button" @click="addSound()">+ Sound</button>
+                        <button type="button" @click="addParticle()">+ Particle</button>
+                    </div>
+                    <div v-if="!rows.length" class="nrc-fx-empty">
+                        No sounds or particles yet. Move the playhead, then add one.
+                    </div>
+                    <div v-for="row in rows" :key="row.uuid" class="nrc-fx-row" @click="seek(row)">
+                        <div class="nrc-fx-dot" :class="row.status" :title="row.status"></div>
+                        <div class="nrc-fx-time">{{ timeLabel(row) }}</div>
+                        <i class="material-icons icon">{{ icons[row.channel] }}</i>
+                        <div class="nrc-fx-name">
+                            <div>{{ row.label }}</div>
+                            <div class="nrc-fx-id">{{ row.effect }}</div>
+                        </div>
+                        <select v-if="row.channel === 'particle'" class="nrc-fx-loc" :value="row.locator"
+                            @click.stop @change="setLocator(row, $event.target.value)">
+                            <option value="">no locator</option>
+                            <option v-for="l in locators" :key="l" :value="l">{{ l }}</option>
+                            <option value="${NEW_LOCATOR}">+ new locator on selected bone</option>
+                        </select>
+                        <i v-if="row.channel === 'particle'" class="material-icons icon nrc-fx-tex"
+                            :class="{off: !row.textured}"
+                            :title="row.textured ? 'Texture attached, click to replace' : 'No texture, showing placeholder. Click to attach a PNG'"
+                            @click.stop="pickTexture(row)">{{ row.textured ? 'image' : 'broken_image' }}</i>
+                        <i class="material-icons icon" @click.stop="remove(row)">clear</i>
+                    </div>
+                </div>
+            `,
+        },
+    });
+    const onProject = () => {
+        (0,_platform_particleTexture__WEBPACK_IMPORTED_MODULE_4__.forgetParticleTexture)();
+        state.refresh();
+    };
+    for (const event of ['select_animation', 'update_keyframe_selection', 'finished_edit', 'select_mode']) {
+        registry.event(event, state.refresh);
+    }
+    registry.event('load_project', onProject);
+    registry.event('select_project', onProject);
+    state.refresh();
 }
 
 
@@ -5408,7 +6056,7 @@ function promptName(type, onConfirm) {
             },
         },
         onFormChange(result) {
-            const normalised = (0,_core_util__WEBPACK_IMPORTED_MODULE_0__.mcId)(result.name);
+            const normalised = (0,_core_util__WEBPACK_IMPORTED_MODULE_0__.mcIdDraft)(result.name);
             if (normalised !== result.name)
                 dialog.setFormValues({ name: normalised }, false);
         },

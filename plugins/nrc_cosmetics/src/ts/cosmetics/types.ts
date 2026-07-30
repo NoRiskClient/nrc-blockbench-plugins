@@ -13,6 +13,7 @@ export interface CosmeticType {
     formatDescription: string;
     icon: string;               // material icon name
     noriskType: string;         // '.norisk.json' type field, e.g. 'EMOTES'
+    assetNamespace: string;
     defaultName: string;        // default project / animation / file name (mc-id safe)
 
     bones: string[];            // rig bone names

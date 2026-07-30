@@ -1,5 +1,5 @@
 import { CosmeticType } from '../cosmetics/types';
-import { mcId } from '../core/util';
+import { mcId, mcIdDraft } from '../core/util';
 
 export function promptName(type: CosmeticType, onConfirm: (id: string) => void) {
     const dialog = new Dialog('nrc_name_' + type.id, {
@@ -15,7 +15,7 @@ export function promptName(type: CosmeticType, onConfirm: (id: string) => void) 
             },
         },
         onFormChange(result: any) {
-            const normalised = mcId(result.name);
+            const normalised = mcIdDraft(result.name);
             if (normalised !== result.name) dialog.setFormValues({ name: normalised }, false);
         },
         onConfirm(result: any) {
