@@ -47,6 +47,17 @@ export function ensureDialogCss(registry: Registry) {
         .nrc-x-chip:hover { background: var(--color-button); }
         .nrc-x-chip.on { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-light); }
 
+        .nrc-x-anims { display: flex; flex-direction: column; gap: 3px; max-height: 190px; overflow-y: auto; }
+        .nrc-x-anim { display: flex; align-items: center; gap: 7px; padding: 3px 7px; border: 1.5px solid transparent; border-radius: 5px; cursor: pointer; user-select: none; }
+        .nrc-x-anim:hover { background: var(--color-button); }
+        .nrc-x-anim.focus { border-color: var(--color-accent); background: var(--color-selected); }
+        .nrc-x-anim .box { font-size: 17px; color: var(--color-subtle_text); }
+        .nrc-x-anim.on .box { color: var(--color-accent); }
+        .nrc-x-anim .nm { flex: 1; font-size: 12px; }
+        .nrc-x-anim .id { font-family: monospace; font-size: 10px; color: var(--color-subtle_text); }
+        .nrc-x-focus { font-size: 11px; color: var(--color-subtle_text); }
+        .nrc-x-focus b { color: var(--color-text); }
+
         .nrc-x-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
         .nrc-x-row > label { width: 64px; color: var(--color-subtle_text); font-size: 12px; }
         .nrc-x-row input { flex: 1; padding: 4px 7px; }

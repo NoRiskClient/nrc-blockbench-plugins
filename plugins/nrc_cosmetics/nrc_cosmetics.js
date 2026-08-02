@@ -2782,7 +2782,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   log: () => (/* binding */ log),
 /* harmony export */   logReset: () => (/* binding */ logReset)
 /* harmony export */ });
-const DEV = true;
+const DEV = false;
 let fs;
 try {
     if (DEV)
@@ -2799,9 +2799,9 @@ function logReset() {
     catch (e) { /* ignore */ }
 }
 function log(msg) {
+    console.log('[NRC]', msg);
     if (!DEV)
         return;
-    console.log('[NRC]', msg);
     try {
         fs && fs.appendFileSync(LOG_PATH, msg + '\n');
     }
@@ -2964,6 +2964,7 @@ class Registry {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   animationId: () => (/* binding */ animationId),
 /* harmony export */   mcId: () => (/* binding */ mcId),
 /* harmony export */   mcIdDraft: () => (/* binding */ mcIdDraft)
 /* harmony export */ });
@@ -2972,6 +2973,9 @@ function mcIdDraft(name) {
 }
 function mcId(name) {
     return mcIdDraft(name).replace(/^_+|_+$/g, '');
+}
+function animationId(name) {
+    return (name || '').split('.').map(mcId).filter(Boolean).join('.');
 }
 
 
@@ -2990,6 +2994,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _assets_playerRig_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../assets/playerRig.json */ "./ts/assets/playerRig.json");
 /* harmony import */ var _assets_steveSkin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../assets/steveSkin */ "./ts/assets/steveSkin.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/playerModel */ "./ts/platform/playerModel.ts");
+
 
 
 const PLAYER_BONES = [
@@ -3023,7 +3029,7 @@ const EMOTE = {
     hasKeyframeEasing: true,
     exportsAnimation: true,
     createsDefaultAnimation: true,
-    exportsModelDefault: () => typeof Cube !== 'undefined' && Cube.all && Cube.all.length !== PLAYER_BONES.length - 1,
+    exportsModelDefault: () => typeof Cube !== 'undefined' && !!Cube.all && (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_2__.propCubes)().length > 0,
     rig: _assets_playerRig_json__WEBPACK_IMPORTED_MODULE_0__,
     defaultSkin: _assets_steveSkin__WEBPACK_IMPORTED_MODULE_1__["default"],
 };
@@ -3233,55 +3239,55 @@ function writeFiles(base, files) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   nrcAnimationCodec: () => (/* binding */ nrcAnimationCodec)
+/* harmony export */   createAnimationCodec: () => (/* binding */ createAnimationCodec)
 /* harmony export */ });
 /* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
 /* harmony import */ var _emoteIdentity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./emoteIdentity */ "./ts/platform/emoteIdentity.ts");
-/* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
 
 
 
-
-const nrcAnimationCodec = new AnimationCodec('nrc_emote_animation', {
-    multiple_per_file: true,
-    compileFile(animations = Animation.all) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('compileFile: ' + (animations ? animations.length : 0) + ' animation(s)');
-        const type = (0,_format__WEBPACK_IMPORTED_MODULE_2__.currentType)();
-        if (!type)
-            return { format_version: '1.8.0', animations: {} };
-        return (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_0__.buildAnimationJson)(type, animations, (0,_emoteIdentity__WEBPACK_IMPORTED_MODULE_1__.currentEmoteId)(type));
-    },
-    exportFile(path, save_as) {
-        const all = (Animation.all || []);
-        const forFile = path ? all.filter((a) => a.path === path) : all;
-        const animations = forFile.length ? forFile : all;
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('exportFile: path=' + path + ' save_as=' + !!save_as + ' animations=' + animations.length);
-        const content = JSON.stringify(this.compileFile(animations), null, 2);
-        const name = (animations[0] && animations[0].name) || 'emote';
-        const remember = (written) => {
-            if (!written)
+function createAnimationCodec(type) {
+    return new AnimationCodec('nrc_' + type.id + '_animation', {
+        multiple_per_file: true,
+        compileFile(animations = (Animation.all || [])) {
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('compileFile: ' + animations.length + ' animation(s)');
+            return (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_0__.buildAnimationJson)(type, animations, (0,_emoteIdentity__WEBPACK_IMPORTED_MODULE_1__.currentEmoteId)(type));
+        },
+        exportFile(path, save_as) {
+            const all = (Animation.all || []);
+            const forFile = path ? all.filter((a) => a.path === path) : all;
+            const animations = forFile.length ? forFile : all;
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('exportFile: path=' + path + ' save_as=' + !!save_as + ' animations=' + animations.length);
+            if (!animations.length) {
+                Blockbench.showQuickMessage('Nothing to save, the project has no animations', 2000);
                 return;
-            for (const anim of animations) {
-                anim.path = written;
-                anim.saved = true;
             }
-            (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('exportFile: wrote ' + written);
-        };
-        if (path && !save_as && Blockbench.writeFile) {
-            Blockbench.writeFile(path, { content }, remember);
-            return;
-        }
-        Blockbench.export({
-            resource_id: 'animation',
-            type: 'JSON Animation',
-            extensions: ['json'],
-            name: name + '.animation',
-            startpath: path,
-            content,
-        }, remember);
-    },
-});
+            const content = JSON.stringify(this.compileFile(animations), null, 2);
+            const remember = (written) => {
+                if (!written)
+                    return;
+                for (const anim of animations) {
+                    anim.path = written;
+                    anim.saved = true;
+                }
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_2__.log)('exportFile: wrote ' + written);
+            };
+            if (path && !save_as && Blockbench.writeFile) {
+                Blockbench.writeFile(path, { content }, remember);
+                return;
+            }
+            Blockbench.export({
+                resource_id: 'animation',
+                type: 'JSON Animation',
+                extensions: ['json'],
+                name: (0,_emoteIdentity__WEBPACK_IMPORTED_MODULE_1__.currentEmoteId)(type) + '.animation',
+                startpath: path,
+                content,
+            }, remember);
+        },
+    });
+}
 
 
 /***/ },
@@ -3320,15 +3326,20 @@ function patch(target, key, replacement) {
     target[key] = replacement(original);
     (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('animationPatches: patched ' + key);
 }
-function installAnimationPatches(type) {
+function installAnimationPatches() {
     if (patched.length)
         return;
-    patch(BarItems['export_animation_file'], 'click', () => function () {
+    patch(BarItems['export_animation_file'], 'click', (original) => function (...args) {
+        const type = (0,_format__WEBPACK_IMPORTED_MODULE_2__.currentType)();
+        if (!type)
+            return original.apply(this, args);
         (0,_ui_animationExportDialog__WEBPACK_IMPORTED_MODULE_1__.openAnimationExportDialog)(type);
     });
     patch(Animator, 'loadParticleEmitter', (original) => function (path, content) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('loadParticleEmitter: ' + path + ' (' + (content ? content.length : 0) + ' bytes)');
         const result = original.apply(this, [path, content]);
+        if (!(0,_format__WEBPACK_IMPORTED_MODULE_2__.currentType)())
+            return result;
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_5__.log)('loadParticleEmitter: ' + path + ' (' + (content ? content.length : 0) + ' bytes)');
         (0,_particleTexture__WEBPACK_IMPORTED_MODULE_3__.resolveParticleTexture)(path, content);
         return result;
     });
@@ -3345,7 +3356,7 @@ function installAnimationPatches(type) {
             return result;
         const added = (Animation.all || []).filter((a) => !before.has(a.uuid));
         for (const anim of added) {
-            const data = (_b = animations[anim.name]) !== null && _b !== void 0 ? _b : animations[(0,_core_util__WEBPACK_IMPORTED_MODULE_4__.mcId)(anim.name)];
+            const data = (_b = animations[anim.name]) !== null && _b !== void 0 ? _b : animations[(0,_core_util__WEBPACK_IMPORTED_MODULE_4__.animationId)(anim.name)];
             if (!data)
                 continue;
             for (const f of type.metaFields) {
@@ -4028,7 +4039,7 @@ function renameEmote(type, newId) {
     if (Project)
         Project.name = newId;
     for (const animation of animations) {
-        if ((0,_core_util__WEBPACK_IMPORTED_MODULE_1__.mcId)(animation.name) === previous)
+        if ((0,_core_util__WEBPACK_IMPORTED_MODULE_1__.animationId)(animation.name) === previous)
             animation.name = newId;
     }
     let updated = 0;
@@ -4100,7 +4111,7 @@ function baseFormatOptions(type) {
         locators: true,
         animation_mode: true,
         animation_files: true,
-        animation_codec: _animationCodec__WEBPACK_IMPORTED_MODULE_0__.nrcAnimationCodec,
+        animation_codec: (0,_animationCodec__WEBPACK_IMPORTED_MODULE_0__.createAnimationCodec)(type),
         display_mode: false,
         codec: Codecs.project,
     };
@@ -4565,6 +4576,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   installPlayerModel: () => (/* binding */ installPlayerModel),
 /* harmony export */   isRigCube: () => (/* binding */ isRigCube),
 /* harmony export */   makeToggleRigLockAction: () => (/* binding */ makeToggleRigLockAction),
+/* harmony export */   propCubes: () => (/* binding */ propCubes),
 /* harmony export */   refreshTemplate: () => (/* binding */ refreshTemplate),
 /* harmony export */   resolveRigCubes: () => (/* binding */ resolveRigCubes),
 /* harmony export */   rigBoneName: () => (/* binding */ rigBoneName),
@@ -4581,13 +4593,19 @@ let boneNames = new Set();
 let resolved = new Set();
 let armModel = 'classic';
 let protectRig = true;
+let syncing = false;
+let cubeCount = -1;
+function baseName(name) {
+    return (name || '').replace(/[\s_]*\d+$/, '');
+}
 function templateElements() {
     const t = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
     return t ? (t.rig.elements || []) : [];
 }
 function refreshTemplate() {
+    const type = (0,_format__WEBPACK_IMPORTED_MODULE_0__.currentType)();
     templateNames = {};
-    boneNames = new Set();
+    boneNames = new Set(type ? type.bones : []);
     for (const e of templateElements()) {
         if (!e.name)
             continue;
@@ -4596,13 +4614,43 @@ function refreshTemplate() {
             templateNames[e.uuid] = e.name;
     }
 }
+function looksLikeRigCube(cube) {
+    if (templateNames[cube.uuid])
+        return true;
+    const parent = cube.parent;
+    if (!parent || !parent.name)
+        return false;
+    const bone = baseName(parent.name);
+    return boneNames.has(bone) && baseName(cube.name) === bone;
+}
 function resolveRigCubes() {
+    if (!boneNames.size)
+        refreshTemplate();
     const all = (Cube.all || []);
-    let match = all.filter((c) => templateNames[c.uuid]);
-    if (!match.length) {
-        match = all.filter((c) => c.parent && boneNames.has(c.parent.name) && c.name === c.parent.name);
+    resolved = new Set(all.filter(looksLikeRigCube).map((c) => c.uuid));
+    cubeCount = all.length;
+}
+function resolveIfStale() {
+    if ((Cube.all || []).length !== cubeCount)
+        resolveRigCubes();
+}
+function propCubes() {
+    resolveIfStale();
+    return (Cube.all || []).filter((c) => !resolved.has(c.uuid));
+}
+function rigRootOf(node) {
+    let found = null;
+    let n = node;
+    while (n && typeof n === 'object') {
+        if (n.name && boneNames.has(baseName(n.name)))
+            found = n;
+        n = n.parent;
     }
-    resolved = new Set(match.map((c) => c.uuid));
+    return found;
+}
+function selectedRig() {
+    const group = typeof Group !== 'undefined' ? Group.first_selected : null;
+    return group ? rigRootOf(group) : null;
 }
 function rigResolved() {
     return resolved.size > 0;
@@ -4614,7 +4662,8 @@ function rigCubes() {
     return (Cube.all || []).filter((c) => resolved.has(c.uuid));
 }
 function rigBoneName(cube) {
-    return templateNames[cube.uuid] || (boneNames.has(cube.name) ? cube.name : '');
+    const name = baseName(cube.name);
+    return templateNames[cube.uuid] || (boneNames.has(name) ? name : '');
 }
 function currentArmModel() {
     return armModel;
@@ -4644,17 +4693,34 @@ function setArmModel(model) {
 function rigProtected() {
     return protectRig;
 }
-function setRigLocked(locked) {
+function syncRigLock() {
+    if (syncing)
+        return;
+    const shaping = typeof Modes !== 'undefined' && (!!Modes.edit || !!Modes.paint);
+    const protect = protectRig && shaping;
+    const exempt = protect && Modes.edit ? selectedRig() : null;
+    let changed = false;
     for (const cube of rigCubes()) {
+        const locked = protect && (!exempt || rigRootOf(cube) !== exempt);
+        if (cube.locked === locked)
+            continue;
         if (locked && cube.selected)
             cube.unselect();
         cube.locked = locked;
+        changed = true;
+    }
+    if (!changed)
+        return;
+    if (exempt) {
+        syncing = true;
+        try {
+            exempt.select();
+        }
+        finally {
+            syncing = false;
+        }
     }
     updateSelection();
-}
-function syncRigLock() {
-    const shaping = typeof Modes !== 'undefined' && (!!Modes.edit || !!Modes.paint);
-    setRigLocked(protectRig && shaping);
 }
 function setRigProtected(on) {
     protectRig = on;
@@ -4674,10 +4740,17 @@ function installPlayerModel(registry) {
         resolveRigCubes();
         syncRigLock();
     };
+    const onSelection = () => {
+        if (syncing || !(0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)())
+            return;
+        resolveIfStale();
+        syncRigLock();
+    };
     registry.event('select_mode', onMode);
     registry.event('unselect_mode', onMode);
     registry.event('load_project', onMode);
     registry.event('select_project', onMode);
+    registry.event('update_selection', onSelection);
 }
 function makeToggleRigLockAction(registry, type) {
     return registry.action('nrc_toggle_rig_lock_' + type.id, {
@@ -5361,6 +5434,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
 /* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
 /* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -5375,7 +5450,12 @@ function buildAnimationJson(type, only, emoteId) {
             compiled.lockVanillaBones = (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.buildLockMap)(anim, type);
         if (emoteId)
             (0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_1__.retargetSoundIds)(compiled, anim, type, emoteId);
-        animations[(0,_core_util__WEBPACK_IMPORTED_MODULE_2__.mcId)(anim.name) || type.defaultName] = compiled;
+        const id = (0,_core_util__WEBPACK_IMPORTED_MODULE_2__.animationId)(anim.name) || type.defaultName;
+        if (animations[id]) {
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('buildAnimationJson: "' + anim.name + '" collides with an earlier animation on "' + id + '"');
+            Blockbench.showQuickMessage('Two animations share the id "' + id + '", only the last one is exported', 2600);
+        }
+        animations[id] = compiled;
     }
     return { format_version: '1.8.0', animations };
 }
@@ -5449,7 +5529,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   openAnimationExportDialog: () => (/* binding */ openAnimationExportDialog)
 /* harmony export */ });
 /* harmony import */ var _emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./emoteSettingsPanel */ "./ts/ui/emoteSettingsPanel.ts");
-/* harmony import */ var _platform_animationCodec__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/animationCodec */ "./ts/platform/animationCodec.ts");
+/* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
+/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+
+
 
 
 function openAnimationExportDialog(type) {
@@ -5457,41 +5541,86 @@ function openAnimationExportDialog(type) {
     if (!animations.length)
         return;
     const initial = Animation.selected || animations[0];
-    const state = Object.assign(Object.assign({}, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.emoteSettingsState)(initial, type)), { animations: animations.map((a) => ({ name: a.name, uuid: a.uuid })), selectedUuid: initial.uuid, pick(uuid) {
-            if (this.selectedUuid === uuid)
+    const edits = {};
+    const selected = {};
+    for (const anim of animations) {
+        const { flags, locks, lockOpen } = (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.emoteSettingsState)(anim, type);
+        edits[anim.uuid] = { flags, locks, lockOpen };
+        selected[anim.uuid] = true;
+    }
+    const state = Object.assign(Object.assign({}, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.emoteSettingsState)(initial, type)), { animations: animations.map((a) => ({ name: a.name, uuid: a.uuid, id: (0,_core_util__WEBPACK_IMPORTED_MODULE_3__.animationId)(a.name) })), selected, focusUuid: initial.uuid, base: (0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_2__.currentEmoteId)(type), flush() {
+            edits[this.focusUuid] = { flags: Object.assign({}, this.flags), locks: Object.assign({}, this.locks), lockOpen: this.lockOpen };
+        },
+        pick(uuid) {
+            if (this.focusUuid === uuid)
                 return;
-            this.selectedUuid = uuid;
-            const anim = animations.find((a) => a.uuid === uuid);
-            if (anim)
-                Object.assign(this, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.emoteSettingsState)(anim, type));
+            this.flush();
+            this.focusUuid = uuid;
+            Object.assign(this, edits[uuid]);
+        },
+        toggle(uuid) {
+            this.selected[uuid] = !this.selected[uuid];
+        },
+        setAll(on) {
+            for (const a of this.animations)
+                this.selected[a.uuid] = on;
         } });
     new Dialog('nrc_animation_export_' + type.id, {
         title: 'Export ' + type.formatName + ' Animations',
         width: 540,
         component: {
             data: () => state,
+            computed: {
+                focusName() {
+                    const a = this.animations.find((x) => x.uuid === this.focusUuid);
+                    return a ? a.name : '';
+                },
+                count() {
+                    return this.animations.filter((a) => this.selected[a.uuid]).length;
+                },
+            },
             template: `
                 <div class="nrc-x">
-                    <div class="nrc-x-sec-h">Animation</div>
-                    <div class="nrc-x-chips">
-                        <span class="nrc-x-chip" v-for="a in animations" :key="a.uuid"
-                            :class="{on: selectedUuid === a.uuid}" @click="pick(a.uuid)">{{ a.name }}</span>
+                    <div>
+                        <div class="nrc-x-sec-h">Animations</div>
+                        <div class="nrc-x-anims">
+                            <div class="nrc-x-anim" v-for="a in animations" :key="a.uuid"
+                                :class="{on: selected[a.uuid], focus: focusUuid === a.uuid}" @click="pick(a.uuid)">
+                                <i class="material-icons box" @click.stop="toggle(a.uuid)">{{ selected[a.uuid] ? 'check_box' : 'check_box_outline_blank' }}</i>
+                                <span class="nm">{{ a.name }}</span>
+                                <span class="id">{{ a.id }}</span>
+                            </div>
+                        </div>
+                        <div class="nrc-x-chips">
+                            <span class="nrc-x-chip" @click="setAll(true)">select all</span>
+                            <span class="nrc-x-chip" @click="setAll(false)">select none</span>
+                        </div>
                     </div>
+
+                    <div class="nrc-x-focus">Settings below apply to <b>{{ focusName }}</b></div>
                     ${_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.EMOTE_SETTINGS_TEMPLATE}
+
+                    <div class="nrc-x-foot" v-if="count">Exports <b>{{ count }}</b> animation(s) into <b>{{ base }}.animation.json</b></div>
+                    <div class="nrc-x-foot" v-else>No animation selected</div>
                 </div>
             `,
         },
         onConfirm() {
-            const target = animations.find((a) => a.uuid === state.selectedUuid);
-            if (!target)
+            const chosen = animations.filter((a) => state.selected[a.uuid]);
+            if (!chosen.length) {
+                Blockbench.showQuickMessage('No animation selected to export', 1800);
                 return;
-            (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.applyEmoteSettings)(target, type, state);
+            }
+            state.flush();
+            for (const anim of chosen)
+                (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_0__.applyEmoteSettings)(anim, type, edits[anim.uuid]);
+            const emoteId = (0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_2__.currentEmoteId)(type);
             Blockbench.export({
                 resource_id: 'animation',
                 type: 'JSON Animation',
                 extensions: ['json'],
-                name: target.name + '.animation',
-                content: JSON.stringify(_platform_animationCodec__WEBPACK_IMPORTED_MODULE_1__.nrcAnimationCodec.compileFile([target]), null, 2),
+                name: emoteId + '.animation',
+                content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_1__.buildAnimationJson)(type, chosen, emoteId), null, 2),
             });
         },
     }).show();
@@ -5556,6 +5685,17 @@ function ensureDialogCss(registry) {
         .nrc-x-chip { font-size: 11px; padding: 3px 9px; border-radius: 12px; border: 1px solid var(--color-border); cursor: pointer; user-select: none; color: var(--color-subtle_text); }
         .nrc-x-chip:hover { background: var(--color-button); }
         .nrc-x-chip.on { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-light); }
+
+        .nrc-x-anims { display: flex; flex-direction: column; gap: 3px; max-height: 190px; overflow-y: auto; }
+        .nrc-x-anim { display: flex; align-items: center; gap: 7px; padding: 3px 7px; border: 1.5px solid transparent; border-radius: 5px; cursor: pointer; user-select: none; }
+        .nrc-x-anim:hover { background: var(--color-button); }
+        .nrc-x-anim.focus { border-color: var(--color-accent); background: var(--color-selected); }
+        .nrc-x-anim .box { font-size: 17px; color: var(--color-subtle_text); }
+        .nrc-x-anim.on .box { color: var(--color-accent); }
+        .nrc-x-anim .nm { flex: 1; font-size: 12px; }
+        .nrc-x-anim .id { font-family: monospace; font-size: 10px; color: var(--color-subtle_text); }
+        .nrc-x-focus { font-size: 11px; color: var(--color-subtle_text); }
+        .nrc-x-focus b { color: var(--color-text); }
 
         .nrc-x-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
         .nrc-x-row > label { width: 64px; color: var(--color-subtle_text); font-size: 12px; }
@@ -62066,7 +62206,7 @@ if ( typeof window !== 'undefined' ) {
   \**********************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.2.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.1.2","fflate":"^0.8.3","three":"^0.160.1"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.3.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.1.2","fflate":"^0.8.3","three":"^0.160.1"}}');
 
 /***/ },
 
@@ -62171,7 +62311,7 @@ const { version, blockbenchConfig } = _package_json__WEBPACK_IMPORTED_MODULE_0__
         onload() {
             (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__.EMOTE, registry);
             (0,_platform_easing__WEBPACK_IMPORTED_MODULE_4__.installEasing)(registry);
-            (0,_platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__.installAnimationPatches)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__.EMOTE);
+            (0,_platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__.installAnimationPatches)();
             console.log('Loaded NoRisk Client Cosmetics plugin');
         },
         onunload() {

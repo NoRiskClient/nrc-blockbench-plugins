@@ -1,5 +1,6 @@
 import playerRig from '../assets/playerRig.json';
 import steveSkin from '../assets/steveSkin';
+import { propCubes } from '../platform/playerModel';
 import { CosmeticType } from './types';
 
 export const PLAYER_BONES = [
@@ -35,7 +36,7 @@ export const EMOTE: CosmeticType = {
     hasKeyframeEasing: true,
     exportsAnimation: true,
     createsDefaultAnimation: true,
-    exportsModelDefault: () => typeof Cube !== 'undefined' && Cube.all && Cube.all.length !== PLAYER_BONES.length - 1,
+    exportsModelDefault: () => typeof Cube !== 'undefined' && !!Cube.all && propCubes().length > 0,
 
     rig: playerRig,
     defaultSkin: steveSkin,

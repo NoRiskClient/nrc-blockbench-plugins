@@ -12,6 +12,12 @@ let boneNames = new Set<string>();
 let resolved = new Set<string>();
 let armModel: ArmModel = 'classic';
 let protectRig = true;
+let syncing = false;
+let cubeCount = -1;
+
+function baseName(name: string): string {
+    return (name || '').replace(/[\s_]*\d+$/, '');
+}
 
 function templateElements(): any[] {
     const t = currentType();
@@ -19,8 +25,9 @@ function templateElements(): any[] {
 }
 
 export function refreshTemplate() {
+    const type = currentType();
     templateNames = {};
-    boneNames = new Set<string>();
+    boneNames = new Set<string>(type ? type.bones : []);
     for (const e of templateElements()) {
         if (!e.name) continue;
         boneNames.add(e.name);
@@ -28,13 +35,43 @@ export function refreshTemplate() {
     }
 }
 
+function looksLikeRigCube(cube: any): boolean {
+    if (templateNames[cube.uuid]) return true;
+    const parent = cube.parent;
+    if (!parent || !parent.name) return false;
+    const bone = baseName(parent.name);
+    return boneNames.has(bone) && baseName(cube.name) === bone;
+}
+
 export function resolveRigCubes() {
+    if (!boneNames.size) refreshTemplate();
     const all = (Cube.all || []) as any[];
-    let match = all.filter((c) => templateNames[c.uuid]);
-    if (!match.length) {
-        match = all.filter((c) => c.parent && boneNames.has(c.parent.name) && c.name === c.parent.name);
+    resolved = new Set(all.filter(looksLikeRigCube).map((c) => c.uuid));
+    cubeCount = all.length;
+}
+
+function resolveIfStale() {
+    if (((Cube.all || []) as any[]).length !== cubeCount) resolveRigCubes();
+}
+
+export function propCubes(): any[] {
+    resolveIfStale();
+    return ((Cube.all || []) as any[]).filter((c) => !resolved.has(c.uuid));
+}
+
+function rigRootOf(node: any): any {
+    let found: any = null;
+    let n = node;
+    while (n && typeof n === 'object') {
+        if (n.name && boneNames.has(baseName(n.name))) found = n;
+        n = n.parent;
     }
-    resolved = new Set(match.map((c) => c.uuid));
+    return found;
+}
+
+function selectedRig(): any {
+    const group = typeof Group !== 'undefined' ? (Group as any).first_selected : null;
+    return group ? rigRootOf(group) : null;
 }
 
 export function rigResolved(): boolean {
@@ -50,7 +87,8 @@ export function rigCubes(): any[] {
 }
 
 export function rigBoneName(cube: any): string {
-    return templateNames[cube.uuid] || (boneNames.has(cube.name) ? cube.name : '');
+    const name = baseName(cube.name);
+    return templateNames[cube.uuid] || (boneNames.has(name) ? name : '');
 }
 
 export function currentArmModel(): ArmModel {
@@ -82,17 +120,28 @@ function rigProtected(): boolean {
     return protectRig;
 }
 
-function setRigLocked(locked: boolean) {
+function syncRigLock() {
+    if (syncing) return;
+
+    const shaping = typeof Modes !== 'undefined' && (!!Modes.edit || !!Modes.paint);
+    const protect = protectRig && shaping;
+    const exempt = protect && Modes.edit ? selectedRig() : null;
+
+    let changed = false;
     for (const cube of rigCubes()) {
+        const locked = protect && (!exempt || rigRootOf(cube) !== exempt);
+        if (cube.locked === locked) continue;
         if (locked && cube.selected) cube.unselect();
         cube.locked = locked;
+        changed = true;
+    }
+    if (!changed) return;
+
+    if (exempt) {
+        syncing = true;
+        try { exempt.select(); } finally { syncing = false; }
     }
     updateSelection();
-}
-
-function syncRigLock() {
-    const shaping = typeof Modes !== 'undefined' && (!!Modes.edit || !!Modes.paint);
-    setRigLocked(protectRig && shaping);
 }
 
 function setRigProtected(on: boolean) {
@@ -114,10 +163,16 @@ export function installPlayerModel(registry: Registry) {
         resolveRigCubes();
         syncRigLock();
     };
+    const onSelection = () => {
+        if (syncing || !isCosmeticFormat()) return;
+        resolveIfStale();
+        syncRigLock();
+    };
     registry.event('select_mode', onMode);
     registry.event('unselect_mode', onMode);
     registry.event('load_project', onMode);
     registry.event('select_project', onMode);
+    registry.event('update_selection', onSelection);
 }
 
 export function makeToggleRigLockAction(registry: Registry, type: CosmeticType): any {

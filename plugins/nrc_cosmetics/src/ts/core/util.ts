@@ -5,3 +5,7 @@ export function mcIdDraft(name: string): string {
 export function mcId(name: string): string {
     return mcIdDraft(name).replace(/^_+|_+$/g, '');
 }
+
+export function animationId(name: string): string {
+    return (name || '').split('.').map(mcId).filter(Boolean).join('.');
+}

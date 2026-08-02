@@ -1,10 +1,13 @@
 import { CosmeticType } from '../cosmetics/types';
 import { initFlags, initLocks, anyLocked, writeMeta } from '../domain/meta';
 
-export interface EmoteSettingsState {
+export interface EmoteSettingsValues {
     flags: { [key: string]: boolean };
     locks: { [bone: string]: boolean };
     lockOpen: boolean;
+}
+
+export interface EmoteSettingsState extends EmoteSettingsValues {
     flagDefs: any[];
     bones: string[];
     hasLockBones: boolean;
@@ -42,7 +45,7 @@ export const EMOTE_SETTINGS_TEMPLATE = `
     </div>
 `;
 
-export function applyEmoteSettings(anim: any, type: CosmeticType, state: EmoteSettingsState) {
+export function applyEmoteSettings(anim: any, type: CosmeticType, state: EmoteSettingsValues) {
     if (!anim) return;
     writeMeta(anim, type, state.flags, state.lockOpen ? state.locks : {});
 }

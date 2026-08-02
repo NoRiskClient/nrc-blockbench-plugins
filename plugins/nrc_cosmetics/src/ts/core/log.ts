@@ -1,4 +1,4 @@
-const DEV = true;
+const DEV = false;
 
 let fs: any;
 try { if (DEV) fs = require('fs'); } catch (e) { /* not in electron */ }
@@ -11,7 +11,7 @@ export function logReset() {
 }
 
 export function log(msg: string) {
-    if (!DEV) return;
     console.log('[NRC]', msg);
+    if (!DEV) return;
     try { fs && fs.appendFileSync(LOG_PATH, msg + '\n'); } catch (e) { /* ignore */ }
 }

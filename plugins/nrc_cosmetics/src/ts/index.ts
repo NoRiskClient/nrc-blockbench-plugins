@@ -20,7 +20,7 @@ const { version, blockbenchConfig } = packageJson;
             onload() {
                 registerCosmeticType(EMOTE, registry);
                 installEasing(registry);
-                installAnimationPatches(EMOTE);
+                installAnimationPatches();
                 console.log('Loaded NoRisk Client Cosmetics plugin');
             },
             onunload() {

@@ -1,9 +1,8 @@
 import { lockPropKey } from '../domain/meta';
-import { CosmeticType } from '../cosmetics/types';
 import { openAnimationExportDialog } from '../ui/animationExportDialog';
 import { currentType } from './format';
 import { resolveParticleTexture } from './particleTexture';
-import { mcId } from '../core/util';
+import { animationId } from '../core/util';
 import { log } from '../core/log';
 
 const patched: Array<{ target: any; key: string; original: any }> = [];
@@ -19,19 +18,22 @@ function patch(target: any, key: string, replacement: (original: any) => any) {
     log('animationPatches: patched ' + key);
 }
 
-export function installAnimationPatches(type: CosmeticType) {
+export function installAnimationPatches() {
     if (patched.length) return;
 
-    patch(BarItems['export_animation_file'], 'click', () =>
-        function () {
+    patch(BarItems['export_animation_file'], 'click', (original) =>
+        function (this: any, ...args: any[]) {
+            const type = currentType();
+            if (!type) return original.apply(this, args);
             openAnimationExportDialog(type);
         }
     );
 
     patch(Animator, 'loadParticleEmitter', (original) =>
         function (this: any, path: string, content: string) {
-            log('loadParticleEmitter: ' + path + ' (' + (content ? content.length : 0) + ' bytes)');
             const result = original.apply(this, [path, content]);
+            if (!currentType()) return result;
+            log('loadParticleEmitter: ' + path + ' (' + (content ? content.length : 0) + ' bytes)');
             resolveParticleTexture(path, content);
             return result;
         }
@@ -51,7 +53,7 @@ export function installAnimationPatches(type: CosmeticType) {
 
             const added = ((Animation.all || []) as any[]).filter((a) => !before.has(a.uuid));
             for (const anim of added) {
-                const data = animations[anim.name] ?? animations[mcId(anim.name)];
+                const data = animations[anim.name] ?? animations[animationId(anim.name)];
                 if (!data) continue;
                 for (const f of type.metaFields) {
                     if (data[f.jsonKey] !== undefined) (anim as any)[f.key] = !!data[f.jsonKey];

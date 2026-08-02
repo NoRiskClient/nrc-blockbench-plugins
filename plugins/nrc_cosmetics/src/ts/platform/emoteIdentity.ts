@@ -1,7 +1,7 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
 import { nodePath } from '../core/node';
-import { mcId } from '../core/util';
+import { animationId, mcId } from '../core/util';
 import { isCosmeticFormat } from './format';
 import { soundEffectId } from './effectFiles';
 import { effectsAnimator, firstDataPoint } from './effectKeyframes';
@@ -47,7 +47,7 @@ export function renameEmote(type: CosmeticType, newId: string) {
 
     if (Project) Project.name = newId;
     for (const animation of animations) {
-        if (mcId(animation.name) === previous) animation.name = newId;
+        if (animationId(animation.name) === previous) animation.name = newId;
     }
 
     let updated = 0;

@@ -1,6 +1,6 @@
 import { CosmeticType } from '../cosmetics/types';
 import { Registry } from '../core/registry';
-import { nrcAnimationCodec } from './animationCodec';
+import { createAnimationCodec } from './animationCodec';
 
 const formatsById: { [id: string]: any } = {};
 const typesById: { [id: string]: CosmeticType } = {};
@@ -21,7 +21,7 @@ function baseFormatOptions(type: CosmeticType): any {
         locators: true,
         animation_mode: true,
         animation_files: true,
-        animation_codec: nrcAnimationCodec,
+        animation_codec: createAnimationCodec(type),
         display_mode: false,
         codec: Codecs.project,
     };
