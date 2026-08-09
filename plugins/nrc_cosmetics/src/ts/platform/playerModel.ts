@@ -59,6 +59,14 @@ export function propCubes(): any[] {
     return ((Cube.all || []) as any[]).filter((c) => !resolved.has(c.uuid));
 }
 
+export function strandedCubes(): any[] {
+    return propCubes().filter((c) => {
+        if (c.export === false) return false;
+        const parent = c.parent;
+        return !!parent && typeof parent.name === 'string' && parent.name.startsWith('biped');
+    });
+}
+
 function rigRootOf(node: any): any {
     let found: any = null;
     let n = node;

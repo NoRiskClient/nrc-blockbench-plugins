@@ -9,6 +9,7 @@ import { writeFiles, sanitize, OutFile } from '../io/exportFiles';
 import { collectEffectFiles, listEffectFiles } from '../platform/effectFiles';
 import { countEffectKeyframes } from '../platform/effectKeyframes';
 import { dataUriToBytes } from '../core/node';
+import { strandedCubes } from '../platform/playerModel';
 import { addLivePreview, clearLivePreviews } from '../platform/templates/livePreview';
 import { mcId } from '../core/util';
 import { log, logReset } from '../core/log';
@@ -22,6 +23,22 @@ const RARITY_COLORS: { [r: string]: string } = {
     EPIC: '#7b25a4',
     LEGENDARY: '#a46823',
 };
+
+function reportStrandedCubes(): boolean {
+    const stranded = strandedCubes();
+    if (!stranded.length) return false;
+    Blockbench.showMessageBox({
+        title: 'Cubes outside a bone',
+        icon: 'warning',
+        message: stranded.length + ' cube(s) sit directly in a biped group: '
+            + stranded.map((c: any) => c.parent.name + '/' + c.name).join(', ')
+            + '.\n\nThe client renders the children of a biped bone, never its own cubes, so these '
+            + 'would be invisible in game. Move them into one of the armor* groups, or into a group '
+            + 'of their own to inherit the limb rotation. Untick Export on a cube to skip this check.',
+        buttons: ['OK'],
+    });
+    return true;
+}
 
 function propTexture(): Uint8Array | null {
     const texture: any = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
@@ -49,6 +66,8 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
         category: 'file',
         condition: () => isCosmeticFormat(type) && Animation.all.length > 0,
         click() {
+            if (reportStrandedCubes()) return;
+
             const metaAnim: any = Animation.selected || Animation.all[0];
             const texture = propTexture();
             const particleCount = countEffectKeyframes('particle');
