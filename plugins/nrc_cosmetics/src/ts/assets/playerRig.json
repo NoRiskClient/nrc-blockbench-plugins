@@ -549,7 +549,21 @@
             0
           ],
           "children": [
-            "00000000-0000-0000-0000-000000000100"
+            "00000000-0000-0000-0000-000000000100",
+            {
+              "name": "armorHead",
+              "uuid": "00000000-0000-0000-0000-000000000300",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                0,
+                24,
+                0
+              ],
+              "children": []
+            }
           ]
         },
         {
@@ -565,7 +579,21 @@
             0
           ],
           "children": [
-            "00000000-0000-0000-0000-000000000101"
+            "00000000-0000-0000-0000-000000000101",
+            {
+              "name": "armorBody",
+              "uuid": "00000000-0000-0000-0000-000000000301",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                0,
+                24,
+                0
+              ],
+              "children": []
+            }
           ]
         },
         {
@@ -581,7 +609,35 @@
             0
           ],
           "children": [
-            "00000000-0000-0000-0000-000000000102"
+            "00000000-0000-0000-0000-000000000102",
+            {
+              "name": "armorRightArm",
+              "uuid": "00000000-0000-0000-0000-000000000302",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                5,
+                22,
+                0
+              ],
+              "children": []
+            },
+            {
+              "name": "armorRightArmSlim",
+              "uuid": "00000000-0000-0000-0000-000000000303",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                5,
+                22,
+                0
+              ],
+              "children": []
+            }
           ]
         },
         {
@@ -597,7 +653,35 @@
             0
           ],
           "children": [
-            "00000000-0000-0000-0000-000000000103"
+            "00000000-0000-0000-0000-000000000103",
+            {
+              "name": "armorLeftArm",
+              "uuid": "00000000-0000-0000-0000-000000000304",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                -5,
+                22,
+                0
+              ],
+              "children": []
+            },
+            {
+              "name": "armorLeftArmSlim",
+              "uuid": "00000000-0000-0000-0000-000000000305",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                -5,
+                22,
+                0
+              ],
+              "children": []
+            }
           ]
         },
         {
@@ -613,7 +697,35 @@
             0
           ],
           "children": [
-            "00000000-0000-0000-0000-000000000104"
+            "00000000-0000-0000-0000-000000000104",
+            {
+              "name": "armorLeftLeg",
+              "uuid": "00000000-0000-0000-0000-000000000308",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                -2,
+                12,
+                0
+              ],
+              "children": []
+            },
+            {
+              "name": "armorLeftBoot",
+              "uuid": "00000000-0000-0000-0000-000000000309",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                -2,
+                12,
+                0
+              ],
+              "children": []
+            }
           ]
         },
         {
@@ -629,7 +741,35 @@
             0
           ],
           "children": [
-            "00000000-0000-0000-0000-000000000105"
+            "00000000-0000-0000-0000-000000000105",
+            {
+              "name": "armorRightLeg",
+              "uuid": "00000000-0000-0000-0000-000000000306",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                2,
+                12,
+                0
+              ],
+              "children": []
+            },
+            {
+              "name": "armorRightBoot",
+              "uuid": "00000000-0000-0000-0000-000000000307",
+              "export": true,
+              "isOpen": true,
+              "visibility": true,
+              "autouv": 0,
+              "origin": [
+                2,
+                12,
+                0
+              ],
+              "children": []
+            }
           ]
         }
       ]
