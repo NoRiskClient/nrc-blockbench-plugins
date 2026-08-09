@@ -9,6 +9,7 @@ import { writeFiles, sanitize, OutFile } from '../io/exportFiles';
 import { collectEffectFiles, listEffectFiles } from '../platform/effectFiles';
 import { countEffectKeyframes } from '../platform/effectKeyframes';
 import { dataUriToBytes } from '../core/node';
+import { sourceMeta } from '../platform/sourceMeta';
 import { strandedCubes } from '../platform/playerModel';
 import { addLivePreview, clearLivePreviews } from '../platform/templates/livePreview';
 import { mcId } from '../core/util';
@@ -64,7 +65,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
         description: 'Export the animation, model and cosmetic metadata',
         icon: 'archive',
         category: 'file',
-        condition: () => isCosmeticFormat(type) && Animation.all.length > 0,
+        condition: () => isCosmeticFormat(type) && (!type.hasAnimation || Animation.all.length > 0),
         click() {
             if (reportStrandedCubes()) return;
 
@@ -73,10 +74,13 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
             const particleCount = countEffectKeyframes('particle');
             const soundCount = countEffectKeyframes('sound');
 
+            const source = sourceMeta();
+            const previous = (source && source.norisk) || null;
+
             const state = {
-                name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName),
-                exportAnimation: type.exportsAnimation,
-                exportNorisk: false,
+                name: (previous && previous.name) || (Project.name || (metaAnim && metaAnim.name) || type.defaultName),
+                exportAnimation: type.exportsAnimation && Animation.all.length > 0,
+                exportNorisk: !!previous,
                 exportModel: type.exportsModelDefault(),
                 exportTexture: !!texture,
                 exportParticles: particleCount > 0,
@@ -85,9 +89,11 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                 particleCount,
                 soundCount,
                 ...emoteSettingsState(metaAnim, type),
-                creator: settings.credit?.value || '',
-                price: 0,
-                rarity: 'COMMON',
+                creator: (previous && previous.creator) || settings.credit?.value || '',
+                price: (previous && previous.price) || 0,
+                rarity: (previous && previous.rarity) || 'COMMON',
+                cosmeticType: (previous && previous.type) || type.noriskTypes[0],
+                cosmeticTypes: type.noriskTypes,
                 rarities: RARITIES,
                 colors: RARITY_COLORS,
                 icon: type.icon,
@@ -181,6 +187,12 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                                 <div class="nrc-x-sec-h">Cosmetic metadata</div>
                                 <div class="nrc-x-row"><label>Creator</label><input type="text" v-model="creator"></div>
                                 <div class="nrc-x-row"><label>Price</label><input type="number" min="0" v-model.number="price"></div>
+                                <div class="nrc-x-row" v-if="cosmeticTypes.length > 1"><label>Category</label>
+                                    <select v-model="cosmeticType">
+                                        <option v-for="t in cosmeticTypes" :key="t" :value="t">{{ t }}</option>
+                                    </select>
+                                </div>
+
                                 <div class="nrc-x-row"><label>Rarity</label>
                                     <div class="nrc-x-pills">
                                         <span class="nrc-x-pill" v-for="r in rarities" :key="r"
@@ -223,8 +235,12 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                                 price: Number(state.price) || 0,
                                 rarity: state.rarity,
                                 path: base,
-                            }), null, 2),
+                                type: state.cosmeticType,
+                            }, previous), null, 2),
                         });
+                    }
+                    if (source && source.mcmeta && state.exportTexture) {
+                        files.push({ suffix: '.png.mcmeta', content: source.mcmeta });
                     }
 
                     log('export base=' + base + ' files=' + files.map((f) => f.name || f.suffix).join(','));
