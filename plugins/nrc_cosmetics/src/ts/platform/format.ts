@@ -16,6 +16,7 @@ function baseFormatOptions(type: CosmeticType): any {
         box_uv: true,
         optional_box_uv: true,
         single_texture: true,
+        render_sides: 'front',
         bone_rig: true,
         centered_grid: true,
         locators: true,
