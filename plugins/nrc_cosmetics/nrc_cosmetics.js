@@ -5362,14 +5362,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   clearLivePreviews: () => (/* binding */ clearLivePreviews)
 /* harmony export */ });
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/parseGeo.js");
-/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/buildBoneTree.js");
-/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/parseEmote.js");
-/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/emotePlayer.js");
-/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/applyEmoteToRig.js");
-/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/steveGeo.js");
-/* harmony import */ var _assets_steveSkin__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../assets/steveSkin */ "./ts/assets/steveSkin.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/parseParticle.js");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/particleSystem.js");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/parseGeo.js");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/buildBoneTree.js");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/parseEmote.js");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/emotePlayer.js");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/applyEmoteToRig.js");
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/steveGeo.js");
+/* harmony import */ var _assets_steveSkin__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../assets/steveSkin */ "./ts/assets/steveSkin.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
 
 
 
@@ -5377,26 +5379,85 @@ __webpack_require__.r(__webpack_exports__);
 const SIZE = 132;
 const FPS = 24;
 const NEGATE_X = true; // bedrock<->blockbench X convention used by the renderer lib
+const BLOCK_TO_PX = 16;
 let renderer = null;
 let camera = null;
 let skinMaterial = null;
 let raf = 0;
 let last = 0;
 let items = [];
-function makeMaterial(dataUri) {
+function makeTexture(dataUri) {
     const img = new Image();
     const tex = new three__WEBPACK_IMPORTED_MODULE_0__.Texture(img);
     tex.magFilter = three__WEBPACK_IMPORTED_MODULE_0__.NearestFilter;
     tex.minFilter = three__WEBPACK_IMPORTED_MODULE_0__.NearestFilter;
+    tex.wrapS = three__WEBPACK_IMPORTED_MODULE_0__.ClampToEdgeWrapping;
+    tex.wrapT = three__WEBPACK_IMPORTED_MODULE_0__.ClampToEdgeWrapping;
+    tex.generateMipmaps = false;
     tex.flipY = false;
     tex.colorSpace = three__WEBPACK_IMPORTED_MODULE_0__.SRGBColorSpace;
     img.onload = () => { tex.needsUpdate = true; };
     img.src = dataUri;
-    return new three__WEBPACK_IMPORTED_MODULE_0__.MeshStandardMaterial({ map: tex, side: three__WEBPACK_IMPORTED_MODULE_0__.DoubleSide, transparent: true, alphaTest: 0.01, roughness: 1, metalness: 0 });
+    return tex;
+}
+function makeMaterial(dataUri) {
+    return new three__WEBPACK_IMPORTED_MODULE_0__.MeshStandardMaterial({
+        map: makeTexture(dataUri),
+        side: three__WEBPACK_IMPORTED_MODULE_0__.FrontSide,
+        transparent: true,
+        alphaTest: 0.01,
+        roughness: 1,
+        metalness: 0,
+    });
+}
+function buildParticleSystem(particles) {
+    if (!particles || !particles.length)
+        return null;
+    const sys = new _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_2__.ParticleSystem();
+    let registered = 0;
+    for (const entry of particles) {
+        try {
+            const effect = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_1__.parseParticle)(entry.json);
+            if (!effect.identifier)
+                continue;
+            sys.register(effect.identifier, { effect, texture: makeTexture(entry.textureDataUri) });
+            registered++;
+        }
+        catch (e) {
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_10__.log)('live preview: particle skipped: ' + e);
+        }
+    }
+    return registered ? sys : null;
+}
+function particleListener(sys, tree, propTree) {
+    return {
+        onParticleKeyframe: (_id, _time, kf) => {
+            if (!sys.hasEffect(kf.effectId))
+                return;
+            const anchor = anchorFor(kf.locator, tree, propTree);
+            if (kf.locator && !anchor)
+                return;
+            const target = anchor || tree.root;
+            sys.spawn(kf.effectId, {
+                positionProvider: () => target.getWorldPosition(new three__WEBPACK_IMPORTED_MODULE_0__.Vector3()),
+                forceLifetime: 'once',
+                unitScale: BLOCK_TO_PX,
+            });
+        },
+    };
+}
+function anchorFor(name, tree, propTree) {
+    if (!name)
+        return null;
+    return tree.bones.get(name)
+        || (propTree && propTree.bones.get(name))
+        || tree.locators.get(name)
+        || (propTree && propTree.locators.get(name))
+        || null;
 }
 function ensureMaterial() {
     if (!skinMaterial)
-        skinMaterial = makeMaterial(_assets_steveSkin__WEBPACK_IMPORTED_MODULE_7__["default"]);
+        skinMaterial = makeMaterial(_assets_steveSkin__WEBPACK_IMPORTED_MODULE_9__["default"]);
     return skinMaterial;
 }
 function ensureRenderer() {
@@ -5412,6 +5473,7 @@ function loop(now) {
     raf = requestAnimationFrame(loop);
     if (now - last < 1000 / FPS)
         return;
+    const dt = Math.min((now - last) / 1000, 0.25);
     last = now;
     if (!renderer || !camera)
         return;
@@ -5421,7 +5483,9 @@ function loop(now) {
             continue;
         try {
             item.player.update(t);
-            (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_5__.applyEmoteToRig)(item.player, item.tree, { negateX: NEGATE_X, propTree: item.propTree || undefined });
+            (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_7__.applyEmoteToRig)(item.player, item.tree, { negateX: NEGATE_X, propTree: item.propTree || undefined });
+            if (item.particles)
+                item.particles.tick(t, dt);
             renderer.render(item.scene, camera);
             item.ctx.clearRect(0, 0, SIZE, SIZE);
             item.ctx.drawImage(renderer.domElement, 0, 0, SIZE, SIZE);
@@ -5429,10 +5493,10 @@ function loop(now) {
         catch (e) { /* skip frame */ }
     }
 }
-function addLivePreview(canvas, animationJson, propGeo, propTexUri) {
+function addLivePreview(canvas, animationJson, propGeo, propTexUri, particles) {
     try {
         ensureRenderer();
-        const tree = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_2__.buildBoneTree)(_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_6__.STEVE_GEO, ensureMaterial(), { negateX: NEGATE_X, armorOnly: false });
+        const tree = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_4__.buildBoneTree)(_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_8__.STEVE_GEO, ensureMaterial(), { negateX: NEGATE_X, armorOnly: false });
         tree.root.rotation.y = Math.PI; // face the camera
         const scene = new three__WEBPACK_IMPORTED_MODULE_0__.Scene();
         scene.add(new three__WEBPACK_IMPORTED_MODULE_0__.AmbientLight(0xffffff, 1.4));
@@ -5442,23 +5506,26 @@ function addLivePreview(canvas, animationJson, propGeo, propTexUri) {
         scene.add(tree.root);
         let propTree = null;
         if (propGeo && propTexUri) {
-            propTree = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_2__.buildBoneTree)((0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_1__.parseGeo)(propGeo), makeMaterial(propTexUri), { negateX: NEGATE_X, armorOnly: false });
+            propTree = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_4__.buildBoneTree)((0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_3__.parseGeo)(propGeo), makeMaterial(propTexUri), { negateX: NEGATE_X, armorOnly: false });
             propTree.root.rotation.y = Math.PI;
             scene.add(propTree.root);
         }
-        const file = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_3__.parseEmoteFile)(animationJson);
+        const file = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_5__.parseEmoteFile)(animationJson);
         if (!file.emotes.length)
             return;
-        const player = new _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_4__.EmotePlayer();
+        const sys = buildParticleSystem(particles);
+        if (sys)
+            scene.add(sys.root);
+        const player = new _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_6__.EmotePlayer(sys ? { keyframeListener: particleListener(sys, tree, propTree) } : undefined);
         player.play(file.emotes[0], performance.now() / 1000, { loop: true });
-        items.push({ ctx: canvas.getContext('2d'), scene, tree, propTree, player, time: 0 });
+        items.push({ ctx: canvas.getContext('2d'), scene, tree, propTree, player, time: 0, particles: sys });
         if (!raf) {
             last = performance.now();
             raf = requestAnimationFrame(loop);
         }
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_8__.log)('live preview add failed: ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_10__.log)('live preview add failed: ' + e);
     }
 }
 function disposeScene(root) {
@@ -5480,6 +5547,13 @@ function clearLivePreviews() {
         raf = 0;
     }
     for (const item of items) {
+        try {
+            if (item.particles) {
+                item.scene.remove(item.particles.root);
+                item.particles.dispose();
+            }
+        }
+        catch (e) { /* ignore */ }
         try {
             disposeScene(item.scene);
         }
@@ -6772,8 +6846,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_sourceMeta__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../platform/sourceMeta */ "./ts/platform/sourceMeta.ts");
 /* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../platform/playerModel */ "./ts/platform/playerModel.ts");
 /* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
-/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _platform_particleTexture__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../platform/particleTexture */ "./ts/platform/particleTexture.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
 
 
 
@@ -6813,16 +6890,65 @@ function reportStrandedCubes() {
     return true;
 }
 function propTexture() {
-    const texture = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
-    if (!texture || !texture.getDataURL)
+    const uri = propTextureDataUri();
+    if (!uri)
         return null;
     try {
-        return (0,_core_node__WEBPACK_IMPORTED_MODULE_8__.dataUriToBytes)(texture.getDataURL());
+        return (0,_core_node__WEBPACK_IMPORTED_MODULE_8__.dataUriToBytes)(uri);
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_13__.log)('export: could not read project texture: ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_14__.log)('export: could not read project texture: ' + e);
         return null;
     }
+}
+function propTextureDataUri() {
+    const texture = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
+    if (!texture || !texture.getDataURL)
+        return undefined;
+    try {
+        return texture.getDataURL();
+    }
+    catch (e) {
+        return undefined;
+    }
+}
+function propGeoJson() {
+    try {
+        const parsed = JSON.parse((0,_serialization_geometry__WEBPACK_IMPORTED_MODULE_3__.buildGeoJson)());
+        const geo = (parsed['minecraft:geometry'] || [])[0];
+        if (!geo)
+            return undefined;
+        geo.bones = (geo.bones || []).map((b) => typeof b.name === 'string' && b.name.toLowerCase().startsWith('biped')
+            ? Object.assign(Object.assign({}, b), { cubes: undefined }) : b);
+        const useful = geo.bones.some((b) => (b.cubes && b.cubes.length) || (b.locators && Object.keys(b.locators).length));
+        return useful ? parsed : undefined;
+    }
+    catch (e) {
+        return undefined;
+    }
+}
+function previewParticles() {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_8__.fs)
+        return [];
+    const out = [];
+    const seen = {};
+    for (const ref of (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__.listEffectFiles)(['particle'])) {
+        if (!ref.path.endsWith('.particle.json') || seen[ref.path])
+            continue;
+        seen[ref.path] = true;
+        const texturePath = (0,_platform_particleTexture__WEBPACK_IMPORTED_MODULE_12__.particleTextureOf)(ref.path);
+        if (!texturePath)
+            continue;
+        try {
+            const json = JSON.parse(_core_node__WEBPACK_IMPORTED_MODULE_8__.fs.readFileSync(ref.path, 'utf8'));
+            const textureDataUri = 'data:image/png;base64,' + (0,_core_node__WEBPACK_IMPORTED_MODULE_8__.toBase64)(_core_node__WEBPACK_IMPORTED_MODULE_8__.fs.readFileSync(texturePath));
+            out.push({ json, textureDataUri });
+        }
+        catch (e) {
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_14__.log)('export preview: particle skipped ' + ref.path + ': ' + e);
+        }
+    }
+    return out;
 }
 function selectedChannels(state) {
     const channels = [];
@@ -6859,7 +6985,7 @@ function createExportAction(registry, type) {
                 component: {
                     data() { return state; },
                     computed: {
-                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_12__.mcId)(this.name) || type.defaultName; },
+                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_13__.mcId)(this.name) || type.defaultName; },
                         outFiles() {
                             const f = [];
                             if (this.exportAnimation)
@@ -6880,7 +7006,7 @@ function createExportAction(registry, type) {
                             const cv = this.$refs.preview;
                             if (cv) {
                                 try {
-                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type));
+                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type), propGeoJson(), propTextureDataUri(), previewParticles());
                                 }
                                 catch (e) { /* ignore */ }
                             }
@@ -6970,7 +7096,7 @@ function createExportAction(registry, type) {
                 },
                 onConfirm() {
                     (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.clearLivePreviews)();
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_13__.logReset)();
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_14__.logReset)();
                     const base = (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.sanitize)(state.name) || type.defaultName;
                     const files = [];
                     if (state.exportAnimation)
@@ -7003,7 +7129,7 @@ function createExportAction(registry, type) {
                     if (source && source.mcmeta && state.exportTexture) {
                         files.push({ suffix: '.png.mcmeta', content: source.mcmeta });
                     }
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_13__.log)('export base=' + base + ' files=' + files.map((f) => f.name || f.suffix).join(','));
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_14__.log)('export base=' + base + ' files=' + files.map((f) => f.name || f.suffix).join(','));
                     if (!files.length) {
                         Blockbench.showQuickMessage('Nothing selected to export', 1800);
                         return;
@@ -7696,6 +7822,53 @@ function resetEmoteRigCache(rigTree) {
 
 /***/ },
 
+/***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/boneNames.js"
+/*!*****************************************************************************!*\
+  !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/boneNames.js ***!
+  \*****************************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ARMOR_BONE_NAMES: () => (/* binding */ ARMOR_BONE_NAMES),
+/* harmony export */   ArmorBones: () => (/* binding */ ArmorBones),
+/* harmony export */   BipedBones: () => (/* binding */ BipedBones),
+/* harmony export */   hasArmorBones: () => (/* binding */ hasArmorBones),
+/* harmony export */   isArmorBone: () => (/* binding */ isArmorBone)
+/* harmony export */ });
+const ArmorBones = {
+    HEAD: "armorHead",
+    BODY: "armorBody",
+    LEFT_ARM: "armorLeftArm",
+    RIGHT_ARM: "armorRightArm",
+    LEFT_ARM_SLIM: "armorLeftArmSlim",
+    RIGHT_ARM_SLIM: "armorRightArmSlim",
+    LEFT_LEG: "armorLeftLeg",
+    RIGHT_LEG: "armorRightLeg",
+    LEFT_BOOT: "armorLeftBoot",
+    RIGHT_BOOT: "armorRightBoot",
+};
+const BipedBones = {
+    RIG: "bipedRig",
+    HEAD: "bipedHead",
+    BODY: "bipedBody",
+    LEFT_ARM: "bipedLeftArm",
+    RIGHT_ARM: "bipedRightArm",
+    LEFT_LEG: "bipedLeftLeg",
+    RIGHT_LEG: "bipedRightLeg",
+};
+const ARMOR_BONE_NAMES = Object.values(ArmorBones);
+const ARMOR_PREFIX = "armor";
+function isArmorBone(name) {
+    return name.toLowerCase().startsWith(ARMOR_PREFIX);
+}
+function hasArmorBones(geo) {
+    return geo.bones.some((b) => isArmorBone(b.name));
+}
+//# sourceMappingURL=boneNames.js.map
+
+/***/ },
+
 /***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/buildBoneTree.js"
 /*!*********************************************************************************!*\
   !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/buildBoneTree.js ***!
@@ -7708,6 +7881,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var _buildCubeGeometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./buildCubeGeometry */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/buildCubeGeometry.js");
+/* harmony import */ var _boneNames__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./boneNames */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/boneNames.js");
+
 
 
 function buildBoneTree(geo, material, options = {}) {
@@ -7718,6 +7893,7 @@ function buildBoneTree(geo, material, options = {}) {
         boneByName.set(b.name, b);
     const renderableBones = computeRenderableBones(geo, armorOnly);
     const groups = new Map();
+    const locators = new Map();
     const defaultRotations = new Map();
     for (const b of geo.bones) {
         const g = new three__WEBPACK_IMPORTED_MODULE_0__.Group();
@@ -7755,6 +7931,17 @@ function buildBoneTree(geo, material, options = {}) {
                 g.add(buildCubeMesh(cube, pivot, geo, material, negateX));
             }
         }
+        for (const [name, locator] of Object.entries(b.locators ?? {})) {
+            if (groups.has(name) || locators.has(name))
+                continue;
+            const offset = (Array.isArray(locator) ? locator : locator.offset) ?? [0, 0, 0];
+            const offsetX = negateX ? -offset[0] : offset[0];
+            const point = new three__WEBPACK_IMPORTED_MODULE_0__.Object3D();
+            point.name = name;
+            point.position.set(offsetX - pivotX, offset[1] - pivot[1], offset[2] - pivot[2]);
+            g.add(point);
+            locators.set(name, point);
+        }
     }
     const root = new three__WEBPACK_IMPORTED_MODULE_0__.Group();
     root.name = "cosmetic_root";
@@ -7763,7 +7950,7 @@ function buildBoneTree(geo, material, options = {}) {
             root.add(groups.get(b.name));
         }
     }
-    return { root, bones: groups, defaultRotations };
+    return { root, bones: groups, locators, defaultRotations };
 }
 function computeRenderableBones(geo, armorOnly) {
     const result = new Set();
@@ -7791,7 +7978,7 @@ function computeRenderableBones(geo, armorOnly) {
             markSubtree(child);
     }
     for (const b of geo.bones) {
-        if (b.name.toLowerCase().startsWith("armor"))
+        if ((0,_boneNames__WEBPACK_IMPORTED_MODULE_2__.isArmorBone)(b.name))
             markSubtree(b.name);
     }
     return result;
@@ -7903,7 +8090,17 @@ function appendFace(positions, normals, uvs, indices, corners, rect, geo, mirror
         [blV, tlV] = [tlV, blV];
         [brV, trV] = [trV, brV];
     }
-    uvs.push(blU, blV, brU, brV, trU, trV, tlU, tlV);
+    const uvCorners = [
+        [blU, blV],
+        [brU, brV],
+        [trU, trV],
+        [tlU, tlV],
+    ];
+    const steps = ((Math.round((rect.rotation ?? 0) / 90) % 4) + 4) % 4;
+    for (let s = 0; s < steps; s++)
+        uvCorners.unshift(uvCorners.pop());
+    for (const [cu, cv] of uvCorners)
+        uvs.push(cu, cv);
     indices.push(baseIdx, baseIdx + 1, baseIdx + 2, baseIdx, baseIdx + 2, baseIdx + 3);
 }
 function buildFaceCorners(x0, y0, z0, x1, y1, z1) {
@@ -7951,6 +8148,7 @@ function resolveUvRects(cube, size, negateX) {
                 v1: r.v0,
                 flipU: r.flipU,
                 flipV: r.flipV,
+                rotation: r.rotation,
             };
         }
     }
@@ -7985,6 +8183,7 @@ function perFaceUv(uv) {
             v1: h < 0 ? v : v + h,
             flipU: w < 0 || undefined,
             flipV: h < 0 || undefined,
+            rotation: f.uv_rotation,
         };
     }
     return out;
@@ -9176,6 +9375,1586 @@ function parseGeo(json) {
 
 /***/ },
 
+/***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/billboardMaterial.js"
+/*!***********************************************************************************************!*\
+  !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/billboardMaterial.js ***!
+  \***********************************************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   FACING_MODE_INDEX: () => (/* binding */ FACING_MODE_INDEX),
+/* harmony export */   INSTANCE_ATTRS: () => (/* binding */ INSTANCE_ATTRS),
+/* harmony export */   createBillboardMaterial: () => (/* binding */ createBillboardMaterial)
+/* harmony export */ });
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+
+const FACING_MODE_INDEX = {
+    rotate_xyz: 0,
+    rotate_xz: 1,
+    lookat_xyz: 2,
+    lookat_xz: 3,
+    lookat_direction: 4,
+    direction_x: 5,
+    direction_y: 6,
+    direction_z: 7,
+    emitter_transform_xy: 8,
+    emitter_transform_xz: 9,
+    emitter_transform_yz: 10,
+};
+function createBillboardMaterial({ texture, material, }) {
+    const blending = blendingFor(material);
+    const transparent = material !== "opaque";
+    const depthWrite = material === "opaque";
+    const alphaTest = material === "alpha" ? 0.01 : 0.0;
+    const mat = new three__WEBPACK_IMPORTED_MODULE_0__.ShaderMaterial({
+        uniforms: {
+            map: { value: texture },
+            alphaTest: { value: alphaTest },
+        },
+        vertexShader: VERTEX_SHADER,
+        fragmentShader: FRAGMENT_SHADER,
+        transparent,
+        depthWrite,
+        depthTest: true,
+        blending,
+        side: three__WEBPACK_IMPORTED_MODULE_0__.DoubleSide,
+    });
+    return mat;
+}
+function blendingFor(m) {
+    switch (m) {
+        case "alpha":
+        case "blend":
+            return three__WEBPACK_IMPORTED_MODULE_0__.NormalBlending;
+        case "add":
+            return three__WEBPACK_IMPORTED_MODULE_0__.AdditiveBlending;
+        case "opaque":
+            return three__WEBPACK_IMPORTED_MODULE_0__.NoBlending;
+    }
+}
+const INSTANCE_ATTRS = {
+    position: "iPosition",
+    size: "iSize",
+    rotation: "iRotation",
+    uvOffset: "iUvOffset",
+    uvScale: "iUvScale",
+    color: "iColor",
+    facingMode: "iFacingMode",
+    velocity: "iVelocity",
+};
+const VERTEX_SHADER = `
+attribute vec3 iPosition;
+attribute vec2 iSize;
+attribute float iRotation;
+attribute vec2 iUvOffset;
+attribute vec2 iUvScale;
+attribute vec4 iColor;
+attribute float iFacingMode;
+attribute vec3 iVelocity;
+
+varying vec2 vUv;
+varying vec4 vColor;
+
+void main() {
+  vec2 corner = position.xy;
+
+  float c = cos(iRotation);
+  float s = sin(iRotation);
+  corner = vec2(corner.x * c - corner.y * s, corner.x * s + corner.y * c);
+
+  corner *= iSize;
+
+  vec3 worldOffset;
+  int mode = int(iFacingMode + 0.5);
+
+  if (mode == 0) {
+    mat3 invView = mat3(
+      viewMatrix[0].xyz,
+      viewMatrix[1].xyz,
+      viewMatrix[2].xyz
+    );
+    vec3 right = vec3(invView[0][0], invView[1][0], invView[2][0]);
+    vec3 up    = vec3(invView[0][1], invView[1][1], invView[2][1]);
+    worldOffset = right * corner.x + up * corner.y;
+  } else if (mode == 1) {
+    vec3 toCam = cameraPosition - iPosition;
+    toCam.y = 0.0;
+    if (length(toCam) < 1e-5) toCam = vec3(0.0, 0.0, 1.0);
+    vec3 forward = normalize(toCam);
+    vec3 up = vec3(0.0, 1.0, 0.0);
+    vec3 right = normalize(cross(up, forward));
+    worldOffset = right * corner.x + up * corner.y;
+  } else if (mode == 2) {
+    mat3 invView = mat3(
+      viewMatrix[0].xyz,
+      viewMatrix[1].xyz,
+      viewMatrix[2].xyz
+    );
+    vec3 right = vec3(invView[0][0], invView[1][0], invView[2][0]);
+    vec3 up    = vec3(invView[0][1], invView[1][1], invView[2][1]);
+    worldOffset = right * corner.x + up * corner.y;
+  } else if (mode == 3) {
+    vec3 toCam = cameraPosition - iPosition;
+    toCam.y = 0.0;
+    if (length(toCam) < 1e-5) toCam = vec3(0.0, 0.0, 1.0);
+    vec3 forward = normalize(toCam);
+    vec3 up = vec3(0.0, 1.0, 0.0);
+    vec3 right = normalize(cross(up, forward));
+    worldOffset = right * corner.x + up * corner.y;
+  } else if (mode == 4) {
+    vec3 toCam = normalize(cameraPosition - iPosition);
+    vec3 vel = iVelocity;
+    if (length(vel) < 1e-5) vel = vec3(0.0, 1.0, 0.0);
+    vec3 up = normalize(vel - dot(vel, toCam) * toCam);
+    if (length(up) < 1e-5) up = vec3(0.0, 1.0, 0.0);
+    vec3 right = normalize(cross(up, toCam));
+    worldOffset = right * corner.x + up * corner.y;
+  } else if (mode == 5) {
+    worldOffset = vec3(0.0, corner.y, corner.x);
+  } else if (mode == 6) {
+    worldOffset = vec3(corner.x, 0.0, corner.y);
+  } else if (mode == 7) {
+    worldOffset = vec3(corner.x, corner.y, 0.0);
+  } else if (mode == 8) {
+    worldOffset = vec3(corner.x, corner.y, 0.0);
+  } else if (mode == 9) {
+    worldOffset = vec3(corner.x, 0.0, corner.y);
+  } else if (mode == 10) {
+    worldOffset = vec3(0.0, corner.x, corner.y);
+  } else {
+    worldOffset = vec3(corner.x, corner.y, 0.0);
+  }
+
+  vec3 worldPos = iPosition + worldOffset;
+  vec4 mvPosition = viewMatrix * vec4(worldPos, 1.0);
+  gl_Position = projectionMatrix * mvPosition;
+
+  vUv = iUvOffset + uv * iUvScale;
+  vColor = iColor;
+}
+`;
+const FRAGMENT_SHADER = `
+uniform sampler2D map;
+uniform float alphaTest;
+
+varying vec2 vUv;
+varying vec4 vColor;
+
+void main() {
+  vec4 tex = texture2D(map, vUv);
+  vec4 color = tex * vColor;
+  if (color.a < alphaTest) discard;
+  gl_FragColor = color;
+}
+`;
+//# sourceMappingURL=billboardMaterial.js.map
+
+/***/ },
+
+/***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/emitter.js"
+/*!*************************************************************************************!*\
+  !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/emitter.js ***!
+  \*************************************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Emitter: () => (/* binding */ Emitter)
+/* harmony export */ });
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var _molang__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../molang */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/molang.js");
+/* harmony import */ var _particle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./particle */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/particle.js");
+
+
+
+class Emitter {
+    constructor(effect, options) {
+        this.effect = effect;
+        this.options = options;
+        this.pool = [];
+        this.particleCount = 0;
+        this.age = 0;
+        this.variables = new Map();
+        this.emitterRandom = [0, 0, 0, 0];
+        this.emitting = true;
+        this.activeTime = 0;
+        this.spawnAccumulator = 0;
+        this.manualSpawned = false;
+        this.expired = false;
+        this.softFinish = false;
+        this.hardStop = false;
+        this.worldPosition = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3();
+        this.lastWorldPosition = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3();
+        this.unitScale = options.unitScale ?? 1;
+        for (let i = 0; i < 4; i++)
+            this.emitterRandom[i] = Math.random();
+        this.refreshWorldPosition();
+        this.lastWorldPosition.copy(this.worldPosition);
+        if (options.preEffectExpression) {
+            (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolang)(options.preEffectExpression, this.emitterCtx());
+        }
+        if (effect.emitterInit.creation) {
+            (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolang)(effect.emitterInit.creation, this.emitterCtx());
+        }
+    }
+    stop() {
+        this.hardStop = true;
+        this.softFinish = true;
+    }
+    finish() {
+        this.softFinish = true;
+    }
+    isFinished() {
+        if (this.hardStop)
+            return true;
+        return this.expired && this.particleCount === 0;
+    }
+    get particles() {
+        return this.pool;
+    }
+    tick(_elapsed, deltaSeconds) {
+        if (this.hardStop) {
+            this.particleCount = 0;
+            return;
+        }
+        this.age += deltaSeconds;
+        this.refreshWorldPosition();
+        if (this.effect.localSpace.position && this.particleCount > 0) {
+            const dx = this.worldPosition.x - this.lastWorldPosition.x;
+            const dy = this.worldPosition.y - this.lastWorldPosition.y;
+            const dz = this.worldPosition.z - this.lastWorldPosition.z;
+            if (dx !== 0 || dy !== 0 || dz !== 0) {
+                for (let i = 0; i < this.particleCount; i++) {
+                    const p = this.pool[i];
+                    if (!p.alive)
+                        continue;
+                    p.position.x += dx;
+                    p.position.y += dy;
+                    p.position.z += dz;
+                }
+            }
+        }
+        this.lastWorldPosition.copy(this.worldPosition);
+        if (this.effect.emitterInit.perUpdate) {
+            (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolang)(this.effect.emitterInit.perUpdate, this.emitterCtx());
+        }
+        this.tickEmitterLifetime();
+        if (this.emitting && !this.softFinish) {
+            this.spawnTick(deltaSeconds);
+        }
+        this.tickParticles(deltaSeconds);
+    }
+    tickEmitterLifetime() {
+        if (this.options.forceLifetime === "once") {
+            const lt = this.effect.emitterLifetime;
+            let active = 1;
+            if (lt.kind === "once" || lt.kind === "looping") {
+                active = scalar(lt.activeTime, this.emitterCtx());
+            }
+            if (this.age >= active) {
+                this.emitting = false;
+                this.expired = true;
+            }
+            return;
+        }
+        if (this.options.forceLifetime === "looping") {
+            this.emitting = true;
+            return;
+        }
+        const lt = this.effect.emitterLifetime;
+        switch (lt.kind) {
+            case "once": {
+                const active = scalar(lt.activeTime, this.emitterCtx());
+                if (this.age >= active) {
+                    this.emitting = false;
+                    this.expired = true;
+                }
+                break;
+            }
+            case "looping": {
+                const active = scalar(lt.activeTime, this.emitterCtx());
+                const sleep = Math.max(0, scalar(lt.sleepTime, this.emitterCtx()));
+                const cycle = active + sleep;
+                if (cycle <= 0) {
+                    this.emitting = active > 0;
+                }
+                else {
+                    const phase = this.age % cycle;
+                    this.emitting = phase < active;
+                }
+                break;
+            }
+            case "expression": {
+                const ctx = this.emitterCtx();
+                const active = (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolangBoolean)(lt.activation, ctx);
+                const expire = (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolangBoolean)(lt.expiration, ctx);
+                this.emitting = active && !expire;
+                if (expire)
+                    this.expired = true;
+                break;
+            }
+        }
+    }
+    spawnTick(deltaSeconds) {
+        const rate = this.effect.rate;
+        if (rate.kind === "instant") {
+            if (this.age - deltaSeconds <= 0) {
+                const n = Math.max(0, Math.floor(scalar(rate.numParticles, this.emitterCtx())));
+                for (let i = 0; i < n; i++)
+                    this.spawnOne();
+            }
+            return;
+        }
+        if (rate.kind === "steady") {
+            const ctx = this.emitterCtx();
+            const spawnRate = Math.max(0, scalar(rate.spawnRate, ctx));
+            const maxParticles = Math.max(0, Math.floor(scalar(rate.maxParticles, ctx)));
+            this.spawnAccumulator += spawnRate * deltaSeconds;
+            while (this.spawnAccumulator >= 1 && this.particleCount < maxParticles) {
+                this.spawnAccumulator -= 1;
+                this.spawnOne();
+            }
+            return;
+        }
+        if (rate.kind === "manual") {
+            if (!this.manualSpawned) {
+                this.manualSpawned = true;
+                const n = Math.max(0, Math.floor(scalar(rate.maxParticles, this.emitterCtx())));
+                for (let i = 0; i < n; i++)
+                    this.spawnOne();
+            }
+        }
+    }
+    spawnOne() {
+        let p;
+        if (this.particleCount < this.pool.length) {
+            p = this.pool[this.particleCount];
+            if (!p) {
+                p = new _particle__WEBPACK_IMPORTED_MODULE_2__.Particle();
+                this.pool[this.particleCount] = p;
+            }
+        }
+        else {
+            p = new _particle__WEBPACK_IMPORTED_MODULE_2__.Particle();
+            this.pool.push(p);
+        }
+        this.particleCount++;
+        p.alive = true;
+        p.random[0] = Math.random();
+        p.random[1] = Math.random();
+        p.random[2] = Math.random();
+        p.random[3] = Math.random();
+        p.variables.clear();
+        for (const [k, v] of this.variables)
+            p.variables.set(k, v);
+        const localPos = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3();
+        const localDir = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3();
+        sampleShape(this.effect.shape, this.emitterCtx(), localPos, localDir);
+        localPos.multiplyScalar(this.unitScale);
+        p.position.set(this.worldPosition.x + localPos.x, this.worldPosition.y + localPos.y, this.worldPosition.z + localPos.z);
+        const speed = scalar(this.effect.initialSpeed, this.emitterCtx()) * this.unitScale;
+        if (localDir.lengthSq() < 1e-9) {
+            p.velocity.set(0, 0, 0);
+        }
+        else {
+            localDir.normalize().multiplyScalar(speed);
+            p.velocity.copy(localDir);
+        }
+        p.speed = p.velocity.length();
+        p.rotation = scalar(this.effect.initialSpin.rotation, this.emitterCtx());
+        p.rotationRate = scalar(this.effect.initialSpin.rotationRate, this.emitterCtx());
+        p.age = 0;
+        if (this.effect.particleLifetime.kind === "expression") {
+            p.lifetime = scalar(this.effect.particleLifetime.maxLifetime, this.particleCtx(p));
+        }
+        else {
+            p.lifetime = 5;
+        }
+        if (p.lifetime <= 0)
+            p.lifetime = 1;
+        this.computeAppearance(p);
+        return p;
+    }
+    tickParticles(dt) {
+        let writeIdx = 0;
+        for (let i = 0; i < this.particleCount; i++) {
+            const p = this.pool[i];
+            if (!p.alive)
+                continue;
+            p.age += dt;
+            let expired = p.age >= p.lifetime;
+            if (this.effect.particleLifetime.kind === "expression" && this.effect.particleLifetime.expiration) {
+                if ((0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolangBoolean)(this.effect.particleLifetime.expiration, this.particleCtx(p))) {
+                    expired = true;
+                }
+            }
+            if (expired) {
+                p.alive = false;
+                continue;
+            }
+            if (this.effect.particleInit.perUpdate) {
+                (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolang)(this.effect.particleInit.perUpdate, this.particleCtx(p));
+            }
+            this.integrateMotion(p, dt);
+            if (this.effect.particleInit.perRender) {
+                (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolang)(this.effect.particleInit.perRender, this.particleCtx(p));
+            }
+            this.computeAppearance(p);
+            if (i !== writeIdx) {
+                const tmp = this.pool[writeIdx];
+                this.pool[writeIdx] = p;
+                this.pool[i] = tmp;
+            }
+            writeIdx++;
+        }
+        this.particleCount = writeIdx;
+    }
+    integrateMotion(p, dt) {
+        const motion = this.effect.motion;
+        switch (motion.kind) {
+            case "static":
+                p.rotation += p.rotationRate * dt;
+                break;
+            case "dynamic": {
+                const ctx = this.particleCtx(p);
+                const accel = vec3(motion.linearAcceleration, ctx);
+                const drag = scalar(motion.linearDrag, ctx);
+                const dragMul = Math.max(0, 1 - drag * dt);
+                const us = this.unitScale;
+                p.velocity.x = (p.velocity.x + accel[0] * us * dt) * dragMul;
+                p.velocity.y = (p.velocity.y + accel[1] * us * dt) * dragMul;
+                p.velocity.z = (p.velocity.z + accel[2] * us * dt) * dragMul;
+                p.position.x += p.velocity.x * dt;
+                p.position.y += p.velocity.y * dt;
+                p.position.z += p.velocity.z * dt;
+                p.speed = p.velocity.length();
+                const rotAccel = scalar(motion.rotationAcceleration, ctx);
+                const rotDrag = scalar(motion.rotationDrag, ctx);
+                const rotDragMul = Math.max(0, 1 - rotDrag * dt);
+                p.rotationRate = (p.rotationRate + rotAccel * dt) * rotDragMul;
+                p.rotation += p.rotationRate * dt;
+                break;
+            }
+            case "parametric": {
+                const ctx = this.particleCtx(p);
+                if (motion.relativePosition) {
+                    const rp = vec3(motion.relativePosition, ctx);
+                    p.position.set(this.worldPosition.x + rp[0], this.worldPosition.y + rp[1], this.worldPosition.z + rp[2]);
+                }
+                if (motion.direction) {
+                    const d = vec3(motion.direction, ctx);
+                    p.velocity.set(d[0], d[1], d[2]);
+                    p.speed = p.velocity.length();
+                }
+                if (typeof motion.rotation !== "undefined") {
+                    p.rotation = scalar(motion.rotation, ctx);
+                }
+                break;
+            }
+            case "collision": {
+                const ctx = this.particleCtx(p);
+                const drag = scalar(motion.drag, ctx);
+                const restitution = scalar(motion.restitution, ctx);
+                const dragMul = Math.max(0, 1 - drag * dt);
+                p.velocity.y -= 9.81 * dt;
+                p.velocity.x *= dragMul;
+                p.velocity.z *= dragMul;
+                p.position.x += p.velocity.x * dt;
+                p.position.y += p.velocity.y * dt;
+                p.position.z += p.velocity.z * dt;
+                if (p.position.y < 0) {
+                    p.position.y = 0;
+                    p.velocity.y = -p.velocity.y * restitution;
+                    if (motion.expireOnContact)
+                        p.alive = false;
+                }
+                p.speed = p.velocity.length();
+                p.rotation += p.rotationRate * dt;
+                break;
+            }
+        }
+    }
+    computeAppearance(p) {
+        const ctx = this.particleCtx(p);
+        p.size[0] = scalar(this.effect.appearance.size[0], ctx) * this.unitScale;
+        p.size[1] = scalar(this.effect.appearance.size[1], ctx) * this.unitScale;
+        const tintColor = sampleTinting(this.effect.tinting, ctx);
+        p.color[0] = tintColor[0];
+        p.color[1] = tintColor[1];
+        p.color[2] = tintColor[2];
+        p.color[3] = tintColor[3];
+        const app = this.effect.appearance;
+        const tw = app.textureWidth || 1;
+        const th = app.textureHeight || 1;
+        if (app.uv.kind === "flipbook") {
+            const fb = app.uv.spec;
+            const baseU = scalar(fb.baseUv[0], ctx);
+            const baseV = scalar(fb.baseUv[1], ctx);
+            const maxFrame = Math.max(1, Math.floor(scalar(fb.maxFrame, ctx)));
+            let frame = 0;
+            if (fb.stretchToLifetime) {
+                const t = p.lifetime > 0 ? p.age / p.lifetime : 0;
+                frame = Math.floor(t * maxFrame);
+                if (fb.loop)
+                    frame = ((frame % maxFrame) + maxFrame) % maxFrame;
+                else
+                    frame = Math.min(frame, maxFrame - 1);
+            }
+            else {
+                frame = Math.floor(p.age * fb.framesPerSecond);
+                if (fb.loop)
+                    frame = ((frame % maxFrame) + maxFrame) % maxFrame;
+                else
+                    frame = Math.min(frame, maxFrame - 1);
+            }
+            const u0 = (baseU + fb.stepUv[0] * frame) / tw;
+            const v0 = (baseV + fb.stepUv[1] * frame) / th;
+            const us = fb.sizeUv[0] / tw;
+            const vs = fb.sizeUv[1] / th;
+            p.uvOffset[0] = u0;
+            p.uvOffset[1] = v0;
+            p.uvScale[0] = us;
+            p.uvScale[1] = vs;
+        }
+        else {
+            const sp = app.uv.spec;
+            const u0 = scalar(sp.offset[0], ctx) / tw;
+            const v0 = scalar(sp.offset[1], ctx) / th;
+            const us = scalar(sp.size[0], ctx) / tw;
+            const vs = scalar(sp.size[1], ctx) / th;
+            p.uvOffset[0] = u0;
+            p.uvOffset[1] = v0;
+            p.uvScale[0] = us;
+            p.uvScale[1] = vs;
+        }
+    }
+    emitterCtx() {
+        return {
+            animTime: this.age,
+            emitterAge: this.age,
+            emitterLifetime: this.cachedEmitterLifetime(),
+            emitterRandom: this.emitterRandom,
+            variables: this.variables,
+            curves: this.effect.curves,
+        };
+    }
+    particleCtx(p) {
+        return {
+            animTime: p.age,
+            particleAge: p.age,
+            particleLifetime: p.lifetime,
+            particleSpeed: p.speed,
+            particleRandom: p.random,
+            emitterAge: this.age,
+            emitterLifetime: this.cachedEmitterLifetime(),
+            emitterRandom: this.emitterRandom,
+            variables: p.variables,
+            curves: this.effect.curves,
+        };
+    }
+    cachedEmitterLifetime() {
+        if (this.activeTime > 0)
+            return this.activeTime;
+        const lt = this.effect.emitterLifetime;
+        let val = 1;
+        if (lt.kind === "once")
+            val = scalar(lt.activeTime, { variables: this.variables, curves: this.effect.curves });
+        else if (lt.kind === "looping")
+            val = scalar(lt.activeTime, { variables: this.variables, curves: this.effect.curves });
+        else
+            val = 1;
+        this.activeTime = val;
+        return val;
+    }
+    refreshWorldPosition() {
+        const provider = this.options.positionProvider;
+        if (typeof provider === "function") {
+            const v = provider();
+            this.worldPosition.copy(v);
+        }
+        else {
+            this.worldPosition.copy(provider);
+        }
+    }
+}
+function scalar(expr, ctx) {
+    return (0,_molang__WEBPACK_IMPORTED_MODULE_1__.evalMolang)(expr, ctx);
+}
+function vec3(v, ctx) {
+    return [scalar(v[0], ctx), scalar(v[1], ctx), scalar(v[2], ctx)];
+}
+function sampleShape(shape, ctx, outPos, outDir) {
+    switch (shape.kind) {
+        case "point": {
+            const off = vec3(shape.offset, ctx);
+            outPos.set(off[0], off[1], off[2]);
+            applyDirection(shape.direction, ctx, outPos, outDir);
+            return;
+        }
+        case "sphere": {
+            const off = vec3(shape.offset, ctx);
+            const r = scalar(shape.radius, ctx);
+            const u = Math.random() * 2 - 1;
+            const phi = Math.random() * 2 * Math.PI;
+            const sample = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3(Math.sqrt(1 - u * u) * Math.cos(phi), u, Math.sqrt(1 - u * u) * Math.sin(phi));
+            const dist = shape.surfaceOnly ? r : r * Math.cbrt(Math.random());
+            sample.multiplyScalar(dist);
+            outPos.set(off[0] + sample.x, off[1] + sample.y, off[2] + sample.z);
+            applyDirection(shape.direction, ctx, outPos, outDir, off);
+            return;
+        }
+        case "box": {
+            const off = vec3(shape.offset, ctx);
+            const half = vec3(shape.halfDimensions, ctx);
+            let x, y, z;
+            if (shape.surfaceOnly) {
+                const ax = half[1] * half[2];
+                const ay = half[0] * half[2];
+                const az = half[0] * half[1];
+                const total = (ax + ay + az) * 2;
+                const r = Math.random() * total;
+                if (r < ax) {
+                    x = half[0];
+                    y = (Math.random() * 2 - 1) * half[1];
+                    z = (Math.random() * 2 - 1) * half[2];
+                }
+                else if (r < 2 * ax) {
+                    x = -half[0];
+                    y = (Math.random() * 2 - 1) * half[1];
+                    z = (Math.random() * 2 - 1) * half[2];
+                }
+                else if (r < 2 * ax + ay) {
+                    y = half[1];
+                    x = (Math.random() * 2 - 1) * half[0];
+                    z = (Math.random() * 2 - 1) * half[2];
+                }
+                else if (r < 2 * ax + 2 * ay) {
+                    y = -half[1];
+                    x = (Math.random() * 2 - 1) * half[0];
+                    z = (Math.random() * 2 - 1) * half[2];
+                }
+                else if (r < 2 * ax + 2 * ay + az) {
+                    z = half[2];
+                    x = (Math.random() * 2 - 1) * half[0];
+                    y = (Math.random() * 2 - 1) * half[1];
+                }
+                else {
+                    z = -half[2];
+                    x = (Math.random() * 2 - 1) * half[0];
+                    y = (Math.random() * 2 - 1) * half[1];
+                }
+            }
+            else {
+                x = (Math.random() * 2 - 1) * half[0];
+                y = (Math.random() * 2 - 1) * half[1];
+                z = (Math.random() * 2 - 1) * half[2];
+            }
+            outPos.set(off[0] + x, off[1] + y, off[2] + z);
+            applyDirection(shape.direction, ctx, outPos, outDir, off);
+            return;
+        }
+        case "disc": {
+            const off = vec3(shape.offset, ctx);
+            const normal = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3(...vec3(shape.planeNormal, ctx));
+            if (normal.lengthSq() < 1e-9)
+                normal.set(0, 1, 0);
+            normal.normalize();
+            const r = scalar(shape.radius, ctx);
+            const dist = shape.surfaceOnly ? r : r * Math.sqrt(Math.random());
+            const angle = Math.random() * 2 * Math.PI;
+            const up = Math.abs(normal.y) < 0.99
+                ? new three__WEBPACK_IMPORTED_MODULE_0__.Vector3(0, 1, 0)
+                : new three__WEBPACK_IMPORTED_MODULE_0__.Vector3(1, 0, 0);
+            const tangent = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3().crossVectors(up, normal).normalize();
+            const bitangent = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3().crossVectors(normal, tangent);
+            const sample = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3()
+                .copy(tangent).multiplyScalar(Math.cos(angle) * dist)
+                .addScaledVector(bitangent, Math.sin(angle) * dist);
+            outPos.set(off[0] + sample.x, off[1] + sample.y, off[2] + sample.z);
+            applyDirection(shape.direction, ctx, outPos, outDir, off);
+            return;
+        }
+        case "entity_aabb": {
+            const x = (Math.random() * 2 - 1) * 0.5;
+            const y = Math.random();
+            const z = (Math.random() * 2 - 1) * 0.5;
+            outPos.set(x, y, z);
+            applyDirection(shape.direction, ctx, outPos, outDir, [0, 0.5, 0]);
+            return;
+        }
+        case "custom": {
+            const off = vec3(shape.offset, ctx);
+            outPos.set(off[0], off[1], off[2]);
+            applyDirection(shape.direction, ctx, outPos, outDir);
+            return;
+        }
+    }
+}
+function applyDirection(direction, ctx, spawnPos, outDir, shapeOrigin = [0, 0, 0]) {
+    if (direction.kind === "vector") {
+        const v = vec3(direction.vector, ctx);
+        outDir.set(v[0], v[1], v[2]);
+        return;
+    }
+    outDir.set(spawnPos.x - shapeOrigin[0], spawnPos.y - shapeOrigin[1], spawnPos.z - shapeOrigin[2]);
+    if (direction.kind === "inwards")
+        outDir.multiplyScalar(-1);
+    if (outDir.lengthSq() < 1e-9) {
+        const u = Math.random() * 2 - 1;
+        const phi = Math.random() * 2 * Math.PI;
+        const r = Math.sqrt(1 - u * u);
+        outDir.set(r * Math.cos(phi), u, r * Math.sin(phi));
+    }
+}
+function sampleTinting(tinting, ctx) {
+    if (tinting.kind === "constant") {
+        return [...tinting.color];
+    }
+    if (tinting.kind === "expression") {
+        return [
+            scalar(tinting.rgba[0], ctx),
+            scalar(tinting.rgba[1], ctx),
+            scalar(tinting.rgba[2], ctx),
+            scalar(tinting.rgba[3], ctx),
+        ];
+    }
+    const t = scalar(tinting.interpolant, ctx);
+    const stops = tinting.colors;
+    if (stops.length === 0)
+        return [1, 1, 1, 1];
+    if (stops.length === 1 || t <= stops[0].time)
+        return [...stops[0].rgba];
+    if (t >= stops[stops.length - 1].time)
+        return [...stops[stops.length - 1].rgba];
+    for (let i = 0; i < stops.length - 1; i++) {
+        const a = stops[i];
+        const b = stops[i + 1];
+        if (t >= a.time && t <= b.time) {
+            const span = b.time - a.time;
+            const u = span === 0 ? 0 : (t - a.time) / span;
+            return [
+                a.rgba[0] + (b.rgba[0] - a.rgba[0]) * u,
+                a.rgba[1] + (b.rgba[1] - a.rgba[1]) * u,
+                a.rgba[2] + (b.rgba[2] - a.rgba[2]) * u,
+                a.rgba[3] + (b.rgba[3] - a.rgba[3]) * u,
+            ];
+        }
+    }
+    return [...stops[stops.length - 1].rgba];
+}
+//# sourceMappingURL=emitter.js.map
+
+/***/ },
+
+/***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/parseParticle.js"
+/*!*******************************************************************************************!*\
+  !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/parseParticle.js ***!
+  \*******************************************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   parseParticle: () => (/* binding */ parseParticle)
+/* harmony export */ });
+function parseParticle(json) {
+    const root = (json ?? {});
+    const effect = (root.particle_effect ?? {});
+    const description = (effect.description ?? {});
+    const renderParams = (description.basic_render_parameters ?? {});
+    const components = (effect.components ?? {});
+    const eventsRaw = (effect.events ?? {});
+    const curvesRaw = (effect.curves ?? {});
+    return {
+        formatVersion: typeof root.format_version === "string" ? root.format_version : "1.10.0",
+        identifier: typeof description.identifier === "string" ? description.identifier : "",
+        material: parseMaterial(renderParams.material),
+        textureRef: typeof renderParams.texture === "string" ? renderParams.texture : "",
+        rate: parseRate(components),
+        emitterLifetime: parseEmitterLifetime(components),
+        shape: parseShape(components),
+        localSpace: parseLocalSpace(components),
+        emitterInit: parseEmitterInit(components),
+        particleLifetime: parseParticleLifetime(components),
+        initialSpeed: parseScalar(components["minecraft:particle_initial_speed"], 0),
+        initialSpin: parseInitialSpin(components),
+        motion: parseMotion(components),
+        appearance: parseAppearance(components),
+        tinting: parseTinting(components),
+        environmentLighting: "minecraft:particle_appearance_lighting" in components,
+        particleInit: parseParticleInit(components),
+        events: parseEvents(eventsRaw),
+        curves: parseCurves(curvesRaw),
+    };
+}
+function parseMaterial(raw) {
+    switch (raw) {
+        case "particles_alpha":
+            return "alpha";
+        case "particles_blend":
+            return "blend";
+        case "particles_add":
+            return "add";
+        case "particles_opaque":
+            return "opaque";
+    }
+    return "alpha";
+}
+function parseRate(comps) {
+    const instant = comps["minecraft:emitter_rate_instant"];
+    if (instant) {
+        return { kind: "instant", numParticles: parseScalar(instant.num_particles, 0) };
+    }
+    const steady = comps["minecraft:emitter_rate_steady"];
+    if (steady) {
+        return {
+            kind: "steady",
+            spawnRate: parseScalar(steady.spawn_rate, 1),
+            maxParticles: parseScalar(steady.max_particles, 50),
+        };
+    }
+    const manual = comps["minecraft:emitter_rate_manual"];
+    if (manual) {
+        return { kind: "manual", maxParticles: parseScalar(manual.max_particles, 50) };
+    }
+    return { kind: "steady", spawnRate: 0, maxParticles: 0 };
+}
+function parseEmitterLifetime(comps) {
+    const once = comps["minecraft:emitter_lifetime_once"];
+    if (once) {
+        return { kind: "once", activeTime: parseScalar(once.active_time, 1) };
+    }
+    const looping = comps["minecraft:emitter_lifetime_looping"];
+    if (looping) {
+        return {
+            kind: "looping",
+            activeTime: parseScalar(looping.active_time, 1),
+            sleepTime: parseScalar(looping.sleep_time, 0),
+        };
+    }
+    const expr = comps["minecraft:emitter_lifetime_expression"];
+    if (expr) {
+        return {
+            kind: "expression",
+            activation: parseScalar(expr.activation_expression, 1),
+            expiration: parseScalar(expr.expiration_expression, 0),
+        };
+    }
+    return { kind: "looping", activeTime: 1, sleepTime: 0 };
+}
+function parseShape(comps) {
+    const point = comps["minecraft:emitter_shape_point"];
+    if (point) {
+        return {
+            kind: "point",
+            offset: parseVec3(point.offset, [0, 0, 0]),
+            direction: parseDirection(point.direction),
+        };
+    }
+    const sphere = comps["minecraft:emitter_shape_sphere"];
+    if (sphere) {
+        return {
+            kind: "sphere",
+            offset: parseVec3(sphere.offset, [0, 0, 0]),
+            radius: parseScalar(sphere.radius, 1),
+            surfaceOnly: sphere.surface_only === true,
+            direction: parseDirection(sphere.direction),
+        };
+    }
+    const box = comps["minecraft:emitter_shape_box"];
+    if (box) {
+        return {
+            kind: "box",
+            offset: parseVec3(box.offset, [0, 0, 0]),
+            halfDimensions: parseVec3(box.half_dimensions, [1, 1, 1]),
+            surfaceOnly: box.surface_only === true,
+            direction: parseDirection(box.direction),
+        };
+    }
+    const disc = comps["minecraft:emitter_shape_disc"];
+    if (disc) {
+        return {
+            kind: "disc",
+            offset: parseVec3(disc.offset, [0, 0, 0]),
+            planeNormal: parseVec3(disc.plane_normal, [0, 1, 0]),
+            radius: parseScalar(disc.radius, 1),
+            surfaceOnly: disc.surface_only === true,
+            direction: parseDirection(disc.direction),
+        };
+    }
+    const aabb = comps["minecraft:emitter_shape_entity_aabb"];
+    if (aabb) {
+        return {
+            kind: "entity_aabb",
+            surfaceOnly: aabb.surface_only === true,
+            direction: parseDirection(aabb.direction),
+        };
+    }
+    const custom = comps["minecraft:emitter_shape_custom"];
+    if (custom) {
+        return {
+            kind: "custom",
+            offset: parseVec3(custom.offset, [0, 0, 0]),
+            direction: parseDirection(custom.direction),
+        };
+    }
+    return { kind: "point", offset: [0, 0, 0], direction: { kind: "outwards" } };
+}
+function parseDirection(raw) {
+    if (raw === "outwards" || raw === undefined)
+        return { kind: "outwards" };
+    if (raw === "inwards")
+        return { kind: "inwards" };
+    if (Array.isArray(raw) && raw.length === 3) {
+        return { kind: "vector", vector: parseVec3(raw, [0, 1, 0]) };
+    }
+    return { kind: "outwards" };
+}
+function parseLocalSpace(comps) {
+    const ls = comps["minecraft:emitter_local_space"];
+    if (!ls)
+        return { position: false, rotation: false, velocity: false };
+    return {
+        position: ls.position === true,
+        rotation: ls.rotation === true,
+        velocity: ls.velocity === true,
+    };
+}
+function parseEmitterInit(comps) {
+    const init = comps["minecraft:emitter_initialization"];
+    if (!init)
+        return {};
+    return {
+        creation: typeof init.creation_expression !== "undefined"
+            ? parseScalar(init.creation_expression, 0)
+            : undefined,
+        perUpdate: typeof init.per_update_expression !== "undefined"
+            ? parseScalar(init.per_update_expression, 0)
+            : undefined,
+    };
+}
+function parseParticleLifetime(comps) {
+    const expr = comps["minecraft:particle_lifetime_expression"];
+    if (expr) {
+        return {
+            kind: "expression",
+            maxLifetime: parseScalar(expr.max_lifetime, 1),
+            expiration: typeof expr.expiration_expression !== "undefined"
+                ? parseScalar(expr.expiration_expression, 0)
+                : undefined,
+        };
+    }
+    const events = comps["minecraft:particle_lifetime_events"];
+    if (events) {
+        const tlRaw = (events.timeline ?? {});
+        const timeline = {};
+        for (const [timeKey, value] of Object.entries(tlRaw)) {
+            const t = Number.parseFloat(timeKey);
+            if (!Number.isFinite(t))
+                continue;
+            if (typeof value === "string")
+                timeline[t] = [value];
+            else if (Array.isArray(value)) {
+                timeline[t] = value.filter((v) => typeof v === "string");
+            }
+        }
+        return {
+            kind: "events",
+            creationEvent: typeof events.creation_event === "string" ? events.creation_event : undefined,
+            expirationEvent: typeof events.expiration_event === "string" ? events.expiration_event : undefined,
+            timeline,
+        };
+    }
+    return { kind: "expression", maxLifetime: 1 };
+}
+function parseInitialSpin(comps) {
+    const spin = comps["minecraft:particle_initial_spin"];
+    if (!spin)
+        return { rotation: 0, rotationRate: 0 };
+    return {
+        rotation: parseScalar(spin.rotation, 0),
+        rotationRate: parseScalar(spin.rotation_rate, 0),
+    };
+}
+function parseMotion(comps) {
+    const dyn = comps["minecraft:particle_motion_dynamic"];
+    if (dyn) {
+        return {
+            kind: "dynamic",
+            linearAcceleration: parseVec3(dyn.linear_acceleration, [0, 0, 0]),
+            linearDrag: parseScalar(dyn.linear_drag_coefficient, 0),
+            rotationAcceleration: parseScalar(dyn.rotation_acceleration, 0),
+            rotationDrag: parseScalar(dyn.rotation_drag_coefficient, 0),
+        };
+    }
+    const par = comps["minecraft:particle_motion_parametric"];
+    if (par) {
+        return {
+            kind: "parametric",
+            relativePosition: par.relative_position
+                ? parseVec3(par.relative_position, [0, 0, 0])
+                : undefined,
+            direction: par.direction ? parseVec3(par.direction, [0, 0, 0]) : undefined,
+            rotation: typeof par.rotation !== "undefined" ? parseScalar(par.rotation, 0) : undefined,
+        };
+    }
+    if ("minecraft:particle_motion_static" in comps)
+        return { kind: "static" };
+    const col = comps["minecraft:particle_motion_collision"];
+    if (col) {
+        return {
+            kind: "collision",
+            radius: parseScalar(col.collision_radius, 0.05),
+            drag: parseScalar(col.collision_drag, 0),
+            restitution: parseScalar(col.coefficient_of_restitution, 1),
+            expireOnContact: col.expire_on_contact === true,
+            events: Array.isArray(col.events)
+                ? col.events.filter((v) => typeof v === "string")
+                : [],
+        };
+    }
+    return {
+        kind: "dynamic",
+        linearAcceleration: [0, 0, 0],
+        linearDrag: 0,
+        rotationAcceleration: 0,
+        rotationDrag: 0,
+    };
+}
+function parseAppearance(comps) {
+    const bb = (comps["minecraft:particle_appearance_billboard"] ?? {});
+    const sizeRaw = bb.size;
+    const size = Array.isArray(sizeRaw) && sizeRaw.length >= 2
+        ? [parseScalar(sizeRaw[0], 1), parseScalar(sizeRaw[1], 1)]
+        : [1, 1];
+    const facing = parseFacingMode(bb.facing_camera_mode);
+    const dirRaw = bb.direction;
+    let customDirection;
+    if (Array.isArray(dirRaw) && dirRaw.length === 3) {
+        customDirection = parseVec3(dirRaw, [0, 0, 0]);
+    }
+    else if (dirRaw &&
+        typeof dirRaw === "object" &&
+        dirRaw.mode === "custom_direction") {
+        const cd = dirRaw.custom_direction;
+        if (Array.isArray(cd))
+            customDirection = parseVec3(cd, [0, 0, 0]);
+    }
+    const uvRaw = (bb.uv ?? {});
+    const textureWidth = typeof uvRaw.texture_width === "number" ? uvRaw.texture_width : 1;
+    const textureHeight = typeof uvRaw.texture_height === "number" ? uvRaw.texture_height : 1;
+    let uv;
+    const flipbookRaw = uvRaw.flipbook;
+    if (flipbookRaw) {
+        uv = { kind: "flipbook", spec: parseFlipbook(flipbookRaw) };
+    }
+    else {
+        const uvOff = uvRaw.uv;
+        const uvSize = uvRaw.uv_size;
+        const off = Array.isArray(uvOff) && uvOff.length >= 2
+            ? [parseScalar(uvOff[0], 0), parseScalar(uvOff[1], 0)]
+            : [0, 0];
+        const sz = Array.isArray(uvSize) && uvSize.length >= 2
+            ? [parseScalar(uvSize[0], textureWidth), parseScalar(uvSize[1], textureHeight)]
+            : [textureWidth, textureHeight];
+        uv = { kind: "static", spec: { offset: off, size: sz } };
+    }
+    return {
+        size,
+        facingMode: facing,
+        customDirection,
+        textureWidth,
+        textureHeight,
+        uv,
+    };
+}
+function parseFacingMode(raw) {
+    switch (raw) {
+        case "rotate_xyz":
+        case "rotate_xz":
+        case "lookat_xyz":
+        case "lookat_xz":
+        case "lookat_direction":
+        case "direction_x":
+        case "direction_y":
+        case "direction_z":
+        case "emitter_transform_xy":
+        case "emitter_transform_xz":
+        case "emitter_transform_yz":
+            return raw;
+    }
+    return "rotate_xyz";
+}
+function parseFlipbook(raw) {
+    const baseRaw = raw.base_UV;
+    const baseUv = Array.isArray(baseRaw) && baseRaw.length >= 2
+        ? [parseScalar(baseRaw[0], 0), parseScalar(baseRaw[1], 0)]
+        : [0, 0];
+    const sizeRaw = raw.size_UV;
+    const sizeUv = Array.isArray(sizeRaw) && sizeRaw.length >= 2
+        ? [Number(sizeRaw[0]) || 0, Number(sizeRaw[1]) || 0]
+        : [0, 0];
+    const stepRaw = raw.step_UV;
+    const stepUv = Array.isArray(stepRaw) && stepRaw.length >= 2
+        ? [Number(stepRaw[0]) || 0, Number(stepRaw[1]) || 0]
+        : [0, 0];
+    return {
+        baseUv,
+        sizeUv,
+        stepUv,
+        framesPerSecond: typeof raw.frames_per_second === "number" ? raw.frames_per_second : 1,
+        maxFrame: parseScalar(raw.max_frame, 1),
+        stretchToLifetime: raw.stretch_to_lifetime === true,
+        loop: raw.loop === true,
+    };
+}
+function parseTinting(comps) {
+    const t = comps["minecraft:particle_appearance_tinting"];
+    if (!t)
+        return { kind: "constant", color: [1, 1, 1, 1] };
+    const colorRaw = t.color;
+    if (Array.isArray(colorRaw) && colorRaw.length >= 3 && typeof colorRaw[0] === "number") {
+        const r = numOrZero(colorRaw[0]);
+        const g = numOrZero(colorRaw[1]);
+        const b = numOrZero(colorRaw[2]);
+        const a = numOrOne(colorRaw[3]);
+        return { kind: "constant", color: [r, g, b, a] };
+    }
+    if (Array.isArray(colorRaw) && colorRaw.length >= 3) {
+        return {
+            kind: "expression",
+            rgba: [
+                parseScalar(colorRaw[0], 1),
+                parseScalar(colorRaw[1], 1),
+                parseScalar(colorRaw[2], 1),
+                parseScalar(colorRaw[3], 1),
+            ],
+        };
+    }
+    if (colorRaw && typeof colorRaw === "object") {
+        const obj = colorRaw;
+        const grad = (obj.gradient ?? {});
+        const colors = [];
+        for (const [k, v] of Object.entries(grad)) {
+            const time = Number.parseFloat(k);
+            if (!Number.isFinite(time) || !Array.isArray(v))
+                continue;
+            colors.push({
+                time,
+                rgba: [numOrZero(v[0]), numOrZero(v[1]), numOrZero(v[2]), numOrOne(v[3])],
+            });
+        }
+        colors.sort((a, b) => a.time - b.time);
+        return {
+            kind: "gradient",
+            colors,
+            interpolant: parseScalar(obj.interpolant, 0),
+        };
+    }
+    return { kind: "constant", color: [1, 1, 1, 1] };
+}
+function parseParticleInit(comps) {
+    const init = comps["minecraft:particle_initialization"];
+    if (!init)
+        return {};
+    return {
+        perUpdate: typeof init.per_update_expression !== "undefined"
+            ? parseScalar(init.per_update_expression, 0)
+            : undefined,
+        perRender: typeof init.per_render_expression !== "undefined"
+            ? parseScalar(init.per_render_expression, 0)
+            : undefined,
+    };
+}
+function parseEvents(raw) {
+    const out = {};
+    for (const [name, val] of Object.entries(raw)) {
+        if (!val || typeof val !== "object")
+            continue;
+        out[name] = parseSingleEvent(val);
+    }
+    return out;
+}
+function parseSingleEvent(obj) {
+    const ev = {};
+    const peObj = obj.particle_effect;
+    if (peObj && typeof peObj === "object") {
+        const type = peObj.type === "emitter" ||
+            peObj.type === "emitter_bound" ||
+            peObj.type === "particle"
+            ? peObj.type
+            : "emitter";
+        ev.particleEffect = {
+            effect: typeof peObj.effect === "string" ? peObj.effect : "",
+            type,
+            preEffectExpression: typeof peObj.pre_effect_expression !== "undefined"
+                ? parseScalar(peObj.pre_effect_expression, 0)
+                : undefined,
+        };
+    }
+    const peeObj = obj.particle_effect_on_entity;
+    if (peeObj && typeof peeObj === "object") {
+        ev.particleEffectOnEntity = {
+            effect: typeof peeObj.effect === "string" ? peeObj.effect : "",
+            preEffectExpression: typeof peeObj.pre_effect_expression !== "undefined"
+                ? parseScalar(peeObj.pre_effect_expression, 0)
+                : undefined,
+        };
+    }
+    const seObj = obj.sound_effect;
+    if (seObj && typeof seObj === "object") {
+        ev.soundEffect = {
+            eventName: typeof seObj.event_name === "string" ? seObj.event_name : "",
+        };
+    }
+    const expr = obj.expression;
+    if (typeof expr !== "undefined") {
+        ev.expression = parseScalar(expr, 0);
+    }
+    const setObj = obj.set;
+    if (setObj && typeof setObj === "object") {
+        const out = {};
+        for (const [k, v] of Object.entries(setObj))
+            out[k] = parseScalar(v, 0);
+        ev.setExpressions = out;
+    }
+    const rand = obj.randomize;
+    if (Array.isArray(rand)) {
+        ev.randomize = [];
+        for (const r of rand) {
+            if (!r || typeof r !== "object")
+                continue;
+            const ro = r;
+            ev.randomize.push({
+                weight: typeof ro.weight === "number" ? ro.weight : 1,
+                event: typeof ro.event === "string" ? ro.event : "",
+            });
+        }
+    }
+    const seq = obj.sequence;
+    if (Array.isArray(seq)) {
+        ev.sequence = seq.filter((v) => typeof v === "string");
+    }
+    return ev;
+}
+function parseCurves(raw) {
+    const out = {};
+    for (const [name, val] of Object.entries(raw)) {
+        if (!val || typeof val !== "object")
+            continue;
+        const obj = val;
+        const type = obj.type === "linear" ||
+            obj.type === "bezier" ||
+            obj.type === "bezier_chain" ||
+            obj.type === "catmull_rom"
+            ? obj.type
+            : "linear";
+        let nodes = [];
+        if (Array.isArray(obj.nodes)) {
+            nodes = obj.nodes.map((n) => Number(n) || 0);
+        }
+        const range = parseRange(obj.range, [0, 1]);
+        const horizontalRange = obj.horizontal_range
+            ? parseRange(obj.horizontal_range, [0, 1])
+            : undefined;
+        out[name] = {
+            type,
+            input: parseScalar(obj.input, 0),
+            range,
+            horizontalRange,
+            nodes,
+        };
+    }
+    return out;
+}
+function parseRange(raw, fallback) {
+    if (Array.isArray(raw) && raw.length >= 2) {
+        return [parseScalar(raw[0], fallback[0]), parseScalar(raw[1], fallback[1])];
+    }
+    return fallback;
+}
+function parseScalar(raw, fallback) {
+    if (typeof raw === "number")
+        return Number.isFinite(raw) ? raw : 0;
+    if (typeof raw === "string") {
+        const trimmed = raw.trim();
+        if (trimmed === "")
+            return fallback;
+        const asNum = Number(trimmed);
+        if (!Number.isNaN(asNum) && /^-?[\d.]+$/.test(trimmed))
+            return asNum;
+        return raw;
+    }
+    return fallback;
+}
+function parseVec3(raw, fallback) {
+    if (Array.isArray(raw)) {
+        return [
+            parseScalar(raw[0], fallback[0]),
+            parseScalar(raw[1], fallback[1]),
+            parseScalar(raw[2], fallback[2]),
+        ];
+    }
+    return fallback;
+}
+function numOrZero(raw) {
+    return typeof raw === "number" && Number.isFinite(raw) ? raw : 0;
+}
+function numOrOne(raw) {
+    return typeof raw === "number" && Number.isFinite(raw) ? raw : 1;
+}
+//# sourceMappingURL=parseParticle.js.map
+
+/***/ },
+
+/***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/particle.js"
+/*!**************************************************************************************!*\
+  !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/particle.js ***!
+  \**************************************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Particle: () => (/* binding */ Particle)
+/* harmony export */ });
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+
+class Particle {
+    constructor() {
+        this.position = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3();
+        this.velocity = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3();
+        this.speed = 0;
+        this.rotation = 0;
+        this.rotationRate = 0;
+        this.age = 0;
+        this.lifetime = 1;
+        this.random = [0, 0, 0, 0];
+        this.variables = new Map();
+        this.size = [1, 1];
+        this.color = [1, 1, 1, 1];
+        this.uvOffset = [0, 0];
+        this.uvScale = [1, 1];
+        this.alive = true;
+    }
+}
+//# sourceMappingURL=particle.js.map
+
+/***/ },
+
+/***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/particleSystem.js"
+/*!********************************************************************************************!*\
+  !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/particleSystem.js ***!
+  \********************************************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ParticleSystem: () => (/* binding */ ParticleSystem)
+/* harmony export */ });
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var _billboardMaterial__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./billboardMaterial */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/billboardMaterial.js");
+/* harmony import */ var _emitter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./emitter */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/emitter.js");
+
+
+
+class ParticleSystem {
+    constructor(opts) {
+        this.root = new three__WEBPACK_IMPORTED_MODULE_0__.Group();
+        this.effects = new Map();
+        this.emitters = [];
+        this.maxInstancesDefault = opts?.maxInstancesPerEffect ?? 256;
+        this.root.name = "ParticleSystem";
+    }
+    register(effectId, loaded, options = {}) {
+        if (this.effects.has(effectId))
+            return;
+        const max = options.maxInstances ?? this.maxInstancesDefault;
+        const entry = createRegisteredEffect(loaded.effect, loaded.texture, max);
+        this.root.add(entry.mesh);
+        this.effects.set(effectId, entry);
+    }
+    hasEffect(effectId) {
+        return this.effects.has(effectId);
+    }
+    spawn(effectId, opts) {
+        const reg = this.effects.get(effectId);
+        if (!reg) {
+            return DEAD_HANDLE;
+        }
+        const emitter = new _emitter__WEBPACK_IMPORTED_MODULE_2__.Emitter(reg.effect, opts);
+        const entry = { emitter, reg };
+        this.emitters.push(entry);
+        return {
+            stop: () => emitter.stop(),
+            finish: () => emitter.finish(),
+            isAlive: () => !emitter.isFinished(),
+        };
+    }
+    tick(elapsed, deltaSeconds) {
+        if (deltaSeconds <= 0)
+            return;
+        let writeIdx = 0;
+        for (let i = 0; i < this.emitters.length; i++) {
+            const entry = this.emitters[i];
+            entry.emitter.tick(elapsed, deltaSeconds);
+            if (entry.emitter.isFinished())
+                continue;
+            if (i !== writeIdx)
+                this.emitters[writeIdx] = entry;
+            writeIdx++;
+        }
+        this.emitters.length = writeIdx;
+        for (const reg of this.effects.values()) {
+            reg.activeCount = 0;
+        }
+        for (const entry of this.emitters) {
+            const reg = entry.reg;
+            const e = entry.emitter;
+            const baseFacing = _billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.FACING_MODE_INDEX[reg.effect.appearance.facingMode] ?? 0;
+            const cap = reg.maxInstances;
+            for (let i = 0; i < e.particleCount; i++) {
+                if (reg.activeCount >= cap)
+                    break;
+                const p = e.particles[i];
+                if (!p.alive)
+                    continue;
+                const slot = reg.activeCount * 1;
+                const pos = reg.attrPosition;
+                const vel = reg.attrVelocity;
+                const sz = reg.attrSize;
+                const uv = reg.attrUvOffset;
+                const us = reg.attrUvScale;
+                const col = reg.attrColor;
+                const rot = reg.attrRotation;
+                const fm = reg.attrFacingMode;
+                pos[slot * 3 + 0] = p.position.x;
+                pos[slot * 3 + 1] = p.position.y;
+                pos[slot * 3 + 2] = p.position.z;
+                vel[slot * 3 + 0] = p.velocity.x;
+                vel[slot * 3 + 1] = p.velocity.y;
+                vel[slot * 3 + 2] = p.velocity.z;
+                sz[slot * 2 + 0] = p.size[0];
+                sz[slot * 2 + 1] = p.size[1];
+                uv[slot * 2 + 0] = p.uvOffset[0];
+                uv[slot * 2 + 1] = p.uvOffset[1];
+                us[slot * 2 + 0] = p.uvScale[0];
+                us[slot * 2 + 1] = p.uvScale[1];
+                col[slot * 4 + 0] = p.color[0];
+                col[slot * 4 + 1] = p.color[1];
+                col[slot * 4 + 2] = p.color[2];
+                col[slot * 4 + 3] = p.color[3];
+                rot[slot] = (p.rotation * Math.PI) / 180;
+                fm[slot] = baseFacing;
+                reg.activeCount++;
+            }
+        }
+        for (const reg of this.effects.values()) {
+            reg.geometry.instanceCount = reg.activeCount;
+            reg.mesh.visible = reg.activeCount > 0;
+            if (reg.activeCount === 0)
+                continue;
+            reg.attrPositionRef.needsUpdate = true;
+            reg.attrVelocityRef.needsUpdate = true;
+            reg.attrSizeRef.needsUpdate = true;
+            reg.attrRotationRef.needsUpdate = true;
+            reg.attrUvOffsetRef.needsUpdate = true;
+            reg.attrUvScaleRef.needsUpdate = true;
+            reg.attrColorRef.needsUpdate = true;
+            reg.attrFacingModeRef.needsUpdate = true;
+        }
+    }
+    dispose() {
+        for (const reg of this.effects.values()) {
+            reg.geometry.dispose();
+            reg.material.dispose();
+            reg.texture.dispose();
+            this.root.remove(reg.mesh);
+        }
+        this.effects.clear();
+        this.emitters.length = 0;
+        if (this.root.parent)
+            this.root.parent.remove(this.root);
+    }
+}
+ParticleSystem.SCRATCH_V3 = new three__WEBPACK_IMPORTED_MODULE_0__.Vector3();
+const DEAD_HANDLE = {
+    stop() { },
+    finish() { },
+    isAlive: () => false,
+};
+function createRegisteredEffect(effect, texture, max) {
+    const planeGeo = new three__WEBPACK_IMPORTED_MODULE_0__.PlaneGeometry(1, 1);
+    const geometry = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferGeometry();
+    geometry.setAttribute("position", planeGeo.attributes.position);
+    geometry.setAttribute("uv", planeGeo.attributes.uv);
+    geometry.setIndex(planeGeo.index);
+    const attrPosition = new Float32Array(max * 3);
+    const attrVelocity = new Float32Array(max * 3);
+    const attrSize = new Float32Array(max * 2);
+    const attrRotation = new Float32Array(max * 1);
+    const attrUvOffset = new Float32Array(max * 2);
+    const attrUvScale = new Float32Array(max * 2);
+    const attrColor = new Float32Array(max * 4);
+    const attrFacingMode = new Float32Array(max * 1);
+    const attrPositionRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrPosition, 3);
+    const attrVelocityRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrVelocity, 3);
+    const attrSizeRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrSize, 2);
+    const attrRotationRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrRotation, 1);
+    const attrUvOffsetRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrUvOffset, 2);
+    const attrUvScaleRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrUvScale, 2);
+    const attrColorRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrColor, 4);
+    const attrFacingModeRef = new three__WEBPACK_IMPORTED_MODULE_0__.InstancedBufferAttribute(attrFacingMode, 1);
+    attrPositionRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    attrVelocityRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    attrSizeRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    attrRotationRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    attrUvOffsetRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    attrUvScaleRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    attrColorRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    attrFacingModeRef.setUsage(three__WEBPACK_IMPORTED_MODULE_0__.DynamicDrawUsage);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.position, attrPositionRef);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.velocity, attrVelocityRef);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.size, attrSizeRef);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.rotation, attrRotationRef);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.uvOffset, attrUvOffsetRef);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.uvScale, attrUvScaleRef);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.color, attrColorRef);
+    geometry.setAttribute(_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.INSTANCE_ATTRS.facingMode, attrFacingModeRef);
+    geometry.instanceCount = 0;
+    const material = (0,_billboardMaterial__WEBPACK_IMPORTED_MODULE_1__.createBillboardMaterial)({ texture, material: effect.material });
+    const mesh = new three__WEBPACK_IMPORTED_MODULE_0__.Mesh(geometry, material);
+    mesh.frustumCulled = false;
+    mesh.visible = false;
+    return {
+        effect,
+        texture,
+        material,
+        geometry,
+        mesh,
+        maxInstances: max,
+        activeCount: 0,
+        attrPosition,
+        attrVelocity,
+        attrSize,
+        attrRotation,
+        attrUvOffset,
+        attrUvScale,
+        attrColor,
+        attrFacingMode,
+        attrPositionRef,
+        attrVelocityRef,
+        attrSizeRef,
+        attrRotationRef,
+        attrUvOffsetRef,
+        attrUvScaleRef,
+        attrColorRef,
+        attrFacingModeRef,
+    };
+}
+//# sourceMappingURL=particleSystem.js.map
+
+/***/ },
+
 /***/ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/runtimeAnimation.js"
 /*!************************************************************************************!*\
   !*** ./node_modules/@noriskclient/nrc-skin-renderer/dist/core/runtimeAnimation.js ***!
@@ -9194,11 +10973,14 @@ __webpack_require__.r(__webpack_exports__);
 
 const DEG_TO_RAD = Math.PI / 180;
 const REUSED_EULER = new three__WEBPACK_IMPORTED_MODULE_0__.Euler(0, 0, 0, "ZYX");
+const RENDERABLE_ANIM = /^nrc\.(idle|quirk_\d+)$/;
 function buildRuntimeAnimations(parsed, geo, tree, options = {}) {
     const negateX = options.negateX ?? true;
     const restPoses = computeRestPoses(geo, negateX);
     const out = [];
     for (const anim of parsed.animations) {
+        if (!RENDERABLE_ANIM.test(anim.name))
+            continue;
         const bones = [];
         let hasMolang = false;
         for (const [boneName, boneAnim] of Object.entries(anim.bones)) {
@@ -62926,7 +64708,7 @@ if ( typeof window !== 'undefined' ) {
   \**********************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.10.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.1.2","fflate":"^0.8.3","three":"^0.160.1"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.11.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.3.1","fflate":"^0.8.3","three":"^0.160.1"}}');
 
 /***/ },
 
