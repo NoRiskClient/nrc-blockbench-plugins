@@ -11,7 +11,9 @@ import { countEffectKeyframes } from '../platform/effectKeyframes';
 import { dataUriToBytes } from '../core/node';
 import { sourceMeta } from '../platform/sourceMeta';
 import { strandedCubes } from '../platform/playerModel';
-import { addLivePreview, clearLivePreviews } from '../platform/templates/livePreview';
+import { addLivePreview, clearLivePreviews, PreviewParticle } from '../platform/templates/livePreview';
+import { particleTextureOf } from '../platform/particleTexture';
+import { fs, toBase64 } from '../core/node';
 import { mcId } from '../core/util';
 import { log, logReset } from '../core/log';
 
@@ -42,14 +44,63 @@ function reportStrandedCubes(): boolean {
 }
 
 function propTexture(): Uint8Array | null {
-    const texture: any = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
-    if (!texture || !texture.getDataURL) return null;
+    const uri = propTextureDataUri();
+    if (!uri) return null;
     try {
-        return dataUriToBytes(texture.getDataURL());
+        return dataUriToBytes(uri);
     } catch (e) {
         log('export: could not read project texture: ' + e);
         return null;
     }
+}
+
+function propTextureDataUri(): string | undefined {
+    const texture: any = (Texture.getDefault && Texture.getDefault()) || (Texture.all || [])[0];
+    if (!texture || !texture.getDataURL) return undefined;
+    try {
+        return texture.getDataURL();
+    } catch (e) {
+        return undefined;
+    }
+}
+
+function propGeoJson(): any {
+    try {
+        const parsed = JSON.parse(buildGeoJson());
+        const geo = (parsed['minecraft:geometry'] || [])[0];
+        if (!geo) return undefined;
+        geo.bones = (geo.bones || []).map((b: any) =>
+            typeof b.name === 'string' && b.name.toLowerCase().startsWith('biped')
+                ? { ...b, cubes: undefined }
+                : b
+        );
+        const useful = geo.bones.some((b: any) =>
+            (b.cubes && b.cubes.length) || (b.locators && Object.keys(b.locators).length)
+        );
+        return useful ? parsed : undefined;
+    } catch (e) {
+        return undefined;
+    }
+}
+
+function previewParticles(): PreviewParticle[] {
+    if (!fs) return [];
+    const out: PreviewParticle[] = [];
+    const seen: Record<string, boolean> = {};
+    for (const ref of listEffectFiles(['particle'])) {
+        if (!ref.path.endsWith('.particle.json') || seen[ref.path]) continue;
+        seen[ref.path] = true;
+        const texturePath = particleTextureOf(ref.path);
+        if (!texturePath) continue;
+        try {
+            const json = JSON.parse(fs.readFileSync(ref.path, 'utf8'));
+            const textureDataUri = 'data:image/png;base64,' + toBase64(fs.readFileSync(texturePath));
+            out.push({ json, textureDataUri });
+        } catch (e) {
+            log('export preview: particle skipped ' + ref.path + ': ' + e);
+        }
+    }
+    return out;
 }
 
 function selectedChannels(state: any): string[] {
@@ -122,7 +173,11 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                     mounted(this: any) {
                         this.$nextTick(() => {
                             const cv = this.$refs.preview;
-                            if (cv) { try { addLivePreview(cv, buildAnimationJson(type)); } catch (e) { /* ignore */ } }
+                            if (cv) {
+                                try {
+                                    addLivePreview(cv, buildAnimationJson(type), propGeoJson(), propTextureDataUri(), previewParticles());
+                                } catch (e) { /* ignore */ }
+                            }
                         });
                     },
                     template: `

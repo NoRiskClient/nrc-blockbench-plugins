@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import { STEVE_GEO, buildBoneTree, parseGeo, parseEmoteFile, EmotePlayer, applyEmoteToRig } from '@noriskclient/nrc-skin-renderer';
+import { STEVE_GEO, buildBoneTree, parseGeo, parseEmoteFile, EmotePlayer, applyEmoteToRig, parseParticle, ParticleSystem } from '@noriskclient/nrc-skin-renderer';
 import steveSkin from '../../assets/steveSkin';
 import { log } from '../../core/log';
 
 const SIZE = 132;
 const FPS = 24;
 const NEGATE_X = true; // bedrock<->blockbench X convention used by the renderer lib
+const BLOCK_TO_PX = 16;
 
 interface Item {
     ctx: any;
@@ -14,6 +15,12 @@ interface Item {
     propTree: any;
     player: any;
     time: number;
+    particles: any;
+}
+
+export interface PreviewParticle {
+    json: any;
+    textureDataUri: string;
 }
 
 let renderer: any = null;
@@ -23,16 +30,72 @@ let raf = 0;
 let last = 0;
 let items: Item[] = [];
 
-function makeMaterial(dataUri: string): any {
+function makeTexture(dataUri: string): any {
     const img = new Image();
     const tex = new THREE.Texture(img);
     tex.magFilter = THREE.NearestFilter;
     tex.minFilter = THREE.NearestFilter;
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.generateMipmaps = false;
     tex.flipY = false;
     (tex as any).colorSpace = (THREE as any).SRGBColorSpace;
     img.onload = () => { tex.needsUpdate = true; };
     img.src = dataUri;
-    return new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.01, roughness: 1, metalness: 0 });
+    return tex;
+}
+
+function makeMaterial(dataUri: string): any {
+    return new THREE.MeshStandardMaterial({
+        map: makeTexture(dataUri),
+        side: THREE.FrontSide,
+        transparent: true,
+        alphaTest: 0.01,
+        roughness: 1,
+        metalness: 0,
+    });
+}
+
+function buildParticleSystem(particles: PreviewParticle[] | undefined): any {
+    if (!particles || !particles.length) return null;
+    const sys = new ParticleSystem();
+    let registered = 0;
+    for (const entry of particles) {
+        try {
+            const effect = parseParticle(entry.json);
+            if (!effect.identifier) continue;
+            sys.register(effect.identifier, { effect, texture: makeTexture(entry.textureDataUri) });
+            registered++;
+        } catch (e) {
+            log('live preview: particle skipped: ' + e);
+        }
+    }
+    return registered ? sys : null;
+}
+
+function particleListener(sys: any, tree: any, propTree: any): any {
+    return {
+        onParticleKeyframe: (_id: string, _time: number, kf: any) => {
+            if (!sys.hasEffect(kf.effectId)) return;
+            const anchor = anchorFor(kf.locator, tree, propTree);
+            if (kf.locator && !anchor) return;
+            const target = anchor || tree.root;
+            sys.spawn(kf.effectId, {
+                positionProvider: () => target.getWorldPosition(new THREE.Vector3()),
+                forceLifetime: 'once',
+                unitScale: BLOCK_TO_PX,
+            });
+        },
+    };
+}
+
+function anchorFor(name: string, tree: any, propTree: any): any {
+    if (!name) return null;
+    return tree.bones.get(name)
+        || (propTree && propTree.bones.get(name))
+        || tree.locators.get(name)
+        || (propTree && propTree.locators.get(name))
+        || null;
 }
 
 function ensureMaterial(): any {
@@ -52,6 +115,7 @@ function ensureRenderer() {
 function loop(now: number) {
     raf = requestAnimationFrame(loop);
     if (now - last < 1000 / FPS) return;
+    const dt = Math.min((now - last) / 1000, 0.25);
     last = now;
     if (!renderer || !camera) return;
     const t = now / 1000;
@@ -60,6 +124,7 @@ function loop(now: number) {
         try {
             item.player.update(t);
             applyEmoteToRig(item.player, item.tree, { negateX: NEGATE_X, propTree: item.propTree || undefined });
+            if (item.particles) item.particles.tick(t, dt);
             renderer.render(item.scene, camera);
             item.ctx.clearRect(0, 0, SIZE, SIZE);
             item.ctx.drawImage(renderer.domElement, 0, 0, SIZE, SIZE);
@@ -67,7 +132,7 @@ function loop(now: number) {
     }
 }
 
-export function addLivePreview(canvas: any, animationJson: any, propGeo?: any, propTexUri?: string) {
+export function addLivePreview(canvas: any, animationJson: any, propGeo?: any, propTexUri?: string, particles?: PreviewParticle[]) {
     try {
         ensureRenderer();
         const tree = buildBoneTree(STEVE_GEO, ensureMaterial(), { negateX: NEGATE_X, armorOnly: false });
@@ -89,10 +154,14 @@ export function addLivePreview(canvas: any, animationJson: any, propGeo?: any, p
 
         const file = parseEmoteFile(animationJson);
         if (!file.emotes.length) return;
-        const player = new EmotePlayer();
+
+        const sys = buildParticleSystem(particles);
+        if (sys) scene.add(sys.root);
+
+        const player = new EmotePlayer(sys ? { keyframeListener: particleListener(sys, tree, propTree) } : undefined);
         player.play(file.emotes[0], performance.now() / 1000, { loop: true });
 
-        items.push({ ctx: canvas.getContext('2d'), scene, tree, propTree, player, time: 0 });
+        items.push({ ctx: canvas.getContext('2d'), scene, tree, propTree, player, time: 0, particles: sys });
         if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); }
     } catch (e) {
         log('live preview add failed: ' + e);
@@ -112,7 +181,15 @@ function disposeScene(root: any) {
 
 export function clearLivePreviews() {
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
-    for (const item of items) { try { disposeScene(item.scene); } catch (e) { /* ignore */ } }
+    for (const item of items) {
+        try {
+            if (item.particles) {
+                item.scene.remove(item.particles.root);
+                item.particles.dispose();
+            }
+        } catch (e) { /* ignore */ }
+        try { disposeScene(item.scene); } catch (e) { /* ignore */ }
+    }
     items = [];
     skinMaterial = null;
     if (renderer && renderer.dispose) { try { renderer.dispose(); if (renderer.forceContextLoss) renderer.forceContextLoss(); } catch (e) { /* ignore */ } }
