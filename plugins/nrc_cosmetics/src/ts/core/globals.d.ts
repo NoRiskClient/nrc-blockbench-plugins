@@ -18,6 +18,8 @@ declare function requestAnimationFrame(cb: (t: number) => void): number;
 declare function cancelAnimationFrame(id: number): void;
 declare const performance: { now(): number };
 declare class AudioContext { decodeAudioData(buffer: any): Promise<any>; }
+declare class Audio { constructor(src?: string); play(): any; pause(): void; }
+declare const process: { env: { [key: string]: string | undefined } };
 declare class TextDecoder { constructor(label?: string); decode(input?: any): string; }
 
 declare class Texture {

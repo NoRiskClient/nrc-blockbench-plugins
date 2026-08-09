@@ -5,6 +5,7 @@ import { animationId, mcId } from '../core/util';
 import { isCosmeticFormat } from './format';
 import { soundEffectId } from './effectFiles';
 import { effectsAnimator, firstDataPoint } from './effectKeyframes';
+import { isVanillaSoundPath } from './vanillaSounds';
 import { promptName } from '../ui/nameDialog';
 import { log } from '../core/log';
 
@@ -20,7 +21,8 @@ function soundKeyframesOf(animation: any): any[] {
 export function soundIdFor(type: CosmeticType, emoteId: string, keyframe: any): string | null {
     const file = firstDataPoint(keyframe).file;
     if (!file || !nodePath) return null;
-    return soundEffectId(type.assetNamespace, emoteId, nodePath.basename(file));
+    if (isVanillaSoundPath(file)) return null;
+    return soundEffectId(type.assetNamespace, type.assetFolder, emoteId, nodePath.basename(file));
 }
 
 export function retargetSoundIds(compiled: any, animation: any, type: CosmeticType, emoteId: string) {
