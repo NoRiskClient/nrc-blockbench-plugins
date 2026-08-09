@@ -1,6 +1,7 @@
 import { OutFile } from '../io/exportFiles';
 import { fs, nodePath, tempDir, toBuffer } from '../core/node';
 import { particleTextureOf, readParticleMeta } from './particleTexture';
+import { isVanillaSoundPath } from './vanillaSounds';
 import {
     CHANNEL_SUFFIX, allEffectKeyframes, isCompanionFile, withoutSuffix,
 } from './effectKeyframes';
@@ -11,8 +12,8 @@ export interface CompanionFile {
     bytes: Uint8Array;
 }
 
-export function soundEffectId(namespace: string, emoteId: string, fileName: string): string {
-    return namespace + ':emotes/' + emoteId + '/' + withoutSuffix(fileName);
+export function soundEffectId(namespace: string, folder: string, id: string, fileName: string): string {
+    return namespace + ':' + folder + '/' + id + '/' + withoutSuffix(fileName);
 }
 
 export function particleEffectId(namespace: string, particleJson: string): string | null {
@@ -162,7 +163,7 @@ export function listEffectFiles(channels?: string[]): EffectFileRef[] {
 
         for (const point of (keyframe.data_points || []) as any[]) {
             const full = point.file;
-            if (!full) continue;
+            if (!full || isVanillaSoundPath(full)) continue;
 
             let name = nodePath.basename(full);
             if (suffix && !isCompanionFile(name)) name = withoutSuffix(name) + suffix;

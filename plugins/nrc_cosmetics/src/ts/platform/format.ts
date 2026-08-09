@@ -20,9 +20,9 @@ function baseFormatOptions(type: CosmeticType): any {
         bone_rig: true,
         centered_grid: true,
         locators: true,
-        animation_mode: true,
-        animation_files: true,
-        animation_codec: createAnimationCodec(type),
+        animation_mode: type.hasAnimation,
+        animation_files: type.hasAnimation,
+        animation_codec: type.hasAnimation ? createAnimationCodec(type) : undefined,
         display_mode: false,
         codec: Codecs.project,
     };

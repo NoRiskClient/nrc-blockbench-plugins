@@ -13,7 +13,8 @@ export function loadRig(type: CosmeticType, skipDefaultAnimation = false) {
         Project.name = type.defaultName;
 
         if (type.createsDefaultAnimation && !skipDefaultAnimation) {
-            new Animation({ name: type.defaultName, loop: 'hold' }).add(false).select();
+            const preset = type.defaultAnimation || { name: type.defaultName, loop: 'hold' };
+            new Animation({ name: preset.name, loop: preset.loop }).add(false).select();
         }
         Canvas.updateAll();
         if (type.hasSkinPreview) setSkinMode(true);
