@@ -8,6 +8,7 @@ import {
     effectsAnimator, findEffectKeyframe, firstDataPoint, selectedEffectKeyframes,
 } from '../platform/effectKeyframes';
 import { forgetParticleTexture, particleTextureOf, setParticleTexture } from '../platform/particleTexture';
+import { isVanillaSoundPath, playVanillaSound, resolveVanillaSound } from '../platform/vanillaSounds';
 import { currentEmoteId } from '../platform/emoteIdentity';
 
 interface EffectRow {
@@ -20,6 +21,7 @@ interface EffectRow {
     status: string;
     file: string;
     textured: boolean;
+    vanilla: boolean;
 }
 
 const CHANNEL_ICONS: { [channel: string]: string } = {
@@ -42,12 +44,14 @@ function buildRows(): EffectRow[] {
             uuid: keyframe.uuid,
             channel: keyframe.channel,
             time: keyframe.time,
-            label: file ? nodePath.basename(file) : (point.effect || '(empty)'),
+            label: (file && !isVanillaSoundPath(file)) ? nodePath.basename(file) : (point.effect || '(empty)'),
             effect: point.effect || '',
             locator: point.locator || '',
             status: effectStatus(point),
             file,
             textured: keyframe.channel === 'particle' && !!particleTextureOf(file),
+            vanilla: keyframe.channel === 'sound' && !!point.effect
+                && (isVanillaSoundPath(file) || (!file && resolveVanillaSound(point.effect).length > 0)),
         };
     });
 }
@@ -86,7 +90,7 @@ function addEffect(type: CosmeticType, channel: string, done: () => void) {
         }
 
         const effect = sound
-            ? soundEffectId(type.assetNamespace, currentEmoteId(type), nodePath.basename(staged))
+            ? soundEffectId(type.assetNamespace, type.assetFolder, currentEmoteId(type), nodePath.basename(staged))
             : particleEffectId(type.assetNamespace, readText(staged));
         if (!effect) {
             Blockbench.showQuickMessage('That file has no particle identifier', 2400);
@@ -121,6 +125,11 @@ export function installEffectsPanel(registry: Registry, type: CosmeticType) {
         },
         addParticle() {
             addEffect(type, 'particle', state.refresh);
+        },
+        playSound(row: EffectRow) {
+            if (!playVanillaSound(row.effect)) {
+                Blockbench.showQuickMessage('That sound is not in your Minecraft assets', 2000);
+            }
         },
         seek(row: EffectRow) {
             const keyframe = findEffectKeyframe(row.uuid);
@@ -190,7 +199,9 @@ export function installEffectsPanel(registry: Registry, type: CosmeticType) {
     };
 
     registry.css(`
-        .nrc-fx { display: flex; flex-direction: column; gap: 4px; padding: 4px; }
+        .nrc-fx { display: flex; flex-direction: column; gap: 4px; padding: 4px; height: 100%; min-height: 0; }
+        .nrc-fx-bar { flex-shrink: 0; }
+        .nrc-fx-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
         .nrc-fx-bar { display: flex; gap: 4px; }
         .nrc-fx-bar button { flex: 1; }
         .nrc-fx-empty { color: var(--color-subtle_text); font-size: 11px; padding: 6px 2px; }
@@ -229,6 +240,7 @@ export function installEffectsPanel(registry: Registry, type: CosmeticType) {
                         <button type="button" @click="addSound()">+ Sound</button>
                         <button type="button" @click="addParticle()">+ Particle</button>
                     </div>
+                    <div class="nrc-fx-list">
                     <div v-if="!rows.length" class="nrc-fx-empty">
                         No sounds or particles yet. Move the playhead, then add one.
                     </div>
@@ -246,11 +258,15 @@ export function installEffectsPanel(registry: Registry, type: CosmeticType) {
                             <option v-for="l in locators" :key="l" :value="l">{{ l }}</option>
                             <option value="${NEW_LOCATOR}">+ new locator on selected bone</option>
                         </select>
+                        <i v-if="row.vanilla" class="material-icons icon"
+                            title="Vanilla sound, click to play it from your Minecraft assets"
+                            @click.stop="playSound(row)">play_circle_outline</i>
                         <i v-if="row.channel === 'particle'" class="material-icons icon nrc-fx-tex"
                             :class="{off: !row.textured}"
                             :title="row.textured ? 'Texture attached, click to replace' : 'No texture, showing placeholder. Click to attach a PNG'"
                             @click.stop="pickTexture(row)">{{ row.textured ? 'image' : 'broken_image' }}</i>
                         <i class="material-icons icon" @click.stop="remove(row)">clear</i>
+                    </div>
                     </div>
                 </div>
             `,
