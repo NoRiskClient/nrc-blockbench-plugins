@@ -2981,6 +2981,69 @@ function animationId(name) {
 
 /***/ },
 
+/***/ "./ts/cosmetics/cosmetic.ts"
+/*!**********************************!*\
+  !*** ./ts/cosmetics/cosmetic.ts ***!
+  \**********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   COSMETIC: () => (/* binding */ COSMETIC),
+/* harmony export */   COSMETIC_CATEGORIES: () => (/* binding */ COSMETIC_CATEGORIES)
+/* harmony export */ });
+/* harmony import */ var _assets_playerRig_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../assets/playerRig.json */ "./ts/assets/playerRig.json");
+/* harmony import */ var _assets_steveSkin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../assets/steveSkin */ "./ts/assets/steveSkin.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _emote__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./emote */ "./ts/cosmetics/emote.ts");
+
+
+
+
+const COSMETIC_CATEGORIES = [
+    'ACCESSORIES',
+    'AURA',
+    'BACK',
+    'BANDANA',
+    'CAPE',
+    'FACE',
+    'HAT',
+    'OVERLAY',
+    'PET',
+    'SHIELD',
+    'SHOES',
+    'SUIT',
+    'WINGS',
+];
+const COSMETIC = {
+    id: 'cosmetic',
+    formatId: 'nrc_cosmetic',
+    formatName: 'NoRisk Client Cosmetic',
+    formatDescription: 'Author NoRisk Client cosmetics against the player rig',
+    icon: 'checkroom',
+    noriskTypes: COSMETIC_CATEGORIES,
+    assetNamespace: 'noriskclient-cosmetics',
+    assetFolder: 'cosmetics',
+    defaultName: 'new_cosmetic',
+    bones: _emote__WEBPACK_IMPORTED_MODULE_3__.PLAYER_BONES,
+    metaFields: [],
+    hasLockBones: false,
+    hasSkinPreview: true,
+    hasKeyframeEasing: false,
+    hasAnimation: true,
+    hasTemplatePicker: false,
+    hasBareAnimations: false,
+    exportsAnimation: true,
+    createsDefaultAnimation: true,
+    defaultAnimation: { name: 'nrc.idle', loop: 'loop' },
+    exportsModelDefault: () => typeof Cube !== 'undefined' && !!Cube.all && (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_2__.propCubes)().length > 0,
+    rig: _assets_playerRig_json__WEBPACK_IMPORTED_MODULE_0__,
+    defaultSkin: _assets_steveSkin__WEBPACK_IMPORTED_MODULE_1__["default"],
+};
+
+
+/***/ },
+
 /***/ "./ts/cosmetics/emote.ts"
 /*!*******************************!*\
   !*** ./ts/cosmetics/emote.ts ***!
@@ -3013,7 +3076,7 @@ const EMOTE = {
     formatName: 'NoRisk Client Emote',
     formatDescription: 'Author NoRisk Client emotes against the player rig',
     icon: 'directions_run',
-    noriskType: 'EMOTES',
+    noriskTypes: ['EMOTES'],
     assetNamespace: 'noriskclient-cosmetics',
     defaultName: 'new_emote',
     bones: PLAYER_BONES,
@@ -3027,6 +3090,10 @@ const EMOTE = {
     hasLockBones: true,
     hasSkinPreview: true,
     hasKeyframeEasing: true,
+    hasAnimation: true,
+    hasTemplatePicker: true,
+    hasBareAnimations: true,
+    assetFolder: 'emotes',
     exportsAnimation: true,
     createsDefaultAnimation: true,
     exportsModelDefault: () => typeof Cube !== 'undefined' && !!Cube.all && (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_2__.propCubes)().length > 0,
@@ -3106,14 +3173,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./domain/meta */ "./ts/domain/meta.ts");
 /* harmony import */ var _ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ui/settingsDialog */ "./ts/ui/settingsDialog.ts");
 /* harmony import */ var _ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ui/exportDialog */ "./ts/ui/exportDialog.ts");
-/* harmony import */ var _tools_outline__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tools/outline */ "./ts/tools/outline.ts");
-/* harmony import */ var _ui_dialogStyles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./ui/dialogStyles */ "./ts/ui/dialogStyles.ts");
+/* harmony import */ var _ui_importDialog__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ui/importDialog */ "./ts/ui/importDialog.ts");
+/* harmony import */ var _tools_outline__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tools/outline */ "./ts/tools/outline.ts");
 /* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
 /* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
 /* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
 /* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
-/* harmony import */ var _ui_effectsPanel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./ui/effectsPanel */ "./ts/ui/effectsPanel.ts");
-/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
+/* harmony import */ var _platform_rig__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/rig */ "./ts/platform/rig.ts");
+/* harmony import */ var _ui_effectsPanel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./ui/effectsPanel */ "./ts/ui/effectsPanel.ts");
+/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
+
 
 
 
@@ -3128,8 +3197,9 @@ __webpack_require__.r(__webpack_exports__);
 
 function registerCosmeticType(type, registry) {
     (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.registerFormat)(registry, type);
-    (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_6__.ensureTemplateCss)(registry);
-    (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type).new = function () { (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_6__.openTemplateDialog)(type); };
+    (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type).new = type.hasTemplatePicker
+        ? function () { (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_6__.openTemplateDialog)(type); }
+        : function () { (0,_platform_rig__WEBPACK_IMPORTED_MODULE_10__.loadRig)(type); };
     const condition = { formats: [type.formatId] };
     for (const f of type.metaFields) {
         registry.property(Animation, 'boolean', f.key, { default: f.default, exposed: false, condition });
@@ -3140,19 +3210,19 @@ function registerCosmeticType(type, registry) {
         }
     }
     registry.menu((0,_ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__.createSettingsAction)(registry, type), 'animation');
-    (0,_ui_effectsPanel__WEBPACK_IMPORTED_MODULE_10__.installEffectsPanel)(registry, type);
-    (0,_ui_dialogStyles__WEBPACK_IMPORTED_MODULE_5__.ensureDialogCss)(registry);
-    registry.menu((0,_tools_outline__WEBPACK_IMPORTED_MODULE_4__.createOutlineAction)(registry, type), 'tools');
-    registry.menu((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_11__.createRenameAction)(registry, type), 'file');
+    (0,_ui_effectsPanel__WEBPACK_IMPORTED_MODULE_11__.installEffectsPanel)(registry, type);
+    registry.menu((0,_tools_outline__WEBPACK_IMPORTED_MODULE_5__.createOutlineAction)(registry, type), 'tools');
+    registry.menu((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_12__.createRenameAction)(registry, type), 'file');
+    registry.menu((0,_ui_importDialog__WEBPACK_IMPORTED_MODULE_4__.createImportAction)(registry, type), 'file.import');
+    if (type.hasBareAnimations)
+        registry.menu((0,_ui_importDialog__WEBPACK_IMPORTED_MODULE_4__.createImportAnimationAction)(registry, type), 'file.import');
     registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAction)(registry, type), 'file.export');
     if (type.hasSkinPreview) {
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__.makeToggleSkinAction)(registry, type));
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__.makeToggleLayerAction)(registry, type));
         registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__.makeToggleArmModelAction)(registry, type));
         registry.menu((0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_9__.makeToggleRigLockAction)(registry, type), 'edit');
-        (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_9__.installPlayerModel)(registry);
         registry.previewMenu((0,_ui_skinDialog__WEBPACK_IMPORTED_MODULE_8__.createSkinAction)(registry, type));
-        (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__.installSkinPreview)(registry);
     }
 }
 
@@ -3709,14 +3779,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
 /* harmony import */ var _particleTexture__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./particleTexture */ "./ts/platform/particleTexture.ts");
-/* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./effectKeyframes */ "./ts/platform/effectKeyframes.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _vanillaSounds__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./vanillaSounds */ "./ts/platform/vanillaSounds.ts");
+/* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./effectKeyframes */ "./ts/platform/effectKeyframes.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
 
 
 
 
-function soundEffectId(namespace, emoteId, fileName) {
-    return namespace + ':emotes/' + emoteId + '/' + (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.withoutSuffix)(fileName);
+
+function soundEffectId(namespace, folder, id, fileName) {
+    return namespace + ':' + folder + '/' + id + '/' + (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.withoutSuffix)(fileName);
 }
 function particleEffectId(namespace, particleJson) {
     const meta = (0,_particleTexture__WEBPACK_IMPORTED_MODULE_1__.readParticleMeta)(particleJson);
@@ -3747,7 +3819,7 @@ function stageEffectFile(scope, name, bytes) {
         return full;
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not stage ' + name + ': ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('effect files: could not stage ' + name + ': ' + e);
         return null;
     }
 }
@@ -3758,7 +3830,7 @@ function stageEffectPath(scope, sourcePath) {
         return stageEffectFile(scope, _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(sourcePath), new Uint8Array(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(sourcePath)));
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read ' + sourcePath + ': ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('effect files: could not read ' + sourcePath + ': ' + e);
         return null;
     }
 }
@@ -3797,7 +3869,7 @@ async function visualizeFromBytes(key, bytes) {
             Timeline.vue.$forceUpdate();
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not build waveform for ' + key + ': ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('effect files: could not build waveform for ' + key + ': ' + e);
     }
 }
 function registerStagedEffect(channel, full, bytes) {
@@ -3814,7 +3886,7 @@ function registerStagedPath(channel, full) {
         registerStagedEffect(channel, full, new Uint8Array(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(full)));
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not register ' + full + ': ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('effect files: could not register ' + full + ': ' + e);
     }
 }
 function effectKey(effect) {
@@ -3826,7 +3898,7 @@ function linkEffectFiles(scope, files) {
         return;
     const staged = {};
     for (const file of files) {
-        const key = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.withoutSuffix)(file.name);
+        const key = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.withoutSuffix)(file.name);
         if (!key)
             continue;
         const path = stageEffectFile(scope, file.name, file.bytes);
@@ -3834,7 +3906,7 @@ function linkEffectFiles(scope, files) {
             staged[key] = { path, bytes: file.bytes };
     }
     let linked = 0;
-    for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.allEffectKeyframes)()) {
+    for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.allEffectKeyframes)()) {
         for (const point of (keyframe.data_points || [])) {
             if (point.file)
                 continue;
@@ -3846,7 +3918,7 @@ function linkEffectFiles(scope, files) {
             linked++;
         }
     }
-    (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: staged ' + Object.keys(staged).length + ', linked ' + linked + ' keyframe(s)');
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('effect files: staged ' + Object.keys(staged).length + ', linked ' + linked + ' keyframe(s)');
 }
 function listEffectFiles(channels) {
     if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
@@ -3859,17 +3931,17 @@ function listEffectFiles(channels) {
         seen.add(path);
         refs.push({ path, name });
     };
-    for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.allEffectKeyframes)()) {
+    for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.allEffectKeyframes)()) {
         if (channels && channels.indexOf(keyframe.channel) === -1)
             continue;
-        const suffix = _effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.CHANNEL_SUFFIX[keyframe.channel];
+        const suffix = _effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.CHANNEL_SUFFIX[keyframe.channel];
         for (const point of (keyframe.data_points || [])) {
             const full = point.file;
-            if (!full)
+            if (!full || (0,_vanillaSounds__WEBPACK_IMPORTED_MODULE_2__.isVanillaSoundPath)(full))
                 continue;
             let name = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(full);
-            if (suffix && !(0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.isCompanionFile)(name))
-                name = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.withoutSuffix)(name) + suffix;
+            if (suffix && !(0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.isCompanionFile)(name))
+                name = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.withoutSuffix)(name) + suffix;
             add(full, name);
             if (keyframe.channel !== 'particle')
                 continue;
@@ -3887,7 +3959,7 @@ function collectEffectFiles(channels) {
             out.push({ name: ref.name, content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(ref.path) });
         }
         catch (e) {
-            (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('effect files: could not read ' + ref.path + ': ' + e);
+            (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('effect files: could not read ' + ref.path + ': ' + e);
         }
     }
     return out;
@@ -3996,8 +4068,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
 /* harmony import */ var _effectFiles__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./effectFiles */ "./ts/platform/effectFiles.ts");
 /* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./effectKeyframes */ "./ts/platform/effectKeyframes.ts");
-/* harmony import */ var _ui_nameDialog__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../ui/nameDialog */ "./ts/ui/nameDialog.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _vanillaSounds__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./vanillaSounds */ "./ts/platform/vanillaSounds.ts");
+/* harmony import */ var _ui_nameDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../ui/nameDialog */ "./ts/ui/nameDialog.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -4016,7 +4090,9 @@ function soundIdFor(type, emoteId, keyframe) {
     const file = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_4__.firstDataPoint)(keyframe).file;
     if (!file || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
         return null;
-    return (0,_effectFiles__WEBPACK_IMPORTED_MODULE_3__.soundEffectId)(type.assetNamespace, emoteId, _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(file));
+    if ((0,_vanillaSounds__WEBPACK_IMPORTED_MODULE_5__.isVanillaSoundPath)(file))
+        return null;
+    return (0,_effectFiles__WEBPACK_IMPORTED_MODULE_3__.soundEffectId)(type.assetNamespace, type.assetFolder, emoteId, _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(file));
 }
 function retargetSoundIds(compiled, animation, type, emoteId) {
     const sounds = compiled && compiled.sound_effects;
@@ -4057,7 +4133,7 @@ function renameEmote(type, newId) {
         }
     }
     Undo.finishEdit('Rename emote');
-    (0,_core_log__WEBPACK_IMPORTED_MODULE_6__.log)('renameEmote: ' + previous + ' -> ' + newId + ', ' + updated + ' sound id(s) updated');
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_7__.log)('renameEmote: ' + previous + ' -> ' + newId + ', ' + updated + ' sound id(s) updated');
     return updated;
 }
 function createRenameAction(registry, type) {
@@ -4068,7 +4144,7 @@ function createRenameAction(registry, type) {
         category: 'file',
         condition: () => (0,_format__WEBPACK_IMPORTED_MODULE_2__.isCosmeticFormat)(type),
         click() {
-            (0,_ui_nameDialog__WEBPACK_IMPORTED_MODULE_5__.promptName)(type, (id) => {
+            (0,_ui_nameDialog__WEBPACK_IMPORTED_MODULE_6__.promptName)(type, (id) => {
                 const updated = renameEmote(type, id);
                 Blockbench.showQuickMessage('Renamed to ' + id
                     + (updated ? ', ' + updated + ' sound id(s) updated' : ''), 2200);
@@ -4113,9 +4189,9 @@ function baseFormatOptions(type) {
         bone_rig: true,
         centered_grid: true,
         locators: true,
-        animation_mode: true,
-        animation_files: true,
-        animation_codec: (0,_animationCodec__WEBPACK_IMPORTED_MODULE_0__.createAnimationCodec)(type),
+        animation_mode: type.hasAnimation,
+        animation_files: type.hasAnimation,
+        animation_codec: type.hasAnimation ? (0,_animationCodec__WEBPACK_IMPORTED_MODULE_0__.createAnimationCodec)(type) : undefined,
         display_mode: false,
         codec: Codecs.project,
     };
@@ -4190,6 +4266,123 @@ function importAnimation(type, file) {
     if (first && first.select)
         first.select();
     return first;
+}
+
+
+/***/ },
+
+/***/ "./ts/platform/import/folderImport.ts"
+/*!********************************************!*\
+  !*** ./ts/platform/import/folderImport.ts ***!
+  \********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   describeError: () => (/* binding */ describeError),
+/* harmony export */   readCosmeticFolder: () => (/* binding */ readCosmeticFolder)
+/* harmony export */ });
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../effectKeyframes */ "./ts/platform/effectKeyframes.ts");
+
+
+function collectCompanions(dir, entries) {
+    const out = [];
+    const take = (from, name) => {
+        try {
+            out.push({ name, bytes: new Uint8Array(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(from, name))) });
+        }
+        catch (e) { /* ignore */ }
+    };
+    for (const name of entries) {
+        if ((0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_1__.isCompanionFile)(name))
+            take(dir, name);
+    }
+    const particleDir = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, 'particle');
+    if (_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(particleDir)) {
+        let textures = [];
+        try {
+            textures = _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readdirSync(particleDir);
+        }
+        catch (e) {
+            textures = [];
+        }
+        for (const name of textures) {
+            if (name.toLowerCase().endsWith('.png'))
+                take(particleDir, name);
+        }
+    }
+    return out;
+}
+function readJson(file) {
+    return JSON.parse(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(file, 'utf8'));
+}
+function readCosmeticFolder(dir) {
+    if (!(0,_core_node__WEBPACK_IMPORTED_MODULE_0__.hasFilesystem)())
+        return { kind: 'no-filesystem' };
+    let entries;
+    try {
+        entries = _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readdirSync(dir);
+    }
+    catch (e) {
+        return { kind: 'unreadable', file: dir, reason: String(e && e.message || e) };
+    }
+    const marker = ['.norisk.json', '.geo.json', '.animation.json']
+        .map((suffix) => ({ suffix, file: entries.find((f) => f.endsWith(suffix)) }))
+        .find((m) => !!m.file);
+    if (!marker || !marker.file)
+        return { kind: 'not-a-cosmetic', dir };
+    const base = marker.file.slice(0, -marker.suffix.length);
+    const at = (suffix) => _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, base + suffix);
+    let norisk = null;
+    if (_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(at('.norisk.json'))) {
+        try {
+            norisk = readJson(at('.norisk.json'));
+        }
+        catch (e) {
+            return { kind: 'unreadable', file: base + '.norisk.json', reason: String(e && e.message || e) };
+        }
+    }
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(at('.geo.json'))) {
+        return { kind: 'texture-only', base, type: String((norisk && norisk.type) || 'texture') };
+    }
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(at('.png')))
+        return { kind: 'no-texture', base };
+    let geo;
+    let animation = null;
+    try {
+        geo = readJson(at('.geo.json'));
+        if (_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(at('.animation.json')))
+            animation = readJson(at('.animation.json'));
+    }
+    catch (e) {
+        return { kind: 'unreadable', file: base, reason: String(e && e.message || e) };
+    }
+    return {
+        dir,
+        base,
+        norisk,
+        geo,
+        animation,
+        textureDataUri: 'data:image/png;base64,' + (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.toBase64)(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(at('.png'))),
+        mcmeta: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(at('.png.mcmeta')) ? _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(at('.png.mcmeta'), 'utf8') : null,
+        companions: collectCompanions(dir, entries),
+    };
+}
+function describeError(error) {
+    switch (error.kind) {
+        case 'no-filesystem':
+            return 'Importing a folder needs the desktop app.';
+        case 'not-a-cosmetic':
+            return 'No .norisk.json in that folder, so it is not a cosmetic.';
+        case 'texture-only':
+            return `"${error.base}" is a ${error.type} and has no geometry. Capes and overlays are `
+                + 'plain textures, there is nothing to open here.';
+        case 'no-texture':
+            return `"${error.base}" has no .png next to it.`;
+        case 'unreadable':
+            return `Could not read ${error.file}: ${error.reason}`;
+    }
 }
 
 
@@ -4808,7 +5001,8 @@ function loadRig(type, skipDefaultAnimation = false) {
         Codecs.project.parse(JSON.parse(JSON.stringify(type.rig)), '');
         Project.name = type.defaultName;
         if (type.createsDefaultAnimation && !skipDefaultAnimation) {
-            new Animation({ name: type.defaultName, loop: 'hold' }).add(false).select();
+            const preset = type.defaultAnimation || { name: type.defaultName, loop: 'hold' };
+            new Animation({ name: preset.name, loop: preset.loop }).add(false).select();
         }
         Canvas.updateAll();
         if (type.hasSkinPreview)
@@ -5131,6 +5325,31 @@ function installSkinPreview(registry) {
 
 /***/ },
 
+/***/ "./ts/platform/sourceMeta.ts"
+/*!***********************************!*\
+  !*** ./ts/platform/sourceMeta.ts ***!
+  \***********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   setSourceMeta: () => (/* binding */ setSourceMeta),
+/* harmony export */   sourceMeta: () => (/* binding */ sourceMeta)
+/* harmony export */ });
+const byProject = new WeakMap();
+function setSourceMeta(meta) {
+    if (typeof Project !== 'undefined' && Project)
+        byProject.set(Project, meta);
+}
+function sourceMeta() {
+    if (typeof Project === 'undefined' || !Project)
+        return null;
+    return byProject.get(Project) || null;
+}
+
+
+/***/ },
+
 /***/ "./ts/platform/templates/livePreview.ts"
 /*!**********************************************!*\
   !*** ./ts/platform/templates/livePreview.ts ***!
@@ -5434,6 +5653,180 @@ async function loadTemplates(force = false) {
 
 /***/ },
 
+/***/ "./ts/platform/vanillaSounds.ts"
+/*!**************************************!*\
+  !*** ./ts/platform/vanillaSounds.ts ***!
+  \**************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   forgetVanillaSounds: () => (/* binding */ forgetVanillaSounds),
+/* harmony export */   isVanillaSoundPath: () => (/* binding */ isVanillaSoundPath),
+/* harmony export */   linkVanillaSound: () => (/* binding */ linkVanillaSound),
+/* harmony export */   linkVanillaSounds: () => (/* binding */ linkVanillaSounds),
+/* harmony export */   playVanillaSound: () => (/* binding */ playVanillaSound),
+/* harmony export */   resolveVanillaSound: () => (/* binding */ resolveVanillaSound)
+/* harmony export */ });
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./effectKeyframes */ "./ts/platform/effectKeyframes.ts");
+
+
+
+function assetRoots() {
+    const roots = [];
+    const appData = (typeof process !== 'undefined' && process.env && process.env.APPDATA) || null;
+    if (appData)
+        roots.push(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(appData, '.minecraft', 'assets'));
+    if (_core_node__WEBPACK_IMPORTED_MODULE_0__.os) {
+        const home = _core_node__WEBPACK_IMPORTED_MODULE_0__.os.homedir();
+        roots.push(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(home, 'AppData', 'Roaming', '.minecraft', 'assets'));
+        roots.push(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(home, '.minecraft', 'assets'));
+        roots.push(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(home, 'Library', 'Application Support', 'minecraft', 'assets'));
+    }
+    return roots.filter((r, i) => roots.indexOf(r) === i && _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(r));
+}
+function indexFiles(root) {
+    const dir = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(root, 'indexes');
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(dir))
+        return [];
+    let names = [];
+    try {
+        names = _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readdirSync(dir);
+    }
+    catch (e) {
+        return [];
+    }
+    return names
+        .filter((n) => n.endsWith('.json'))
+        .map((n) => _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(dir, n))
+        .sort((a, b) => _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.statSync(b).mtimeMs - _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.statSync(a).mtimeMs);
+}
+function objectPath(root, hash) {
+    return _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(root, 'objects', hash.slice(0, 2), hash);
+}
+function readJson(file) {
+    try {
+        return JSON.parse(_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(file, 'utf8'));
+    }
+    catch (e) {
+        return null;
+    }
+}
+let sources = null;
+const catalogues = {};
+const resolved = {};
+function catalogue(root, indexFile) {
+    if (indexFile in catalogues)
+        return catalogues[indexFile];
+    const index = readJson(indexFile);
+    const objects = index && index.objects;
+    const soundsEntry = objects && objects['minecraft/sounds.json'];
+    const sounds = soundsEntry && readJson(objectPath(root, soundsEntry.hash));
+    catalogues[indexFile] = (objects && sounds) ? { root, objects, sounds } : null;
+    return catalogues[indexFile];
+}
+function forgetVanillaSounds() {
+    sources = null;
+    for (const key of Object.keys(catalogues))
+        delete catalogues[key];
+    for (const key of Object.keys(resolved))
+        delete resolved[key];
+}
+function resolveVanillaSound(effect) {
+    if (!_core_node__WEBPACK_IMPORTED_MODULE_0__.fs || !_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath)
+        return [];
+    if (resolved[effect])
+        return resolved[effect];
+    const event = effect.indexOf(':') === -1 ? effect : effect.slice(effect.indexOf(':') + 1);
+    if (!sources) {
+        sources = [];
+        for (const root of assetRoots()) {
+            for (const indexFile of indexFiles(root))
+                sources.push({ root, indexFile });
+        }
+    }
+    for (const source of sources) {
+        const parsed = catalogue(source.root, source.indexFile);
+        if (!parsed)
+            continue;
+        const { root, objects, sounds } = parsed;
+        const entry = sounds[event];
+        if (!entry || !Array.isArray(entry.sounds))
+            continue;
+        const files = [];
+        for (const sound of entry.sounds) {
+            const name = typeof sound === 'string' ? sound : (sound && sound.name);
+            if (!name)
+                continue;
+            const key = 'minecraft/sounds/' + String(name).split(':').pop() + '.ogg';
+            const object = objects[key];
+            if (!object)
+                continue;
+            const file = objectPath(root, object.hash);
+            if (_core_node__WEBPACK_IMPORTED_MODULE_0__.fs.existsSync(file))
+                files.push(file);
+        }
+        if (files.length) {
+            resolved[effect] = files;
+            return files;
+        }
+    }
+    (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('vanilla sound not found locally: ' + effect);
+    resolved[effect] = [];
+    return [];
+}
+function isVanillaSoundPath(file) {
+    if (typeof file !== 'string')
+        return false;
+    return file.split('\\').join('/').indexOf('/assets/objects/') !== -1;
+}
+function linkVanillaSound(point, effect) {
+    const files = resolveVanillaSound(effect);
+    if (!files.length)
+        return false;
+    point.extend({ file: files[0] });
+    return true;
+}
+function linkVanillaSounds() {
+    let linked = 0;
+    for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.allEffectKeyframes)()) {
+        if (keyframe.channel !== 'sound')
+            continue;
+        for (const point of (keyframe.data_points || [])) {
+            if (point.file || !point.effect)
+                continue;
+            if (linkVanillaSound(point, point.effect))
+                linked++;
+        }
+    }
+    if (linked)
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('linked ' + linked + ' vanilla sound(s)');
+    return linked;
+}
+let current = null;
+function playVanillaSound(effect) {
+    const files = resolveVanillaSound(effect);
+    if (!files.length)
+        return false;
+    const file = files[Math.floor(Math.random() * files.length)];
+    try {
+        if (current)
+            current.pause();
+        current = new Audio('file:///' + file.replace(/\\/g, '/'));
+        current.play();
+        return true;
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('vanilla sound playback failed: ' + e);
+        return false;
+    }
+}
+
+
+/***/ },
+
 /***/ "./ts/serialization/animation.ts"
 /*!***************************************!*\
   !*** ./ts/serialization/animation.ts ***!
@@ -5504,28 +5897,40 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   buildNoriskJson: () => (/* binding */ buildNoriskJson)
 /* harmony export */ });
-function buildNoriskJson(type, meta) {
-    return {
-        id: guid(),
+const DEFAULT_SETTINGS = {
+    scale: 1.0,
+    previewScale: 1.0,
+    offset: { x: 0, y: 0, z: 0 },
+    previewOffset: { x: 0, y: 0, z: 0 },
+    renderMode: 'ORIGINAL',
+};
+function supportedBones() {
+    const groups = (typeof Group !== 'undefined' && Group.all) || [];
+    const hasContent = (g) => (g.children || []).some((c) => (c instanceof Cube) || hasContent(c));
+    return groups
+        .filter((g) => typeof g.name === 'string' && g.name.startsWith('armor') && hasContent(g))
+        .map((g) => g.name);
+}
+function buildNoriskJson(type, meta, base) {
+    var _a, _b;
+    const previous = (base && typeof base === 'object') ? base : {};
+    const bones = previous.supportedBones || supportedBones();
+    return Object.assign({}, previous, {
+        id: previous.id || guid(),
         name: meta.name,
         creator: meta.creator,
         price: meta.price,
-        type: type.noriskType,
-        dateAdded: new Date().toISOString().slice(0, 10),
+        type: meta.type || previous.type || type.noriskTypes[0],
+        dateAdded: previous.dateAdded || new Date().toISOString().slice(0, 10),
         path: meta.path,
         rarity: meta.rarity,
-        isExclusive: false,
-        defaultSettings: {
-            scale: 1.0,
-            previewScale: 1.0,
-            offset: { x: 0, y: 0, z: 0 },
-            previewOffset: { x: 0, y: 0, z: 0 },
-            renderMode: 'ORIGINAL',
-        },
-        layers: [],
-        features: [],
-        compatibleCosmetics: [],
-    };
+        isExclusive: (_b = (_a = meta.isExclusive) !== null && _a !== void 0 ? _a : previous.isExclusive) !== null && _b !== void 0 ? _b : false,
+        defaultSettings: Object.assign({}, DEFAULT_SETTINGS, previous.defaultSettings),
+        layers: previous.layers || [],
+        features: previous.features || [],
+        compatibleCosmetics: previous.compatibleCosmetics || [],
+        supportedBones: bones,
+    });
 }
 
 
@@ -6026,7 +6431,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_effectFiles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/effectFiles */ "./ts/platform/effectFiles.ts");
 /* harmony import */ var _platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/effectKeyframes */ "./ts/platform/effectKeyframes.ts");
 /* harmony import */ var _platform_particleTexture__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../platform/particleTexture */ "./ts/platform/particleTexture.ts");
-/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
+/* harmony import */ var _platform_vanillaSounds__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../platform/vanillaSounds */ "./ts/platform/vanillaSounds.ts");
+/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
+
 
 
 
@@ -6050,12 +6457,14 @@ function buildRows() {
             uuid: keyframe.uuid,
             channel: keyframe.channel,
             time: keyframe.time,
-            label: file ? _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(file) : (point.effect || '(empty)'),
+            label: (file && !(0,_platform_vanillaSounds__WEBPACK_IMPORTED_MODULE_4__.isVanillaSoundPath)(file)) ? _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(file) : (point.effect || '(empty)'),
             effect: point.effect || '',
             locator: point.locator || '',
             status: (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_1__.effectStatus)(point),
             file,
             textured: keyframe.channel === 'particle' && !!(0,_platform_particleTexture__WEBPACK_IMPORTED_MODULE_3__.particleTextureOf)(file),
+            vanilla: keyframe.channel === 'sound' && !!point.effect
+                && ((0,_platform_vanillaSounds__WEBPACK_IMPORTED_MODULE_4__.isVanillaSoundPath)(file) || (!file && (0,_platform_vanillaSounds__WEBPACK_IMPORTED_MODULE_4__.resolveVanillaSound)(point.effect).length > 0)),
         };
     });
 }
@@ -6084,13 +6493,13 @@ function addEffect(type, channel, done) {
             Blockbench.showQuickMessage('That needs the desktop app', 2000);
             return;
         }
-        const staged = (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_1__.stageEffectPath)((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_4__.currentEmoteId)(type), picked.path);
+        const staged = (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_1__.stageEffectPath)((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_5__.currentEmoteId)(type), picked.path);
         if (!staged) {
             Blockbench.showQuickMessage('Could not stage that file', 2400);
             return;
         }
         const effect = sound
-            ? (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_1__.soundEffectId)(type.assetNamespace, (0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_4__.currentEmoteId)(type), _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(staged))
+            ? (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_1__.soundEffectId)(type.assetNamespace, type.assetFolder, (0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_5__.currentEmoteId)(type), _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(staged))
             : (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_1__.particleEffectId)(type.assetNamespace, readText(staged));
         if (!effect) {
             Blockbench.showQuickMessage('That file has no particle identifier', 2400);
@@ -6121,6 +6530,11 @@ function installEffectsPanel(registry, type) {
         },
         addParticle() {
             addEffect(type, 'particle', state.refresh);
+        },
+        playSound(row) {
+            if (!(0,_platform_vanillaSounds__WEBPACK_IMPORTED_MODULE_4__.playVanillaSound)(row.effect)) {
+                Blockbench.showQuickMessage('That sound is not in your Minecraft assets', 2000);
+            }
         },
         seek(row) {
             const keyframe = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.findEffectKeyframe)(row.uuid);
@@ -6196,7 +6610,9 @@ function installEffectsPanel(registry, type) {
         },
     };
     registry.css(`
-        .nrc-fx { display: flex; flex-direction: column; gap: 4px; padding: 4px; }
+        .nrc-fx { display: flex; flex-direction: column; gap: 4px; padding: 4px; height: 100%; min-height: 0; }
+        .nrc-fx-bar { flex-shrink: 0; }
+        .nrc-fx-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
         .nrc-fx-bar { display: flex; gap: 4px; }
         .nrc-fx-bar button { flex: 1; }
         .nrc-fx-empty { color: var(--color-subtle_text); font-size: 11px; padding: 6px 2px; }
@@ -6234,6 +6650,7 @@ function installEffectsPanel(registry, type) {
                         <button type="button" @click="addSound()">+ Sound</button>
                         <button type="button" @click="addParticle()">+ Particle</button>
                     </div>
+                    <div class="nrc-fx-list">
                     <div v-if="!rows.length" class="nrc-fx-empty">
                         No sounds or particles yet. Move the playhead, then add one.
                     </div>
@@ -6251,11 +6668,15 @@ function installEffectsPanel(registry, type) {
                             <option v-for="l in locators" :key="l" :value="l">{{ l }}</option>
                             <option value="${NEW_LOCATOR}">+ new locator on selected bone</option>
                         </select>
+                        <i v-if="row.vanilla" class="material-icons icon"
+                            title="Vanilla sound, click to play it from your Minecraft assets"
+                            @click.stop="playSound(row)">play_circle_outline</i>
                         <i v-if="row.channel === 'particle'" class="material-icons icon nrc-fx-tex"
                             :class="{off: !row.textured}"
                             :title="row.textured ? 'Texture attached, click to replace' : 'No texture, showing placeholder. Click to attach a PNG'"
                             @click.stop="pickTexture(row)">{{ row.textured ? 'image' : 'broken_image' }}</i>
                         <i class="material-icons icon" @click.stop="remove(row)">clear</i>
+                    </div>
                     </div>
                 </div>
             `,
@@ -6348,10 +6769,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_effectFiles__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../platform/effectFiles */ "./ts/platform/effectFiles.ts");
 /* harmony import */ var _platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../platform/effectKeyframes */ "./ts/platform/effectKeyframes.ts");
 /* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
-/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../platform/playerModel */ "./ts/platform/playerModel.ts");
-/* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
-/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
-/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _platform_sourceMeta__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../platform/sourceMeta */ "./ts/platform/sourceMeta.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
+/* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
 
 
 
@@ -6374,7 +6797,7 @@ const RARITY_COLORS = {
     LEGENDARY: '#a46823',
 };
 function reportStrandedCubes() {
-    const stranded = (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_9__.strandedCubes)();
+    const stranded = (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_10__.strandedCubes)();
     if (!stranded.length)
         return false;
     Blockbench.showMessageBox({
@@ -6397,7 +6820,7 @@ function propTexture() {
         return (0,_core_node__WEBPACK_IMPORTED_MODULE_8__.dataUriToBytes)(texture.getDataURL());
     }
     catch (e) {
-        (0,_core_log__WEBPACK_IMPORTED_MODULE_12__.log)('export: could not read project texture: ' + e);
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_13__.log)('export: could not read project texture: ' + e);
         return null;
     }
 }
@@ -6415,7 +6838,7 @@ function createExportAction(registry, type) {
         description: 'Export the animation, model and cosmetic metadata',
         icon: 'archive',
         category: 'file',
-        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type) && Animation.all.length > 0,
+        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)(type) && (!type.hasAnimation || Animation.all.length > 0),
         click() {
             var _a;
             if (reportStrandedCubes())
@@ -6424,17 +6847,19 @@ function createExportAction(registry, type) {
             const texture = propTexture();
             const particleCount = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_7__.countEffectKeyframes)('particle');
             const soundCount = (0,_platform_effectKeyframes__WEBPACK_IMPORTED_MODULE_7__.countEffectKeyframes)('sound');
-            const state = Object.assign(Object.assign({ name: (Project.name || (metaAnim && metaAnim.name) || type.defaultName), exportAnimation: type.exportsAnimation, exportNorisk: false, exportModel: type.exportsModelDefault(), exportTexture: !!texture, exportParticles: particleCount > 0, exportSounds: soundCount > 0, hasTexture: !!texture, particleCount,
-                soundCount }, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.emoteSettingsState)(metaAnim, type)), { creator: ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '', price: 0, rarity: 'COMMON', rarities: RARITIES, colors: RARITY_COLORS, icon: type.icon, typeName: type.formatName });
+            const source = (0,_platform_sourceMeta__WEBPACK_IMPORTED_MODULE_9__.sourceMeta)();
+            const previous = (source && source.norisk) || null;
+            const state = Object.assign(Object.assign({ name: (previous && previous.name) || (Project.name || (metaAnim && metaAnim.name) || type.defaultName), exportAnimation: type.exportsAnimation && Animation.all.length > 0, exportNorisk: !!previous, exportModel: type.exportsModelDefault(), exportTexture: !!texture, exportParticles: particleCount > 0, exportSounds: soundCount > 0, hasTexture: !!texture, particleCount,
+                soundCount }, (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.emoteSettingsState)(metaAnim, type)), { creator: (previous && previous.creator) || ((_a = settings.credit) === null || _a === void 0 ? void 0 : _a.value) || '', price: (previous && previous.price) || 0, rarity: (previous && previous.rarity) || 'COMMON', cosmeticType: (previous && previous.type) || type.noriskTypes[0], cosmeticTypes: type.noriskTypes, rarities: RARITIES, colors: RARITY_COLORS, icon: type.icon, typeName: type.formatName });
             new Dialog('nrc_export_' + type.id, {
                 id: 'nrc_export_' + type.id,
                 title: 'Export ' + type.formatName,
                 width: 540,
-                onCancel() { (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_10__.clearLivePreviews)(); },
+                onCancel() { (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.clearLivePreviews)(); },
                 component: {
                     data() { return state; },
                     computed: {
-                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_11__.mcId)(this.name) || type.defaultName; },
+                        base() { return (0,_core_util__WEBPACK_IMPORTED_MODULE_12__.mcId)(this.name) || type.defaultName; },
                         outFiles() {
                             const f = [];
                             if (this.exportAnimation)
@@ -6455,7 +6880,7 @@ function createExportAction(registry, type) {
                             const cv = this.$refs.preview;
                             if (cv) {
                                 try {
-                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_10__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type));
+                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type));
                                 }
                                 catch (e) { /* ignore */ }
                             }
@@ -6523,6 +6948,12 @@ function createExportAction(registry, type) {
                                 <div class="nrc-x-sec-h">Cosmetic metadata</div>
                                 <div class="nrc-x-row"><label>Creator</label><input type="text" v-model="creator"></div>
                                 <div class="nrc-x-row"><label>Price</label><input type="number" min="0" v-model.number="price"></div>
+                                <div class="nrc-x-row" v-if="cosmeticTypes.length > 1"><label>Category</label>
+                                    <select v-model="cosmeticType">
+                                        <option v-for="t in cosmeticTypes" :key="t" :value="t">{{ t }}</option>
+                                    </select>
+                                </div>
+
                                 <div class="nrc-x-row"><label>Rarity</label>
                                     <div class="nrc-x-pills">
                                         <span class="nrc-x-pill" v-for="r in rarities" :key="r"
@@ -6538,8 +6969,8 @@ function createExportAction(registry, type) {
                     `,
                 },
                 onConfirm() {
-                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_10__.clearLivePreviews)();
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_12__.logReset)();
+                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.clearLivePreviews)();
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_13__.logReset)();
                     const base = (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.sanitize)(state.name) || type.defaultName;
                     const files = [];
                     if (state.exportAnimation)
@@ -6565,10 +6996,14 @@ function createExportAction(registry, type) {
                                 price: Number(state.price) || 0,
                                 rarity: state.rarity,
                                 path: base,
-                            }), null, 2),
+                                type: state.cosmeticType,
+                            }, previous), null, 2),
                         });
                     }
-                    (0,_core_log__WEBPACK_IMPORTED_MODULE_12__.log)('export base=' + base + ' files=' + files.map((f) => f.name || f.suffix).join(','));
+                    if (source && source.mcmeta && state.exportTexture) {
+                        files.push({ suffix: '.png.mcmeta', content: source.mcmeta });
+                    }
+                    (0,_core_log__WEBPACK_IMPORTED_MODULE_13__.log)('export base=' + base + ' files=' + files.map((f) => f.name || f.suffix).join(','));
                     if (!files.length) {
                         Blockbench.showQuickMessage('Nothing selected to export', 1800);
                         return;
@@ -6576,6 +7011,117 @@ function createExportAction(registry, type) {
                     (0,_io_exportFiles__WEBPACK_IMPORTED_MODULE_5__.writeFiles)(base, files);
                 },
             }).show();
+        },
+    });
+}
+
+
+/***/ },
+
+/***/ "./ts/ui/importDialog.ts"
+/*!*******************************!*\
+  !*** ./ts/ui/importDialog.ts ***!
+  \*******************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createImportAction: () => (/* binding */ createImportAction),
+/* harmony export */   createImportAnimationAction: () => (/* binding */ createImportAnimationAction)
+/* harmony export */ });
+/* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
+/* harmony import */ var _platform_rig__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/rig */ "./ts/platform/rig.ts");
+/* harmony import */ var _platform_import_geometryImport__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/import/geometryImport */ "./ts/platform/import/geometryImport.ts");
+/* harmony import */ var _platform_import_animationImport__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../platform/import/animationImport */ "./ts/platform/import/animationImport.ts");
+/* harmony import */ var _platform_import_folderImport__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../platform/import/folderImport */ "./ts/platform/import/folderImport.ts");
+/* harmony import */ var _platform_effectFiles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../platform/effectFiles */ "./ts/platform/effectFiles.ts");
+/* harmony import */ var _platform_vanillaSounds__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../platform/vanillaSounds */ "./ts/platform/vanillaSounds.ts");
+/* harmony import */ var _platform_sourceMeta__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../platform/sourceMeta */ "./ts/platform/sourceMeta.ts");
+/* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+
+
+
+
+
+
+
+
+
+let lastDir;
+function fail(message) {
+    Blockbench.showMessageBox({ title: 'Import Cosmetic', icon: 'error', message, buttons: ['OK'] });
+}
+function build(type, folder) {
+    (0,_platform_rig__WEBPACK_IMPORTED_MODULE_1__.loadRig)(type, true);
+    (0,_platform_import_geometryImport__WEBPACK_IMPORTED_MODULE_2__.importGeometry)(folder.geo, folder.textureDataUri || undefined);
+    if (folder.animation)
+        (0,_platform_import_animationImport__WEBPACK_IMPORTED_MODULE_3__.importAnimation)(type, folder.animation);
+    if (folder.companions.length)
+        (0,_platform_effectFiles__WEBPACK_IMPORTED_MODULE_5__.linkEffectFiles)(folder.base, folder.companions);
+    (0,_platform_vanillaSounds__WEBPACK_IMPORTED_MODULE_6__.linkVanillaSounds)();
+    (0,_platform_sourceMeta__WEBPACK_IMPORTED_MODULE_7__.setSourceMeta)({ norisk: folder.norisk, mcmeta: folder.mcmeta, dir: folder.dir });
+    Project.name = (folder.norisk && folder.norisk.name) || folder.base;
+    Canvas.updateAll();
+    Blockbench.showQuickMessage(`Imported ${folder.base}`, 1600);
+}
+function createImportAnimationAction(registry, type) {
+    return registry.action('nrc_import_animation_' + type.id, {
+        name: 'Import ' + type.formatName + ' Animation',
+        description: 'Open a lone .animation.json on the rig, without a model or texture',
+        icon: 'movie_filter',
+        category: 'file',
+        condition: () => type.hasBareAnimations && type.hasAnimation,
+        click() {
+            Blockbench.import({
+                resource_id: 'nrc_animation_import',
+                extensions: ['json'],
+                type: type.formatName + ' Animation',
+                readtype: 'text',
+            }, (files) => {
+                const picked = files && files[0];
+                if (!picked)
+                    return;
+                let json;
+                try {
+                    json = JSON.parse(picked.content);
+                }
+                catch (e) {
+                    return fail('That file is not valid JSON: ' + (e && e.message || e));
+                }
+                if (!json || !json.animations) {
+                    return fail('No "animations" in that file, so it is not an animation.');
+                }
+                (0,_platform_rig__WEBPACK_IMPORTED_MODULE_1__.loadRig)(type, true);
+                (0,_platform_import_animationImport__WEBPACK_IMPORTED_MODULE_3__.importAnimation)(type, json);
+                Project.name = String(picked.name || type.defaultName).replace(/\.animation\.json$/i, '');
+                Canvas.updateAll();
+                Blockbench.showQuickMessage('Imported ' + Project.name, 1600);
+            });
+        },
+    });
+}
+function createImportAction(registry, type) {
+    return registry.action('nrc_import_' + type.id, {
+        name: 'Import ' + type.formatName,
+        description: 'Open a cosmetic folder with its model, texture, animation and metadata',
+        icon: 'folder_open',
+        category: 'file',
+        condition: () => (0,_core_node__WEBPACK_IMPORTED_MODULE_0__.hasFilesystem)() && !!Blockbench.pickDirectory,
+        click() {
+            const dir = Blockbench.pickDirectory({
+                title: 'Import ' + type.formatName,
+                startpath: lastDir,
+                resource_id: 'nrc_cosmetic_import',
+            });
+            if (!dir)
+                return;
+            lastDir = dir;
+            const result = (0,_platform_import_folderImport__WEBPACK_IMPORTED_MODULE_4__.readCosmeticFolder)(dir);
+            if ('kind' in result) {
+                (0,_core_log__WEBPACK_IMPORTED_MODULE_8__.log)('import rejected: ' + result.kind);
+                return fail((0,_platform_import_folderImport__WEBPACK_IMPORTED_MODULE_4__.describeError)(result));
+            }
+            build(type, result);
         },
     });
 }
@@ -62380,7 +62926,7 @@ if ( typeof window !== 'undefined' ) {
   \**********************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.5.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.1.2","fflate":"^0.8.3","three":"^0.160.1"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.10.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.1.2","fflate":"^0.8.3","three":"^0.160.1"}}');
 
 /***/ },
 
@@ -62469,6 +63015,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./platform/animationPatches */ "./ts/platform/animationPatches.ts");
 /* harmony import */ var _platform_easing__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./platform/easing */ "./ts/platform/easing/index.ts");
 /* harmony import */ var _cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cosmetics/emote */ "./ts/cosmetics/emote.ts");
+/* harmony import */ var _cosmetics_cosmetic__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./cosmetics/cosmetic */ "./ts/cosmetics/cosmetic.ts");
+/* harmony import */ var _ui_dialogStyles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ui/dialogStyles */ "./ts/ui/dialogStyles.ts");
+/* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
+/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
+
+
+
+
+
 
 
 
@@ -62483,7 +63039,12 @@ const { version, blockbenchConfig } = _package_json__WEBPACK_IMPORTED_MODULE_0__
         version,
         await_loading: true,
         onload() {
+            (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_8__.ensureTemplateCss)(registry);
+            (0,_ui_dialogStyles__WEBPACK_IMPORTED_MODULE_7__.ensureDialogCss)(registry);
+            (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_10__.installPlayerModel)(registry);
+            (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_9__.installSkinPreview)(registry);
             (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__.EMOTE, registry);
+            (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_cosmetic__WEBPACK_IMPORTED_MODULE_6__.COSMETIC, registry);
             (0,_platform_easing__WEBPACK_IMPORTED_MODULE_4__.installEasing)(registry);
             (0,_platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__.installAnimationPatches)();
             console.log('Loaded NoRisk Client Cosmetics plugin');
