@@ -49,6 +49,7 @@ declare const Animation: {
 declare const Undo: {
     initEdit(aspects: any): any;
     finishEdit(message: string, aspects?: any): any;
+    cancelEdit(): void;
 };
 declare const Canvas: any;
 declare function updateSelection(): void;

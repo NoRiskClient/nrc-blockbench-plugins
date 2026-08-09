@@ -4,6 +4,7 @@ import { registerFormat, getFormat } from './platform/format';
 import { lockPropKey } from './domain/meta';
 import { createSettingsAction } from './ui/settingsDialog';
 import { createExportAction } from './ui/exportDialog';
+import { createOutlineAction } from './tools/outline';
 import { ensureDialogCss } from './ui/dialogStyles';
 import { ensureTemplateCss, openTemplateDialog } from './ui/templateDialog';
 import { makeToggleSkinAction, makeToggleLayerAction, makeToggleArmModelAction, installSkinPreview } from './platform/skinPreview';
@@ -32,6 +33,7 @@ export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     installEffectsPanel(registry, type);
 
     ensureDialogCss(registry);
+    registry.menu(createOutlineAction(registry, type), 'tools');
     registry.menu(createRenameAction(registry, type), 'file');
     registry.menu(createExportAction(registry, type), 'file.export');
 
