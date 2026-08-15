@@ -4186,6 +4186,7 @@ function baseFormatOptions(type) {
         optional_box_uv: true,
         single_texture: true,
         render_sides: 'front',
+        animated_textures: true,
         bone_rig: true,
         centered_grid: true,
         locators: true,
@@ -64708,7 +64709,7 @@ if ( typeof window !== 'undefined' ) {
   \**********************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.11.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.3.1","fflate":"^0.8.3","three":"^0.160.1"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.12.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.3.1","fflate":"^0.8.3","three":"^0.160.1"}}');
 
 /***/ },
 
