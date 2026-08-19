@@ -1,5 +1,6 @@
 import { fs, nodePath, tempDir, toBuffer } from '../core/node';
 import { log } from '../core/log';
+import { companionStem } from './effectKeyframes';
 
 const PLACEHOLDER_NAME = 'missing_particle.png';
 const PLACEHOLDER_SIZE = 128;
@@ -159,7 +160,7 @@ export function setParticleTexture(particleFile: string, pngPath: string): boole
         return false;
     }
 
-    const name = nodePath.basename(pngPath).replace(/\.png$/i, '');
+    const name = companionStem(nodePath.basename(pngPath));
     const target = nodePath.join(nodePath.dirname(particleFile), name + '.png');
 
     try {

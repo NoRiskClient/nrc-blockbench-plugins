@@ -3788,7 +3788,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function soundEffectId(namespace, folder, id, fileName) {
-    return namespace + ':' + folder + '/' + id + '/' + (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.withoutSuffix)(fileName);
+    return namespace + ':' + folder + '/' + id + '/' + (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.companionStem)(fileName);
 }
 function particleEffectId(namespace, particleJson) {
     const meta = (0,_particleTexture__WEBPACK_IMPORTED_MODULE_1__.readParticleMeta)(particleJson);
@@ -3925,11 +3925,11 @@ function listEffectFiles(channels) {
         return [];
     const seen = new Set();
     const refs = [];
-    const add = (path, name) => {
+    const add = (path, name, textureName) => {
         if (seen.has(path))
             return;
         seen.add(path);
-        refs.push({ path, name });
+        refs.push({ path, name, textureName });
     };
     for (const keyframe of (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.allEffectKeyframes)()) {
         if (channels && channels.indexOf(keyframe.channel) === -1)
@@ -3939,15 +3939,16 @@ function listEffectFiles(channels) {
             const full = point.file;
             if (!full || (0,_vanillaSounds__WEBPACK_IMPORTED_MODULE_2__.isVanillaSoundPath)(full))
                 continue;
-            let name = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(full);
-            if (suffix && !(0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.isCompanionFile)(name))
-                name = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.withoutSuffix)(name) + suffix;
-            add(full, name);
-            if (keyframe.channel !== 'particle')
+            const name = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.companionStem)(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(full)) + suffix;
+            if (keyframe.channel !== 'particle') {
+                add(full, name);
                 continue;
+            }
             const texture = (0,_particleTexture__WEBPACK_IMPORTED_MODULE_1__.particleTextureOf)(full);
+            const textureName = texture ? (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_3__.companionStem)(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(texture)) : undefined;
+            add(full, name, textureName);
             if (texture)
-                add(texture, _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(texture));
+                add(texture, textureName + '.png');
         }
     }
     return refs;
@@ -3956,13 +3957,27 @@ function collectEffectFiles(channels) {
     const out = [];
     for (const ref of listEffectFiles(channels)) {
         try {
-            out.push({ name: ref.name, content: _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(ref.path) });
+            const content = _core_node__WEBPACK_IMPORTED_MODULE_0__.fs.readFileSync(ref.path);
+            out.push({ name: ref.name, content: ref.textureName ? withTextureName(content, ref.textureName) : content });
         }
         catch (e) {
             (0,_core_log__WEBPACK_IMPORTED_MODULE_4__.log)('effect files: could not read ' + ref.path + ': ' + e);
         }
     }
     return out;
+}
+function withTextureName(content, textureName) {
+    try {
+        const json = JSON.parse(content.toString('utf8'));
+        const params = json.particle_effect.description.basic_render_parameters;
+        if (String(params.texture || '').split('/').pop() === textureName)
+            return content;
+        params.texture = textureName;
+        return JSON.stringify(json, null, 2);
+    }
+    catch (e) {
+        return content;
+    }
 }
 
 
@@ -3979,6 +3994,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   CHANNEL_SUFFIX: () => (/* binding */ CHANNEL_SUFFIX),
 /* harmony export */   EFFECT_CHANNELS: () => (/* binding */ EFFECT_CHANNELS),
 /* harmony export */   allEffectKeyframes: () => (/* binding */ allEffectKeyframes),
+/* harmony export */   companionStem: () => (/* binding */ companionStem),
 /* harmony export */   countEffectKeyframes: () => (/* binding */ countEffectKeyframes),
 /* harmony export */   effectsAnimator: () => (/* binding */ effectsAnimator),
 /* harmony export */   findEffectKeyframe: () => (/* binding */ findEffectKeyframe),
@@ -3998,6 +4014,10 @@ function isCompanionFile(name) {
 }
 function withoutSuffix(name) {
     return name.replace(SUFFIX_PATTERN, '').toLowerCase();
+}
+// Minecraft resource paths: [a-z0-9/._-] only, enforced at render time.
+function companionStem(name) {
+    return withoutSuffix(name).replace(/\.png$/i, '').replace(/[^a-z0-9._-]+/g, '_');
 }
 function effectsAnimator(animation, create = false) {
     if (!animation || !animation.animators)
@@ -4586,6 +4606,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _core_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/node */ "./ts/core/node.ts");
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _effectKeyframes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./effectKeyframes */ "./ts/platform/effectKeyframes.ts");
+
 
 
 const PLACEHOLDER_NAME = 'missing_particle.png';
@@ -4738,7 +4760,7 @@ function setParticleTexture(particleFile, pngPath) {
         (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('setParticleTexture: could not read ' + particleFile + ': ' + e);
         return false;
     }
-    const name = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(pngPath).replace(/\.png$/i, '');
+    const name = (0,_effectKeyframes__WEBPACK_IMPORTED_MODULE_2__.companionStem)(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.basename(pngPath));
     const target = _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.join(_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.dirname(particleFile), name + '.png');
     try {
         if (_core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.resolve(pngPath) !== _core_node__WEBPACK_IMPORTED_MODULE_0__.nodePath.resolve(target)) {
@@ -64709,7 +64731,7 @@ if ( typeof window !== 'undefined' ) {
   \**********************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.12.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.3.1","fflate":"^0.8.3","three":"^0.160.1"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.13.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.3.1","fflate":"^0.8.3","three":"^0.160.1"}}');
 
 /***/ },
 

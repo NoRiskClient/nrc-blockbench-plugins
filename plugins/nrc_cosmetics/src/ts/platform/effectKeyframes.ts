@@ -15,6 +15,11 @@ export function withoutSuffix(name: string): string {
     return name.replace(SUFFIX_PATTERN, '').toLowerCase();
 }
 
+// Minecraft resource paths: [a-z0-9/._-] only, enforced at render time.
+export function companionStem(name: string): string {
+    return withoutSuffix(name).replace(/\.png$/i, '').replace(/[^a-z0-9._-]+/g, '_');
+}
+
 export function effectsAnimator(animation: any, create = false): any {
     if (!animation || !animation.animators) return null;
     if (!animation.animators.effects && create) {

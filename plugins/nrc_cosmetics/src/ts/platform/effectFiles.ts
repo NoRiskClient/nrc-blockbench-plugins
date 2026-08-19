@@ -3,7 +3,7 @@ import { fs, nodePath, tempDir, toBuffer } from '../core/node';
 import { particleTextureOf, readParticleMeta } from './particleTexture';
 import { isVanillaSoundPath } from './vanillaSounds';
 import {
-    CHANNEL_SUFFIX, allEffectKeyframes, isCompanionFile, withoutSuffix,
+    CHANNEL_SUFFIX, allEffectKeyframes, companionStem, withoutSuffix,
 } from './effectKeyframes';
 import { log } from '../core/log';
 
@@ -13,7 +13,7 @@ export interface CompanionFile {
 }
 
 export function soundEffectId(namespace: string, folder: string, id: string, fileName: string): string {
-    return namespace + ':' + folder + '/' + id + '/' + withoutSuffix(fileName);
+    return namespace + ':' + folder + '/' + id + '/' + companionStem(fileName);
 }
 
 export function particleEffectId(namespace: string, particleJson: string): string | null {
@@ -144,6 +144,7 @@ export function linkEffectFiles(scope: string, files: CompanionFile[]) {
 export interface EffectFileRef {
     name: string;
     path: string;
+    textureName?: string;
 }
 
 export function listEffectFiles(channels?: string[]): EffectFileRef[] {
@@ -151,10 +152,10 @@ export function listEffectFiles(channels?: string[]): EffectFileRef[] {
 
     const seen = new Set<string>();
     const refs: EffectFileRef[] = [];
-    const add = (path: string, name: string) => {
+    const add = (path: string, name: string, textureName?: string) => {
         if (seen.has(path)) return;
         seen.add(path);
-        refs.push({ path, name });
+        refs.push({ path, name, textureName });
     };
 
     for (const keyframe of allEffectKeyframes()) {
@@ -165,13 +166,15 @@ export function listEffectFiles(channels?: string[]): EffectFileRef[] {
             const full = point.file;
             if (!full || isVanillaSoundPath(full)) continue;
 
-            let name = nodePath.basename(full);
-            if (suffix && !isCompanionFile(name)) name = withoutSuffix(name) + suffix;
-            add(full, name);
-
-            if (keyframe.channel !== 'particle') continue;
+            const name = companionStem(nodePath.basename(full)) + suffix;
+            if (keyframe.channel !== 'particle') {
+                add(full, name);
+                continue;
+            }
             const texture = particleTextureOf(full);
-            if (texture) add(texture, nodePath.basename(texture));
+            const textureName = texture ? companionStem(nodePath.basename(texture)) : undefined;
+            add(full, name, textureName);
+            if (texture) add(texture, textureName + '.png');
         }
     }
     return refs;
@@ -181,10 +184,23 @@ export function collectEffectFiles(channels?: string[]): OutFile[] {
     const out: OutFile[] = [];
     for (const ref of listEffectFiles(channels)) {
         try {
-            out.push({ name: ref.name, content: fs.readFileSync(ref.path) });
+            const content = fs.readFileSync(ref.path);
+            out.push({ name: ref.name, content: ref.textureName ? withTextureName(content, ref.textureName) : content });
         } catch (e) {
             log('effect files: could not read ' + ref.path + ': ' + e);
         }
     }
     return out;
+}
+
+function withTextureName(content: any, textureName: string): Uint8Array | string {
+    try {
+        const json = JSON.parse(content.toString('utf8'));
+        const params = json.particle_effect.description.basic_render_parameters;
+        if (String(params.texture || '').split('/').pop() === textureName) return content;
+        params.texture = textureName;
+        return JSON.stringify(json, null, 2);
+    } catch (e) {
+        return content;
+    }
 }
