@@ -3175,13 +3175,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ui/exportDialog */ "./ts/ui/exportDialog.ts");
 /* harmony import */ var _ui_importDialog__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ui/importDialog */ "./ts/ui/importDialog.ts");
 /* harmony import */ var _tools_outline__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tools/outline */ "./ts/tools/outline.ts");
-/* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
-/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
-/* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
-/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
-/* harmony import */ var _platform_rig__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/rig */ "./ts/platform/rig.ts");
-/* harmony import */ var _ui_effectsPanel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./ui/effectsPanel */ "./ts/ui/effectsPanel.ts");
-/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
+/* harmony import */ var _ui_molangGuideDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/molangGuideDialog */ "./ts/ui/molangGuideDialog.ts");
+/* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
+/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
+/* harmony import */ var _ui_skinDialog__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./ui/skinDialog */ "./ts/ui/skinDialog.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _platform_rig__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./platform/rig */ "./ts/platform/rig.ts");
+/* harmony import */ var _ui_effectsPanel__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./ui/effectsPanel */ "./ts/ui/effectsPanel.ts");
+/* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
+
 
 
 
@@ -3198,8 +3200,8 @@ __webpack_require__.r(__webpack_exports__);
 function registerCosmeticType(type, registry) {
     (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.registerFormat)(registry, type);
     (0,_platform_format__WEBPACK_IMPORTED_MODULE_0__.getFormat)(type).new = type.hasTemplatePicker
-        ? function () { (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_6__.openTemplateDialog)(type); }
-        : function () { (0,_platform_rig__WEBPACK_IMPORTED_MODULE_10__.loadRig)(type); };
+        ? function () { (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_7__.openTemplateDialog)(type); }
+        : function () { (0,_platform_rig__WEBPACK_IMPORTED_MODULE_11__.loadRig)(type); };
     const condition = { formats: [type.formatId] };
     for (const f of type.metaFields) {
         registry.property(Animation, 'boolean', f.key, { default: f.default, exposed: false, condition });
@@ -3210,19 +3212,20 @@ function registerCosmeticType(type, registry) {
         }
     }
     registry.menu((0,_ui_settingsDialog__WEBPACK_IMPORTED_MODULE_2__.createSettingsAction)(registry, type), 'animation');
-    (0,_ui_effectsPanel__WEBPACK_IMPORTED_MODULE_11__.installEffectsPanel)(registry, type);
+    (0,_ui_effectsPanel__WEBPACK_IMPORTED_MODULE_12__.installEffectsPanel)(registry, type);
     registry.menu((0,_tools_outline__WEBPACK_IMPORTED_MODULE_5__.createOutlineAction)(registry, type), 'tools');
-    registry.menu((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_12__.createRenameAction)(registry, type), 'file');
+    registry.menu((0,_ui_molangGuideDialog__WEBPACK_IMPORTED_MODULE_6__.createMolangGuideAction)(registry, type), 'tools');
+    registry.menu((0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_13__.createRenameAction)(registry, type), 'file');
     registry.menu((0,_ui_importDialog__WEBPACK_IMPORTED_MODULE_4__.createImportAction)(registry, type), 'file.import');
     if (type.hasBareAnimations)
         registry.menu((0,_ui_importDialog__WEBPACK_IMPORTED_MODULE_4__.createImportAnimationAction)(registry, type), 'file.import');
     registry.menu((0,_ui_exportDialog__WEBPACK_IMPORTED_MODULE_3__.createExportAction)(registry, type), 'file.export');
     if (type.hasSkinPreview) {
-        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__.makeToggleSkinAction)(registry, type));
-        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__.makeToggleLayerAction)(registry, type));
-        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_7__.makeToggleArmModelAction)(registry, type));
-        registry.menu((0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_9__.makeToggleRigLockAction)(registry, type), 'edit');
-        registry.previewMenu((0,_ui_skinDialog__WEBPACK_IMPORTED_MODULE_8__.createSkinAction)(registry, type));
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_8__.makeToggleSkinAction)(registry, type));
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_8__.makeToggleLayerAction)(registry, type));
+        registry.previewMenu((0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_8__.makeToggleArmModelAction)(registry, type));
+        registry.menu((0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_10__.makeToggleRigLockAction)(registry, type), 'edit');
+        registry.previewMenu((0,_ui_skinDialog__WEBPACK_IMPORTED_MODULE_9__.createSkinAction)(registry, type));
     }
 }
 
@@ -3299,6 +3302,1317 @@ function writeFiles(base, files) {
         }, next);
     };
     next();
+}
+
+
+/***/ },
+
+/***/ "./ts/molang/catalog.ts"
+/*!******************************!*\
+  !*** ./ts/molang/catalog.ts ***!
+  \******************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MOLANG_CATALOG: () => (/* binding */ MOLANG_CATALOG)
+/* harmony export */ });
+const PLACEHOLDER = 'Blockbench reads this as 0. To preview it, add it under Animation → Variable Placeholders.';
+const bone = (part, label) => ({
+    name: `query.${part}_x_rot`,
+    aliases: [`query.${part}_y_rot`, `query.${part}_z_rot`],
+    kind: 'query',
+    contexts: ['emote'],
+    summary: `Rotation of the player's vanilla ${label} after Minecraft has posed it — lets a prop follow the real ${label}.`,
+    returns: 'degrees, one query per axis',
+    updates: 'every frame, per player',
+    example: `query.${part}_x_rot * 0.5`,
+    support: { client: 'yes', web: 'no', blockbench: 'partial' },
+    caveat: `Emotes only — reads 0 in cosmetics. The web preview has no player pose and reads 0. ${PLACEHOLDER}`,
+    source: 'GeoMolang.kt:71-88',
+    demo: {
+        caption: part === 'head'
+            ? 'The head nods (simulated player input). The right arm copies the nod through the query.'
+            : `The ${label} swings (simulated player input). The head copies the swing through the query.`,
+        expression: `query.${part}_x_rot`,
+        bone: part === 'head' ? 'right_arm' : 'head',
+        axis: 'x',
+        sim: `pose:${part}`,
+    },
+});
+const MOLANG_CATALOG = [
+    {
+        name: 'query.anim_time',
+        aliases: [],
+        kind: 'query',
+        contexts: ['cosmetic', 'emote'],
+        summary: 'Seconds since the animation started. The backbone of almost every moving keyframe.',
+        returns: 'seconds',
+        updates: 'every frame',
+        example: 'math.sin(query.anim_time * 180) * 10',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Loops wrap it back to 0; hold_on_last_frame keeps it counting. Write query., never q. — the game reads q.anim_time as 0 while both previews accept it.',
+        source: 'GeoMolang.kt:66',
+        usage: 2765,
+        usedIn: ['splash_aura', 'neon_aura', 'capy_plush', 'black_onyx_wings', 'glow_squid', 'elephant'],
+        demo: {
+            caption: 'Time × 360 = one full turn per second. The same trick spins the bubbles of splash_aura.',
+            expression: 'query.anim_time * 360',
+            bone: 'head',
+            axis: 'y',
+        },
+    },
+    {
+        name: 'query.life_time',
+        aliases: ['query.time'],
+        kind: 'query',
+        contexts: ['cosmetic'],
+        summary: 'Seconds the cosmetic has existed, independent of which animation is playing.',
+        returns: 'seconds, in 1/20 s steps',
+        updates: 'every frame, value changes per tick',
+        example: 'math.cos(query.life_time * 90) * 2',
+        support: { client: 'yes', web: 'partial', blockbench: 'partial' },
+        caveat: 'Reads 0 in emotes. The web preview only knows query.time and treats it as anim_time. Blockbench knows query.life_time but not query.time.',
+        source: 'GeoMolang.kt:67',
+        usage: 24,
+        usedIn: ['autumn_aura', 'easter_aura'],
+        demo: {
+            caption: 'The animation here restarts every 2 s, but life_time keeps counting — the head turns smoothly through every restart.',
+            expression: 'query.life_time * 45',
+            bone: 'head',
+            axis: 'y',
+            seconds: 8,
+            loop: 2,
+        },
+    },
+    {
+        name: 'query.is_moving',
+        aliases: [],
+        kind: 'query',
+        contexts: ['cosmetic', 'emote'],
+        summary: 'Whether the player is walking.',
+        returns: '1 or 0',
+        updates: 'every frame',
+        example: 'query.is_moving * math.sin(query.anim_time * 360) * 5',
+        support: { client: 'yes', web: 'no', blockbench: 'partial' },
+        caveat: `Cosmetics use limb swing, emotes use position change, so the threshold differs slightly. ${PLACEHOLDER}`,
+        source: 'GeoMolang.kt:68',
+        usage: 2,
+        usedIn: ['halloween_bike'],
+        demo: {
+            caption: 'Steve walks for 2 s, then stands for 2 s. Multiplying by is_moving switches the spin off while standing — halloween_bike spins its wheels this way.',
+            expression: 'query.is_moving * query.anim_time * 400',
+            bone: 'right_arm',
+            axis: 'x',
+            sim: 'walk',
+        },
+    },
+    {
+        name: 'query.is_sneaking',
+        aliases: [],
+        kind: 'query',
+        contexts: ['emote'],
+        summary: 'Whether the player is holding sneak.',
+        returns: '1 or 0',
+        updates: 'every frame',
+        example: '-query.is_sneaking * 3',
+        support: { client: 'partial', web: 'no', blockbench: 'partial' },
+        caveat: `Emotes only, and not on 1.8.9 — reads 0 there and in cosmetics. ${PLACEHOLDER}`,
+        source: 'GeoMolang.kt:69',
+        demo: {
+            caption: 'Steve sneaks for 2 s, then stands up. The arm lifts only while sneaking.',
+            expression: 'query.is_sneaking * -60',
+            bone: 'right_arm',
+            axis: 'x',
+            sim: 'sneak',
+        },
+    },
+    bone('head', 'head'),
+    bone('body', 'body'),
+    bone('right_arm', 'right arm'),
+    bone('left_arm', 'left arm'),
+    bone('right_leg', 'right leg'),
+    bone('left_leg', 'left leg'),
+    {
+        name: 'variable.particle_age',
+        aliases: [],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: 'Seconds this particle has been alive.',
+        returns: 'seconds',
+        updates: '20 times per second, first tick reads 0.05',
+        example: 'variable.particle_age / variable.particle_lifetime',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'The web preview reads this spelling as 0 and only understands query.particle_age. Keep variable. — that is what the game reads.',
+        source: 'GeoParticleInstanceLogic.kt:57,99',
+        usage: 1,
+        usedIn: ['firework'],
+        demo: {
+            caption: 'Age divided by lifetime runs from 0 at birth to 1 at death, whatever the lifetime — firework uses it to fade its flames through a colour gradient.',
+            expression: 'variable.particle_age / variable.particle_lifetime',
+            particle: true,
+        },
+    },
+    {
+        name: 'variable.particle_lifetime',
+        aliases: [],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: 'How long this particle lives, as resolved from max_lifetime.',
+        returns: 'seconds',
+        updates: 'once per particle',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'The web preview reads this spelling as 0; it only understands particle_lifetime as a query.',
+        source: 'GeoParticleInstanceLogic.kt:58,69',
+        usage: 1,
+        usedIn: ['firework'],
+        demo: {
+            caption: 'One minus the progress: a size that starts full and shrinks to nothing exactly when the particle dies.',
+            expression: '0.3 * (1 - variable.particle_age / variable.particle_lifetime)',
+            particle: true,
+        },
+    },
+    {
+        name: 'variable.particle_random_1',
+        aliases: ['variable.particle_random_2', 'variable.particle_random_3', 'variable.particle_random_4'],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: 'Four independent random numbers, fixed for the life of each particle. Use them to vary size, speed or colour per particle.',
+        returns: '0 to 1',
+        updates: 'once per particle',
+        example: '0.1 + variable.particle_random_1 * 0.2',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoParticleInstanceLogic.kt:59-62',
+        usage: 4,
+        usedIn: ['enchant_aura', 'amethyst', 'dinnerbone', 'overgrowth'],
+        demo: {
+            caption: 'Each line is one particle. Every particle rolls once and keeps its number — enchant_aura picks one of 26 glyphs this way.',
+            expression: 'math.floor(variable.particle_random_1 * 26)',
+            particle: true,
+        },
+    },
+    {
+        name: 'variable.emitter_age',
+        aliases: [],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: 'Seconds since the emitter started.',
+        returns: 'seconds',
+        updates: '20 times per second',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'The web preview reads this spelling as 0; it only understands emitter_age as a query.',
+        source: 'GeoEmitterLogic.kt:35,72',
+    },
+    {
+        name: 'variable.emitter_lifetime',
+        aliases: [],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: "The emitter's active_time for once and looping emitters, otherwise 1.",
+        returns: 'seconds',
+        updates: 'once per emitter',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'The web preview reads this spelling as 0; it only understands emitter_lifetime as a query.',
+        source: 'GeoEmitterLogic.kt:36-42',
+    },
+    {
+        name: 'variable.emitter_random_1',
+        aliases: ['variable.emitter_random_2', 'variable.emitter_random_3', 'variable.emitter_random_4'],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: 'Four random numbers shared by every particle of one emitter — one colour or heading for the whole burst.',
+        returns: '0 to 1',
+        updates: 'once per emitter, re-rolled when a looping emitter restarts',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoEmitterLogic.kt:43-46',
+    },
+    {
+        name: 'variable.particle_spawn_x',
+        aliases: ['variable.particle_spawn_y', 'variable.particle_spawn_z'],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: 'Where the particle spawned, relative to the emitter. NRC addition, not part of Bedrock.',
+        returns: 'blocks',
+        updates: 'once per particle',
+        support: { client: 'yes', web: 'no', blockbench: 'no' },
+        caveat: 'Game only — both previews read 0.',
+        source: 'GeoParticleShape.kt:54-56,242-244',
+    },
+    {
+        name: 'variable.<curve name>',
+        aliases: [],
+        kind: 'variable',
+        contexts: ['particle'],
+        summary: 'A curve declared in the particle file, read by its key.',
+        returns: 'the curve output',
+        updates: '20 times per second',
+        example: 'variable.size_curve',
+        support: { client: 'yes', web: 'partial', blockbench: 'yes' },
+        caveat: 'The web preview only finds curves written as curves.<name>; the standard variable.<name> reads 0 there.',
+        source: 'GeoMolangCurve.kt:43',
+    },
+    {
+        name: 'query.particle_age',
+        aliases: [],
+        kind: 'query',
+        contexts: ['particle'],
+        summary: 'Web-preview spelling of the particle age.',
+        returns: 'seconds',
+        updates: 'every frame',
+        support: { client: 'no', web: 'yes', blockbench: 'no' },
+        caveat: 'Works only in the web preview. The game has no particle queries — use variable.particle_age.',
+        source: 'molang.ts:501',
+    },
+    {
+        name: 'query.particle_lifetime',
+        aliases: [],
+        kind: 'query',
+        contexts: ['particle'],
+        summary: 'Web-preview spelling of the particle lifetime.',
+        returns: 'seconds',
+        updates: 'once per particle',
+        support: { client: 'no', web: 'yes', blockbench: 'no' },
+        caveat: 'Works only in the web preview. Use variable.particle_lifetime.',
+        source: 'molang.ts:504',
+    },
+    {
+        name: 'query.particle_speed',
+        aliases: [],
+        kind: 'query',
+        contexts: ['particle'],
+        summary: "The particle's current speed.",
+        returns: 'blocks per second',
+        updates: 'every frame',
+        support: { client: 'no', web: 'yes', blockbench: 'no' },
+        caveat: 'Works only in the web preview. The game has nothing equivalent.',
+        source: 'molang.ts:507',
+    },
+    {
+        name: 'query.emitter_age',
+        aliases: [],
+        kind: 'query',
+        contexts: ['particle'],
+        summary: 'Web-preview spelling of the emitter age.',
+        returns: 'seconds',
+        updates: 'every frame',
+        support: { client: 'no', web: 'yes', blockbench: 'no' },
+        caveat: 'Works only in the web preview. Use variable.emitter_age.',
+        source: 'molang.ts:511',
+    },
+    {
+        name: 'query.emitter_lifetime',
+        aliases: [],
+        kind: 'query',
+        contexts: ['particle'],
+        summary: 'Web-preview spelling of the emitter lifetime.',
+        returns: 'seconds',
+        updates: 'once per emitter',
+        support: { client: 'no', web: 'yes', blockbench: 'no' },
+        caveat: 'Works only in the web preview. Use variable.emitter_lifetime.',
+        source: 'molang.ts:514',
+    },
+    {
+        name: 'math.sin',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'A smooth back-and-forth wave. Put time inside, multiply the result by how far it should swing.',
+        returns: '-1 to 1',
+        updates: '',
+        example: 'math.sin(query.anim_time * 360) * 15',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Degrees, not radians — a full cycle is 360. Inside: speed (360 = once per second). Outside: size of the swing. Added number: the resting angle.',
+        source: 'GeoMolang.kt:118 · GeoMolangRuntime.kt:129',
+        usage: 2566,
+        usedIn: ['black_onyx_wings', 'glow_squid', 'elephant', 'bug_box'],
+        demo: {
+            caption: 'black_onyx_wings: rests at 22.5°, swings 10° either way, 250/360 ≈ 0.7 flaps per second.',
+            expression: '22.5 + math.sin(query.anim_time * 250) * 10',
+            bone: 'right_arm',
+            axis: 'z',
+        },
+    },
+    {
+        name: 'math.cos',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'The same wave as sin, shifted a quarter cycle — it starts at its peak instead of the middle.',
+        returns: '-1 to 1',
+        updates: '',
+        example: 'math.cos(query.anim_time * 360) * 15',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Degrees, not radians — a full cycle is 360. Pair sin and cos on two axes to move in a circle.',
+        source: 'GeoMolang.kt:119 · GeoMolangRuntime.kt:130',
+        usage: 1599,
+        usedIn: ['minime_charm', 'elephant'],
+        demo: {
+            caption: 'minime_charm: legs dangle 15° either way, 90/360 = one cycle every 4 s, matching the loop length.',
+            expression: 'math.cos((query.anim_time - 0.5) * 90) * 15',
+            bone: 'right_leg',
+            axis: 'z',
+        },
+    },
+    {
+        name: 'math.abs',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Flips negative numbers to positive — turns a swing into a bounce.',
+        returns: '0 or more',
+        updates: '',
+        example: 'math.abs(math.sin(query.anim_time * 360)) * 4',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoMolang.kt:120 · GeoMolangRuntime.kt:138',
+        usage: 94,
+        usedIn: ['elephant', 'giraffe', 'party'],
+        demo: {
+            caption: 'The sine half below zero is folded up, so the head only ever hops upwards. elephant and giraffe walk like this (with * 0.5).',
+            expression: 'math.abs(math.sin(query.anim_time * 300)) * 3',
+            bone: 'head',
+            channel: 'position',
+            axis: 'y',
+        },
+    },
+    {
+        name: 'math.random',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'A random number between lo and hi, or 0 to 1 with no arguments.',
+        returns: 'lo to hi',
+        updates: 'every evaluation — different each frame in a keyframe',
+        example: 'math.random(-2, 2)',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Great in particles (spawn rate, lifetime, spin). In a keyframe it re-rolls every frame and jitters. With one argument the particle engine returns 0 to a, the web preview returns a.',
+        source: 'GeoMolang.kt:312 · GeoMolangRuntime.kt:113',
+        usage: 47,
+        usedIn: ['firework', 'cuddle'],
+        demo: {
+            caption: 'In a keyframe every frame gets a new number — the head shivers. Use it in particles, not bones.',
+            expression: 'math.random(-3, 3)',
+            bone: 'head',
+            axis: 'x',
+        },
+    },
+    {
+        name: 'math.floor',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Rounds down to a whole number — good for stepped, stop-motion movement.',
+        returns: 'whole number',
+        updates: '',
+        example: 'math.floor(query.anim_time * 4) * 10',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoMolang.kt:121 · GeoMolangRuntime.kt:139',
+        usage: 5,
+        usedIn: ['enchant_aura', 'amethyst'],
+        demo: {
+            caption: 'Time × 4 rounded down jumps 4 times per second; × 22.5 turns each jump into a fixed step.',
+            expression: 'math.floor(query.anim_time * 4) * 22.5',
+            bone: 'head',
+            axis: 'y',
+        },
+    },
+    {
+        name: 'math.ceil',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Rounds up to a whole number.',
+        returns: 'whole number',
+        updates: '',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoMolang.kt:122 · GeoMolangRuntime.kt:140',
+        demo: {
+            caption: 'A sine rounded up is either 0 or 1 — the arm snaps between two poses instead of gliding.',
+            expression: 'math.ceil(math.sin(query.anim_time * 180)) * -45',
+            bone: 'right_arm',
+            axis: 'x',
+        },
+    },
+    {
+        name: 'math.round',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Rounds to the nearest whole number.',
+        returns: 'whole number',
+        updates: '',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Exactly .5 rounds to the nearest even number in game (2.5 → 2), up in the previews (2.5 → 3).',
+        source: 'GeoMolang.kt:123 · GeoMolangRuntime.kt:141',
+        demo: {
+            caption: 'A wave rounded to whole steps: the head clicks through five positions.',
+            expression: 'math.round(math.sin(query.anim_time * 90) * 2) * 20',
+            bone: 'head',
+            axis: 'y',
+        },
+    },
+    {
+        name: 'math.sqrt',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Square root — fast at first, then slower and slower.',
+        returns: '0 or more',
+        updates: '',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Negative input gives NaN in the game but 0 in the web preview.',
+        source: 'GeoMolang.kt:124 · GeoMolangRuntime.kt:142',
+        demo: {
+            caption: 'The arm shoots up and then eases into its final height.',
+            expression: 'math.sqrt(query.anim_time) * -45',
+            bone: 'right_arm',
+            axis: 'z',
+        },
+    },
+    {
+        name: 'math.exp',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'e raised to a power — grows slowly, then explodes.',
+        returns: 'more than 0',
+        updates: '',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoMolang.kt:125 · GeoMolangRuntime.kt:144',
+        usage: 1,
+        usedIn: ['sleepy'],
+        demo: {
+            caption: 'sleepy: a wobble whose size grows exponentially, like nodding off.',
+            expression: 'math.exp(query.anim_time * 0.5) * math.sin(query.anim_time * 300)',
+            bone: 'head',
+            axis: 'x',
+        },
+    },
+    {
+        name: 'math.ln',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Natural logarithm — the opposite of exp: quick start, then barely moving.',
+        returns: 'any number',
+        updates: '',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Zero or negative input gives -Infinity/NaN in game; add 1 to time as in the demo.',
+        source: 'GeoMolang.kt:126 · GeoMolangRuntime.kt:145',
+        demo: {
+            caption: 'The arm rises quickly, then creeps on.',
+            expression: 'math.ln(query.anim_time + 1) * 50',
+            bone: 'left_arm',
+            axis: 'z',
+        },
+    },
+    {
+        name: 'math.pow',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'base raised to exponent. A high power squeezes a wave into short, sharp spikes.',
+        returns: 'any number',
+        updates: '',
+        example: 'math.pow(query.anim_time, 2) * 3',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoMolang.kt:137 · GeoMolangRuntime.kt:143',
+        usage: 3,
+        usedIn: ['chicken_suit'],
+        demo: {
+            caption: 'chicken_suit: a cosine to the power of 100 is almost always 0 and spikes at the top — the head stays still, then pecks every 2 s.',
+            expression: 'math.pow(math.abs(math.cos(math.mod(query.anim_time * 90, 360))), 100) * 30',
+            bone: 'head',
+            axis: 'x',
+        },
+    },
+    {
+        name: 'math.mod',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Remainder of a divided by b — counts up to b and starts over.',
+        returns: 'any number',
+        updates: '',
+        example: 'math.mod(query.anim_time, 1) * 90',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Negative numbers differ: the game truncates (−1 mod 3 = −1), the web preview floors (= 2). Keep inputs positive. % is not Molang — use math.mod.',
+        source: 'GeoMolang.kt:138 · GeoMolangRuntime.kt:146',
+        usage: 3,
+        usedIn: ['chicken_suit'],
+        demo: {
+            caption: 'A sawtooth: the head turns 90° over half a second, snaps back, and repeats.',
+            expression: 'math.mod(query.anim_time * 180, 90)',
+            bone: 'head',
+            axis: 'y',
+        },
+    },
+    {
+        name: 'math.min',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'The smaller of the arguments — a ceiling a value cannot pass.',
+        returns: 'any number',
+        updates: '',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Two arguments in keyframes and the web preview; particles take any number.',
+        source: 'GeoMolang.kt:139 · GeoMolangRuntime.kt:149',
+        demo: {
+            caption: 'The arm raises with time until it hits 90° and stays there.',
+            expression: 'math.min(query.anim_time * 60, 90) * -1',
+            bone: 'right_arm',
+            axis: 'x',
+        },
+    },
+    {
+        name: 'math.max',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'The larger of the arguments — a floor a value cannot go below.',
+        returns: 'any number',
+        updates: '',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'Two arguments in keyframes and the web preview; particles take any number.',
+        source: 'GeoMolang.kt:140 · GeoMolangRuntime.kt:150',
+        demo: {
+            caption: 'Negative half of the wave is cut off: the arm swings forward, then rests half the time.',
+            expression: 'math.max(math.sin(query.anim_time * 180) * 60, 0) * -1',
+            bone: 'left_arm',
+            axis: 'x',
+        },
+    },
+    {
+        name: 'math.clamp',
+        aliases: [],
+        kind: 'function',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Keeps value between min and max — a wave that pauses at both ends.',
+        returns: 'min to max',
+        updates: '',
+        example: 'math.clamp(query.anim_time * 30, 0, 90)',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        source: 'GeoMolang.kt:154 · GeoMolangRuntime.kt:151',
+        demo: {
+            caption: 'A big ±120° wave clamped to ±45°: the head turns, holds, turns back, holds.',
+            expression: 'math.clamp(math.sin(query.anim_time * 90) * 120, -45, 45)',
+            bone: 'head',
+            axis: 'y',
+        },
+    },
+    {
+        name: 'math.tan',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Tangent of an angle given in degrees.',
+        returns: 'any number',
+        updates: '',
+        support: { client: 'partial', web: 'no', blockbench: 'no' },
+        caveat: 'Particles only — reads 0 in keyframes and in both previews.',
+        source: 'GeoMolangRuntime.kt:132',
+    },
+    {
+        name: 'math.asin',
+        aliases: ['math.acos', 'math.atan'],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Inverse trigonometry, returning degrees.',
+        returns: 'degrees',
+        updates: '',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game — reads 0 in keyframes.',
+        source: 'GeoMolangRuntime.kt:133-135',
+    },
+    {
+        name: 'math.atan2',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Angle of the vector (x, y), taking y first.',
+        returns: 'degrees',
+        updates: '',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game — reads 0 in keyframes.',
+        source: 'GeoMolangRuntime.kt:136',
+    },
+    {
+        name: 'math.lerp',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Blends from a to b by t (0 = a, 1 = b).',
+        returns: 'a to b',
+        updates: '',
+        example: 'math.lerp(0.2, 0.05, variable.particle_age / variable.particle_lifetime)',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game — reads 0 in keyframes, so a keyframe built on it goes to 0.',
+        source: 'GeoMolangRuntime.kt:159',
+        demo: {
+            caption: 'Size goes from 0.2 at birth to 0.05 at death.',
+            expression: 'math.lerp(0.2, 0.05, variable.particle_age / variable.particle_lifetime)',
+            particle: true,
+        },
+    },
+    {
+        name: 'math.lerprotate',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Blends between two angles the short way round.',
+        returns: 'degrees',
+        updates: '',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game.',
+        source: 'GeoMolangRuntime.kt:165',
+    },
+    {
+        name: 'math.hermite_blend',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Smooth S-curve from 0 to 1 — ease in and out in one call.',
+        returns: '0 to 1',
+        updates: '',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game. The game clamps t to 0–1, the web preview does not.',
+        source: 'GeoMolangRuntime.kt:177',
+        demo: {
+            caption: 'Same 0 → 1 as age / lifetime, but starting and ending gently.',
+            expression: 'math.hermite_blend(variable.particle_age / variable.particle_lifetime)',
+            particle: true,
+        },
+    },
+    {
+        name: 'math.random_integer',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'A random whole number from lo to hi, both included.',
+        returns: 'whole number',
+        updates: 'every evaluation',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game.',
+        source: 'GeoMolangRuntime.kt:120',
+    },
+    {
+        name: 'math.die_roll',
+        aliases: ['math.die_roll_integer'],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Sum of several random rolls.',
+        returns: 'number',
+        updates: 'every evaluation',
+        support: { client: 'partial', web: 'partial', blockbench: 'yes' },
+        caveat: 'The arguments differ: the game takes (count, sides) and always rolls whole dice; the web preview and Blockbench take (count, low, high). Particles only in the game.',
+        source: 'GeoMolangRuntime.kt:199-208',
+    },
+    {
+        name: 'math.pi',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'The number π.',
+        returns: '3.14159…',
+        updates: '',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game — reads 0 in keyframes.',
+        source: 'GeoMolangRuntime.kt:183',
+    },
+    {
+        name: 'math.sign',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: '1 for positive, −1 for negative, 0 for zero.',
+        returns: '-1, 0 or 1',
+        updates: '',
+        support: { client: 'partial', web: 'no', blockbench: 'yes' },
+        caveat: 'Particles only in the game; reads 0 in the web preview.',
+        source: 'GeoMolangRuntime.kt:186',
+    },
+    {
+        name: 'math.trunc',
+        aliases: ['math.truncate'],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Drops the fractional part, rounding toward zero.',
+        returns: 'whole number',
+        updates: '',
+        support: { client: 'partial', web: 'no', blockbench: 'partial' },
+        caveat: 'Particles only in the game; reads 0 in the web preview. Blockbench knows trunc but not truncate.',
+        source: 'GeoMolangRuntime.kt:195-196',
+    },
+    {
+        name: 'math.log',
+        aliases: [],
+        kind: 'function',
+        contexts: ['particle'],
+        summary: 'Same as math.ln.',
+        returns: 'any number',
+        updates: '',
+        support: { client: 'partial', web: 'no', blockbench: 'no' },
+        caveat: 'Particles only in the game; both previews read 0. Prefer math.ln.',
+        source: 'GeoMolangRuntime.kt:194',
+    },
+    {
+        name: 'math.inverse_lerp',
+        aliases: ['math.min_angle', 'math.copy_sign'],
+        kind: 'function',
+        contexts: [],
+        summary: 'Standard Molang functions that only Blockbench implements.',
+        returns: '',
+        updates: '',
+        support: { client: 'no', web: 'no', blockbench: 'yes' },
+        caveat: 'They preview fine in Blockbench and read 0 in the game.',
+        source: 'Blockbench Molang parser',
+    },
+    {
+        name: 'math.ease_in_quad',
+        aliases: [],
+        kind: 'function',
+        contexts: [],
+        summary: "Blockbench's easing functions (ease_in_quad, ease_out_cubic and the rest).",
+        returns: '',
+        updates: '',
+        support: { client: 'no', web: 'no', blockbench: 'yes' },
+        caveat: 'Blockbench only — the game reads 0. For eased motion use keyframe easing instead, which the game supports.',
+        source: 'Blockbench Molang parser',
+    },
+    {
+        name: '+  -  *  /  ( )',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['cosmetic', 'emote', 'particle'],
+        summary: 'Arithmetic and grouping. Division by zero gives 0.',
+        returns: '',
+        updates: '',
+        example: '(query.anim_time + 0.5) * 90',
+        support: { client: 'yes', web: 'yes', blockbench: 'yes' },
+        caveat: 'This is all a keyframe value understands in the game. Anything else — like % in autumn_aura and easter_aura — makes the game stop reading right there, silently.',
+        source: 'GeoMolang.kt:213-252',
+        demo: {
+            caption: 'Same expression, evaluated like a keyframe in game and in the preview. Red rows are where they disagree.',
+            compare: ['(query.anim_time + 0.5) * 90', '-(2 + 3) * 4', '10 / 0', '(query.time * 10) % 360'],
+        },
+    },
+    {
+        name: '<  >  <=  >=  ==  !=',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['particle'],
+        summary: 'Comparisons, giving 1 or 0.',
+        returns: '1 or 0',
+        updates: '',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game. In a keyframe the parser stops at the operator without an error, so a > b quietly becomes a — it previews correctly and breaks in game.',
+        source: 'api/molang/GeoMolang.kt',
+        demo: {
+            caption: 'In a keyframe the game only reads up to the comparison.',
+            compare: ['query.anim_time > 30', '5 == 5', '2 <= 1'],
+        },
+    },
+    {
+        name: '&&  ||  !',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['particle'],
+        summary: 'Logic, giving 1 or 0.',
+        returns: '1 or 0',
+        updates: '',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game, and both sides are always evaluated.',
+        source: 'GeoMolangExpression.kt:113-121',
+        demo: {
+            caption: 'In a keyframe the game stops at the first logic operator.',
+            compare: ['1 && 0', '0 || 1', '!0'],
+        },
+    },
+    {
+        name: 'condition ? a : b',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['particle'],
+        summary: 'Pick a or b depending on the condition.',
+        returns: '',
+        updates: '',
+        example: 'variable.particle_age > 1 ? 0.1 : 0.3',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game. Without the : part the game returns the condition itself.',
+        source: 'api/molang/GeoMolang.kt:69-81',
+        demo: {
+            caption: 'Looks right in every preview, but in a keyframe the game returns the left side of the comparison.',
+            compare: ['query.anim_time > 30 ? 90 : 0', '1 ? 10 : 20'],
+        },
+    },
+    {
+        name: 'variable.name = value;',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['particle'],
+        summary: 'Store a value for later expressions; statements are separated by ;.',
+        returns: 'the last statement',
+        updates: '',
+        example: 'variable.size = 0.2 + variable.particle_random_1 * 0.1;',
+        support: { client: 'partial', web: 'yes', blockbench: 'yes' },
+        caveat: 'Particles only in the game. Emitter variables are copied into each particle when it spawns.',
+        source: 'GeoParticleInstanceLogic.kt:54',
+        demo: {
+            caption: 'Keyframes cannot store variables in game.',
+            compare: ['variable.a = 5; variable.a * 2'],
+        },
+    },
+    {
+        name: 'q.  v.  t.  c.',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['particle'],
+        summary: 'Short forms of query., variable., temp. and context.',
+        returns: '',
+        updates: '',
+        support: { client: 'partial', web: 'partial', blockbench: 'yes' },
+        caveat: 'The game only accepts v. (in particles). q. reads 0 everywhere in game even though both previews accept it — always write query. fivehead ships math.sin(q.anim_time * 3000), which stands still in game.',
+        source: 'GeoMolang.kt:330',
+        usedIn: ['fivehead'],
+        demo: {
+            caption: 'q. works in the preview and is 0 in game.',
+            compare: ['q.anim_time * 2', 'math.sin(q.anim_time * 3000) * 4', 'Math.sin(query.anim_time * 3000) * 4'],
+        },
+    },
+    {
+        name: 'return  loop  ??  this',
+        aliases: [],
+        kind: 'syntax',
+        contexts: [],
+        summary: 'Control flow and null-coalescing from Bedrock Molang.',
+        returns: '',
+        updates: '',
+        support: { client: 'no', web: 'partial', blockbench: 'yes' },
+        caveat: 'Not supported in game. The web preview understands return only.',
+        source: 'api/molang/GeoMolang.kt',
+    },
+];
+
+
+/***/ },
+
+/***/ "./ts/molang/clientEval.ts"
+/*!*********************************!*\
+  !*** ./ts/molang/clientEval.ts ***!
+  \*********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   evalClient: () => (/* binding */ evalClient),
+/* harmony export */   parseClient: () => (/* binding */ parseClient)
+/* harmony export */ });
+const QUERIES = new Set(['anim_time', 'life_time', 'is_moving', 'is_sneaking']);
+for (const part of ['head', 'body', 'right_arm', 'left_arm', 'right_leg', 'left_leg']) {
+    for (const axis of ['x', 'y', 'z'])
+        QUERIES.add(`${part}_${axis}_rot`);
+}
+const DEG = Math.PI / 180;
+function rint(v) {
+    const f = Math.floor(v);
+    const d = v - f;
+    if (d > 0.5)
+        return f + 1;
+    if (d < 0.5)
+        return f;
+    return f % 2 === 0 ? f : f + 1;
+}
+function mathFunc1(name, v) {
+    switch (name) {
+        case 'sin': return Math.sin(v * DEG);
+        case 'cos': return Math.cos(v * DEG);
+        case 'abs': return Math.abs(v);
+        case 'floor': return Math.floor(v);
+        case 'ceil': return Math.ceil(v);
+        case 'round': return rint(v);
+        case 'sqrt': return Math.sqrt(v);
+        case 'exp': return Math.exp(v);
+        case 'ln': return Math.log(v);
+        default: return 0;
+    }
+}
+function mathFunc2(name, a, b) {
+    switch (name) {
+        case 'pow': return Math.pow(a, b);
+        case 'mod': return b !== 0 ? a % b : 0;
+        case 'min': return Math.min(a, b);
+        case 'max': return Math.max(a, b);
+        default: return 0;
+    }
+}
+const constant = (value) => () => value;
+class Parser {
+    constructor(input) {
+        this.input = input;
+        this.pos = 0;
+    }
+    parseExpression() {
+        return this.parseAddSub();
+    }
+    parseAddSub() {
+        let left = this.parseMulDiv();
+        while (this.pos < this.input.length) {
+            this.skipWhitespace();
+            if (this.pos >= this.input.length)
+                break;
+            const op = this.input[this.pos];
+            if (op !== '+' && op !== '-')
+                break;
+            this.pos++;
+            const l = left;
+            const r = this.parseMulDiv();
+            left = op === '+' ? (q) => l(q) + r(q) : (q) => l(q) - r(q);
+        }
+        return left;
+    }
+    parseMulDiv() {
+        let left = this.parseUnary();
+        while (this.pos < this.input.length) {
+            this.skipWhitespace();
+            if (this.pos >= this.input.length)
+                break;
+            const op = this.input[this.pos];
+            if (op !== '*' && op !== '/')
+                break;
+            this.pos++;
+            const l = left;
+            const r = this.parseUnary();
+            left = op === '*'
+                ? (q) => l(q) * r(q)
+                : (q) => { const d = r(q); return d !== 0 ? l(q) / d : 0; };
+        }
+        return left;
+    }
+    parseUnary() {
+        this.skipWhitespace();
+        if (this.pos < this.input.length && this.input[this.pos] === '-') {
+            this.pos++;
+            const inner = this.parseUnary();
+            return (q) => -inner(q);
+        }
+        return this.parsePrimary();
+    }
+    parsePrimary() {
+        this.skipWhitespace();
+        if (this.pos >= this.input.length)
+            return constant(0);
+        const c = this.input[this.pos];
+        if (c === '(') {
+            this.pos++;
+            const expr = this.parseExpression();
+            this.skipWhitespace();
+            if (this.pos < this.input.length && this.input[this.pos] === ')')
+                this.pos++;
+            return expr;
+        }
+        if (/[0-9.]/.test(c))
+            return this.parseNumber();
+        if (/[A-Za-z]/.test(c))
+            return this.parseIdentifier();
+        return constant(0);
+    }
+    parseNumber() {
+        const start = this.pos;
+        while (this.pos < this.input.length && /[0-9.]/.test(this.input[this.pos]))
+            this.pos++;
+        const value = Number(this.input.substring(start, this.pos));
+        return constant(Number.isFinite(value) ? value : 0);
+    }
+    parseIdentifier() {
+        const start = this.pos;
+        while (this.pos < this.input.length && /[A-Za-z0-9_.]/.test(this.input[this.pos]))
+            this.pos++;
+        const ident = this.input.substring(start, this.pos);
+        this.skipWhitespace();
+        if (this.pos < this.input.length && this.input[this.pos] === '(') {
+            this.pos++;
+            const args = [this.parseExpression()];
+            this.skipWhitespace();
+            while (this.pos < this.input.length && this.input[this.pos] === ',') {
+                this.pos++;
+                args.push(this.parseExpression());
+                this.skipWhitespace();
+            }
+            if (this.pos < this.input.length && this.input[this.pos] === ')')
+                this.pos++;
+            const lower = ident.toLowerCase();
+            if (!lower.startsWith('math.'))
+                return args[0];
+            const fn = lower.slice('math.'.length);
+            if (fn === 'random') {
+                const lo = args[0];
+                const hi = args[1];
+                return (q) => {
+                    const a = lo ? lo(q) : 0;
+                    const b = hi ? hi(q) : 1;
+                    return a + Math.random() * (b - a);
+                };
+            }
+            if (args.length >= 3 && fn === 'clamp') {
+                const [v, lo, hi] = args;
+                return (q) => Math.min(Math.max(v(q), lo(q)), hi(q));
+            }
+            if (args.length >= 2 && ['pow', 'mod', 'min', 'max'].includes(fn)) {
+                const [a, b] = args;
+                return (q) => mathFunc2(fn, a(q), b(q));
+            }
+            const arg = args[0];
+            return (q) => mathFunc1(fn, arg(q));
+        }
+        if (ident.startsWith('query.')) {
+            const name = ident.slice('query.'.length);
+            if (name === 'time')
+                return (q) => { var _a; return (_a = q.life_time) !== null && _a !== void 0 ? _a : 0; };
+            if (!QUERIES.has(name))
+                return constant(0);
+            return (q) => { var _a; return (_a = q[name]) !== null && _a !== void 0 ? _a : 0; };
+        }
+        return constant(0);
+    }
+    skipWhitespace() {
+        while (this.pos < this.input.length && /\s/.test(this.input[this.pos]))
+            this.pos++;
+    }
+}
+function parseClient(expression) {
+    return new Parser(expression.trim()).parseExpression();
+}
+function evalClient(expression, queries = {}) {
+    return parseClient(expression)(queries);
+}
+
+
+/***/ },
+
+/***/ "./ts/molang/demo.ts"
+/*!***************************!*\
+  !*** ./ts/molang/demo.ts ***!
+  \***************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   COMPARE_ANIM_TIME: () => (/* binding */ COMPARE_ANIM_TIME),
+/* harmony export */   compareInKeyframe: () => (/* binding */ compareInKeyframe),
+/* harmony export */   sampleKeyframeDemo: () => (/* binding */ sampleKeyframeDemo),
+/* harmony export */   sampleParticleDemo: () => (/* binding */ sampleParticleDemo)
+/* harmony export */ });
+/* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/molang.js");
+/* harmony import */ var _clientEval__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./clientEval */ "./ts/molang/clientEval.ts");
+
+
+const FPS = 60;
+const PARTICLE_LIFETIME = 2;
+const COMPARE_ANIM_TIME = 40;
+const STEVE = {
+    head: 'bipedHead',
+    body: 'bipedBody',
+    right_arm: 'bipedRightArm',
+    left_arm: 'bipedLeftArm',
+    right_leg: 'bipedRightLeg',
+    left_leg: 'bipedLeftLeg',
+};
+const PARTICLE_RANDOMS = [
+    [0.12, 0.53, 0.81, 0.34],
+    [0.47, 0.91, 0.22, 0.68],
+    [0.76, 0.08, 0.59, 0.95],
+    [0.95, 0.37, 0.44, 0.11],
+    [0.31, 0.72, 0.05, 0.52],
+];
+const NONE = { queries: {}, pose: [], input: 0, label: '' };
+function simulate(sim, t) {
+    const active = t % 4 < 2 ? 1 : 0;
+    if (sim === 'walk') {
+        const swing = active * Math.sin(t * Math.PI * 3) * 30;
+        return {
+            queries: { is_moving: active },
+            pose: [{ bone: 'right_leg', axis: 'x', value: swing }, { bone: 'left_leg', axis: 'x', value: -swing }],
+            input: active,
+            label: 'query.is_moving',
+        };
+    }
+    if (sim === 'sneak') {
+        return {
+            queries: { is_sneaking: active },
+            pose: [{ bone: 'body', axis: 'x', value: active * 28 }],
+            input: active,
+            label: 'query.is_sneaking',
+        };
+    }
+    if (sim && sim.startsWith('pose:')) {
+        const part = sim.slice('pose:'.length);
+        const value = Math.sin(t * Math.PI / 2) * 35;
+        return {
+            queries: { [`${part}_x_rot`]: value },
+            pose: [{ bone: part, axis: 'x', value }],
+            input: value,
+            label: `query.${part}_x_rot`,
+        };
+    }
+    return NONE;
+}
+function finite(value) {
+    return Number.isFinite(value) ? value : 0;
+}
+class BakedBones {
+    constructor() {
+        this.bones = {};
+    }
+    add(bone, channel, axis, time, value) {
+        const name = STEVE[bone];
+        const channels = this.bones[name] || (this.bones[name] = {});
+        const frames = channels[channel] || (channels[channel] = {});
+        const vec = frames[time] || (frames[time] = [0, 0, 0]);
+        vec['xyz'.indexOf(axis)] += value;
+    }
+    toAnimationJson(seconds) {
+        if (!Object.keys(this.bones).length)
+            return null;
+        return {
+            format_version: '1.8.0',
+            animations: { demo: { loop: true, animation_length: seconds, bones: this.bones } },
+        };
+    }
+}
+function sampleKeyframeDemo(demo, expression) {
+    const seconds = demo.seconds || 4;
+    const node = (0,_clientEval__WEBPACK_IMPORTED_MODULE_1__.parseClient)(expression);
+    const frames = Math.round(seconds * FPS);
+    const values = [];
+    const input = [];
+    const baked = new BakedBones();
+    let inputLabel = '';
+    for (let i = 0; i <= frames; i++) {
+        const t = i / FPS;
+        const time = t.toFixed(4);
+        const sim = simulate(demo.sim, t);
+        const value = finite(node(Object.assign(Object.assign({}, sim.queries), { anim_time: demo.loop ? t % demo.loop : t, life_time: t })));
+        values.push(value);
+        if (sim.label) {
+            input.push(sim.input);
+            inputLabel = sim.label;
+        }
+        for (const p of sim.pose)
+            baked.add(p.bone, 'rotation', p.axis, time, p.value);
+        if (demo.bone)
+            baked.add(demo.bone, demo.channel || 'rotation', demo.axis || 'x', time, value);
+    }
+    return {
+        seconds,
+        lines: [values],
+        input: inputLabel ? input : null,
+        inputLabel,
+        animationJson: baked.toAnimationJson(seconds),
+    };
+}
+function sampleParticleDemo(expression) {
+    const frames = Math.round(PARTICLE_LIFETIME * FPS);
+    const lines = PARTICLE_RANDOMS.map((random) => {
+        const line = [];
+        for (let i = 0; i <= frames; i++) {
+            const age = i / FPS;
+            line.push(finite((0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_0__.evalMolang)(expression, {
+                particleAge: age,
+                particleLifetime: PARTICLE_LIFETIME,
+                particleRandom: random,
+                emitterAge: age,
+                emitterLifetime: PARTICLE_LIFETIME,
+                emitterRandom: PARTICLE_RANDOMS[0],
+                variables: new Map([
+                    ['particle_age', age],
+                    ['particle_lifetime', PARTICLE_LIFETIME],
+                    ['emitter_age', age],
+                    ['emitter_lifetime', PARTICLE_LIFETIME],
+                ]),
+            })));
+        }
+        return line;
+    });
+    return { seconds: PARTICLE_LIFETIME, lines, input: null, inputLabel: '', animationJson: null };
+}
+function compareInKeyframe(expressions) {
+    const queries = { anim_time: COMPARE_ANIM_TIME, life_time: COMPARE_ANIM_TIME };
+    return expressions.map((expression) => ({
+        expression,
+        game: finite((0,_clientEval__WEBPACK_IMPORTED_MODULE_1__.parseClient)(expression)(queries)),
+        preview: finite((0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_0__.evalMolang)(expression, { animTime: COMPARE_ANIM_TIME, variables: new Map() })),
+    }));
+}
+
+
+/***/ },
+
+/***/ "./ts/molang/graph.ts"
+/*!****************************!*\
+  !*** ./ts/molang/graph.ts ***!
+  \****************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GRAPH_H: () => (/* binding */ GRAPH_H),
+/* harmony export */   GRAPH_W: () => (/* binding */ GRAPH_W),
+/* harmony export */   buildGraph: () => (/* binding */ buildGraph),
+/* harmony export */   formatNumber: () => (/* binding */ formatNumber),
+/* harmony export */   playheadX: () => (/* binding */ playheadX)
+/* harmony export */ });
+const GRAPH_W = 320;
+const GRAPH_H = 120;
+const PAD = 8;
+function formatNumber(value) {
+    if (Math.abs(value) >= 1000)
+        return value.toFixed(0);
+    return String(Math.round(value * 100) / 100);
+}
+function range(lines) {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const line of lines)
+        for (const v of line) {
+            if (v < min)
+                min = v;
+            if (v > max)
+                max = v;
+        }
+    if (!Number.isFinite(min))
+        return [-1, 1];
+    if (max - min < 1e-6)
+        return [min - 1, max + 1];
+    return [min, max];
+}
+function toPath(values, min, max) {
+    const span = max - min;
+    const last = Math.max(values.length - 1, 1);
+    return values.map((v, i) => {
+        const x = (i / last) * GRAPH_W;
+        const y = PAD + ((max - v) / span) * (GRAPH_H - PAD * 2);
+        return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+}
+function buildGraph(samples) {
+    const [min, max] = range(samples.lines);
+    const zero = min < 0 && max > 0 ? PAD + (max / (max - min)) * (GRAPH_H - PAD * 2) : null;
+    let input = '';
+    if (samples.input) {
+        const [inMin, inMax] = range([samples.input]);
+        input = toPath(samples.input, inMin, inMax);
+    }
+    return {
+        lines: samples.lines.map((line) => toPath(line, min, max)),
+        input,
+        inputLabel: samples.inputLabel,
+        zero,
+        min: formatNumber(min),
+        max: formatNumber(max),
+    };
+}
+function playheadX(t, seconds) {
+    return (t / seconds) * GRAPH_W;
 }
 
 
@@ -4590,6 +5904,49 @@ function importGeometry(geoJson, textureDataUri) {
 
 /***/ },
 
+/***/ "./ts/platform/molangAutocomplete.ts"
+/*!*******************************************!*\
+  !*** ./ts/platform/molangAutocomplete.ts ***!
+  \*******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   installMolangAutocomplete: () => (/* binding */ installMolangAutocomplete)
+/* harmony export */ });
+/* harmony import */ var _molang_catalog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../molang/catalog */ "./ts/molang/catalog.ts");
+
+function nrcQueryIds() {
+    const ids = new Set();
+    for (const entry of _molang_catalog__WEBPACK_IMPORTED_MODULE_0__.MOLANG_CATALOG) {
+        if (entry.kind !== 'query' || entry.support.client === 'no')
+            continue;
+        for (const name of [entry.name, ...entry.aliases]) {
+            if (name.startsWith('query.'))
+                ids.add(name.slice('query.'.length));
+        }
+    }
+    return [...ids];
+}
+function installMolangAutocomplete(registry) {
+    const autocomplete = window.MolangAutocomplete;
+    const context = autocomplete === null || autocomplete === void 0 ? void 0 : autocomplete.DefaultContext;
+    if (!context || typeof context.getNamespace !== 'function')
+        return;
+    const namespace = context.getNamespace('query', false);
+    if (!namespace)
+        return;
+    for (const id of nrcQueryIds()) {
+        if (namespace.hasQuery(id))
+            continue;
+        namespace.addQuery({ id, priority: 10 });
+        registry.track(() => namespace.removeQuery(id));
+    }
+}
+
+
+/***/ },
+
 /***/ "./ts/platform/particleTexture.ts"
 /*!****************************************!*\
   !*** ./ts/platform/particleTexture.ts ***!
@@ -5382,7 +6739,8 @@ function sourceMeta() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   addLivePreview: () => (/* binding */ addLivePreview),
-/* harmony export */   clearLivePreviews: () => (/* binding */ clearLivePreviews)
+/* harmony export */   clearLivePreviews: () => (/* binding */ clearLivePreviews),
+/* harmony export */   removeLivePreview: () => (/* binding */ removeLivePreview)
 /* harmony export */ });
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @noriskclient/nrc-skin-renderer */ "./node_modules/@noriskclient/nrc-skin-renderer/dist/core/particles/parseParticle.js");
@@ -5400,13 +6758,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const SIZE = 132;
-const FPS = 24;
+const DEFAULT_FPS = 24;
+const DEFAULT_CAMERA_DISTANCE = 44;
 const NEGATE_X = true; // bedrock<->blockbench X convention used by the renderer lib
 const BLOCK_TO_PX = 16;
 let renderer = null;
 let camera = null;
 let skinMaterial = null;
 let raf = 0;
+let renderedSize = SIZE;
 let last = 0;
 let items = [];
 function makeTexture(dataUri) {
@@ -5483,18 +6843,30 @@ function ensureMaterial() {
         skinMaterial = makeMaterial(_assets_steveSkin__WEBPACK_IMPORTED_MODULE_9__["default"]);
     return skinMaterial;
 }
+function makeCamera(distance) {
+    const cam = new three__WEBPACK_IMPORTED_MODULE_0__.PerspectiveCamera(38, 1, 0.1, 1000);
+    cam.position.set(0, 20, distance);
+    cam.lookAt(0, 16, 0);
+    return cam;
+}
 function ensureRenderer() {
     if (renderer)
         return;
     renderer = new three__WEBPACK_IMPORTED_MODULE_0__.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(SIZE, SIZE);
-    camera = new three__WEBPACK_IMPORTED_MODULE_0__.PerspectiveCamera(38, 1, 0.1, 1000);
-    camera.position.set(0, 20, 44);
-    camera.lookAt(0, 16, 0);
+    renderedSize = SIZE;
+    camera = makeCamera(DEFAULT_CAMERA_DISTANCE);
+}
+function maxFps() {
+    let fps = DEFAULT_FPS;
+    for (const item of items)
+        if (item.fps > fps)
+            fps = item.fps;
+    return fps;
 }
 function loop(now) {
     raf = requestAnimationFrame(loop);
-    if (now - last < 1000 / FPS)
+    if (now - last < 1000 / maxFps())
         return;
     const dt = Math.min((now - last) / 1000, 0.25);
     last = now;
@@ -5509,14 +6881,19 @@ function loop(now) {
             (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_7__.applyEmoteToRig)(item.player, item.tree, { negateX: NEGATE_X, propTree: item.propTree || undefined });
             if (item.particles)
                 item.particles.tick(t, dt);
-            renderer.render(item.scene, camera);
-            item.ctx.clearRect(0, 0, SIZE, SIZE);
-            item.ctx.drawImage(renderer.domElement, 0, 0, SIZE, SIZE);
+            if (renderedSize !== item.size) {
+                renderer.setSize(item.size, item.size);
+                renderedSize = item.size;
+            }
+            renderer.render(item.scene, item.camera);
+            item.ctx.clearRect(0, 0, item.size, item.size);
+            item.ctx.drawImage(renderer.domElement, 0, 0, item.size, item.size);
         }
         catch (e) { /* skip frame */ }
     }
 }
-function addLivePreview(canvas, animationJson, propGeo, propTexUri, particles) {
+function addLivePreview(canvas, animationJson, options = {}) {
+    const { propGeo, propTexUri, particles, fps, cameraDistance } = options;
     try {
         ensureRenderer();
         const tree = (0,_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_4__.buildBoneTree)(_noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_8__.STEVE_GEO, ensureMaterial(), { negateX: NEGATE_X, armorOnly: false });
@@ -5541,7 +6918,8 @@ function addLivePreview(canvas, animationJson, propGeo, propTexUri, particles) {
             scene.add(sys.root);
         const player = new _noriskclient_nrc_skin_renderer__WEBPACK_IMPORTED_MODULE_6__.EmotePlayer(sys ? { keyframeListener: particleListener(sys, tree, propTree) } : undefined);
         player.play(file.emotes[0], performance.now() / 1000, { loop: true });
-        items.push({ ctx: canvas.getContext('2d'), scene, tree, propTree, player, time: 0, particles: sys });
+        items.push({ ctx: canvas.getContext('2d'), scene, tree, propTree, player, time: 0, particles: sys, size: canvas.width || SIZE, fps: fps || DEFAULT_FPS,
+            camera: cameraDistance ? makeCamera(cameraDistance) : camera });
         if (!raf) {
             last = performance.now();
             raf = requestAnimationFrame(loop);
@@ -5564,24 +6942,33 @@ function disposeScene(root) {
         }
     });
 }
+function disposeItem(item) {
+    try {
+        if (item.particles) {
+            item.scene.remove(item.particles.root);
+            item.particles.dispose();
+        }
+    }
+    catch (e) { }
+    try {
+        disposeScene(item.scene);
+    }
+    catch (e) { }
+    item.ctx.clearRect(0, 0, item.size, item.size);
+}
+function removeLivePreview(canvas) {
+    for (const item of items)
+        if (item.ctx.canvas === canvas)
+            disposeItem(item);
+    items = items.filter((item) => item.ctx.canvas !== canvas);
+}
 function clearLivePreviews() {
     if (raf) {
         cancelAnimationFrame(raf);
         raf = 0;
     }
-    for (const item of items) {
-        try {
-            if (item.particles) {
-                item.scene.remove(item.particles.root);
-                item.particles.dispose();
-            }
-        }
-        catch (e) { /* ignore */ }
-        try {
-            disposeScene(item.scene);
-        }
-        catch (e) { /* ignore */ }
-    }
+    for (const item of items)
+        disposeItem(item);
     items = [];
     skinMaterial = null;
     if (renderer && renderer.dispose) {
@@ -7029,7 +8416,7 @@ function createExportAction(registry, type) {
                             const cv = this.$refs.preview;
                             if (cv) {
                                 try {
-                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type), propGeoJson(), propTextureDataUri(), previewParticles());
+                                    (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_11__.addLivePreview)(cv, (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type), { propGeo: propGeoJson(), propTexUri: propTextureDataUri(), particles: previewParticles() });
                                 }
                                 catch (e) { /* ignore */ }
                             }
@@ -7272,6 +8659,355 @@ function createImportAction(registry, type) {
             }
             build(type, result);
         },
+    });
+}
+
+
+/***/ },
+
+/***/ "./ts/ui/molangGuideDialog.ts"
+/*!************************************!*\
+  !*** ./ts/ui/molangGuideDialog.ts ***!
+  \************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createMolangGuideAction: () => (/* binding */ createMolangGuideAction),
+/* harmony export */   ensureMolangGuideCss: () => (/* binding */ ensureMolangGuideCss)
+/* harmony export */ });
+/* harmony import */ var _molang_catalog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../molang/catalog */ "./ts/molang/catalog.ts");
+/* harmony import */ var _molang_demo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../molang/demo */ "./ts/molang/demo.ts");
+/* harmony import */ var _molang_graph__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../molang/graph */ "./ts/molang/graph.ts");
+/* harmony import */ var _platform_format__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../platform/format */ "./ts/platform/format.ts");
+/* harmony import */ var _platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../platform/templates/livePreview */ "./ts/platform/templates/livePreview.ts");
+
+
+
+
+
+const FILTERS = [
+    { id: 'all', label: 'All' },
+    { id: 'animation', label: 'Animation' },
+    { id: 'particle', label: 'Particles' },
+    { id: 'math', label: 'Math' },
+    { id: 'syntax', label: 'Syntax' },
+];
+const STAGE_SIZE = 200;
+const REBAKE_DELAY = 250;
+const STAGE_FPS = 60;
+const STAGE_CAMERA_DISTANCE = 56;
+const ENTRIES = _molang_catalog__WEBPACK_IMPORTED_MODULE_0__.MOLANG_CATALOG
+    .filter((entry) => entry.support.client !== 'no')
+    .sort((a, b) => (b.usage || 0) - (a.usage || 0) || a.name.localeCompare(b.name));
+function matchesFilter(entry, filter) {
+    switch (filter) {
+        case 'all': return true;
+        case 'math': return entry.kind === 'function';
+        case 'syntax': return entry.kind === 'syntax';
+        case 'particle': return entry.kind !== 'function' && entry.kind !== 'syntax' && entry.contexts.includes('particle');
+        case 'animation': return entry.kind !== 'function' && entry.kind !== 'syntax'
+            && (entry.contexts.includes('emote') || entry.contexts.includes('cosmetic'));
+    }
+}
+function matchesSearch(entry, needle) {
+    if (!needle)
+        return true;
+    const haystack = [entry.name, ...entry.aliases, entry.summary, entry.caveat || '', ...(entry.usedIn || [])]
+        .join(' ').toLowerCase();
+    return needle.toLowerCase().split(/\s+/).every((part) => haystack.includes(part));
+}
+function copy(text) {
+    const clipbench = window.Clipbench;
+    if (clipbench && typeof clipbench.setText === 'function')
+        clipbench.setText(text);
+    else if (navigator.clipboard)
+        navigator.clipboard.writeText(text);
+    Blockbench.showQuickMessage('Copied ' + text, 1200);
+}
+function shortCount(count) {
+    return count >= 1000 ? (count / 1000).toFixed(1) + 'k' : String(count);
+}
+function supportLabel(support) {
+    return support === 'yes' ? 'works' : support === 'partial' ? 'partly' : 'reads 0';
+}
+function ensureMolangGuideCss(registry) {
+    registry.css(`
+        .nrc-mg { display: flex; gap: 12px; height: 560px; }
+        .nrc-mg-side { width: 230px; flex: none; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+        .nrc-mg-side input { width: 100%; box-sizing: border-box; }
+        .nrc-mg-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+        .nrc-mg-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+        .nrc-mg-item { display: flex; align-items: center; gap: 6px; padding: 3px 7px; border-radius: 4px; cursor: pointer; }
+        .nrc-mg-item:hover { background: var(--color-button); }
+        .nrc-mg-item.on { background: var(--color-selected); }
+        .nrc-mg-item .nm { flex: 1; font-family: var(--font-code, monospace); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .nrc-mg-item .use { font-size: 10px; color: var(--color-subtle_text); }
+        .nrc-mg-item .demo { font-size: 13px; color: var(--color-accent); }
+        .nrc-mg-empty { color: var(--color-subtle_text); font-size: 12px; padding: 8px 4px; }
+        .nrc-mg-main { flex: 1; min-width: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; padding-right: 4px; }
+        .nrc-mg-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .nrc-mg-title code { font-size: 17px; font-weight: 600; cursor: pointer; }
+        .nrc-mg-title code:hover { text-decoration: underline; }
+        .nrc-mg-title .also { font-size: 11px; color: var(--color-subtle_text); font-family: var(--font-code, monospace); }
+        .nrc-mg-summary { margin: 0; font-size: 13px; }
+        .nrc-mg-facts { display: flex; flex-wrap: wrap; gap: 5px; }
+        .nrc-mg-fact { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--color-button); color: var(--color-subtle_text); }
+        .nrc-mg-fact b { color: var(--color-text); font-weight: 600; }
+        .nrc-mg-demo { display: flex; gap: 10px; align-items: stretch; }
+        .nrc-mg-stage { flex: none; background: var(--color-dark); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .nrc-mg-stage canvas { width: ${STAGE_SIZE}px; height: ${STAGE_SIZE}px; }
+        .nrc-mg-graph { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; background: var(--color-dark); border-radius: 6px; padding: 6px 8px; }
+        .nrc-mg-graph svg { width: 100%; flex: 1; min-height: 110px; overflow: visible; }
+        .nrc-mg-graph .axis { display: flex; justify-content: space-between; font-size: 10px; color: var(--color-subtle_text); }
+        .nrc-mg-graph .readout { font-family: var(--font-code, monospace); font-size: 11px; min-height: 14px; }
+        .nrc-mg-caption { font-size: 12px; }
+        .nrc-mg-expr { display: flex; gap: 6px; align-items: center; }
+        .nrc-mg-expr input { flex: 1; font-family: var(--font-code, monospace); font-size: 12px; padding: 5px 8px; }
+        .nrc-mg-expr .material-icons { cursor: pointer; font-size: 18px; color: var(--color-subtle_text); }
+        .nrc-mg-expr .material-icons:hover { color: var(--color-text); }
+        .nrc-mg-hint { font-size: 11px; color: var(--color-subtle_text); }
+        .nrc-mg-table { border-collapse: collapse; font-size: 12px; width: 100%; }
+        .nrc-mg-table th { text-align: left; font-weight: 600; color: var(--color-subtle_text); padding: 3px 6px; font-size: 11px; }
+        .nrc-mg-table td { padding: 4px 6px; border-top: 1px solid var(--color-border); }
+        .nrc-mg-table td.code { font-family: var(--font-code, monospace); }
+        .nrc-mg-table tr.bad td { background: rgba(220, 80, 80, 0.14); }
+        .nrc-mg-example { font-family: var(--font-code, monospace); font-size: 12px; background: var(--color-dark); padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+        .nrc-mg-caveat { font-size: 12px; color: #d9a14a; display: flex; gap: 6px; }
+        .nrc-mg-caveat .material-icons { font-size: 16px; }
+        .nrc-mg-meta { font-size: 11px; color: var(--color-subtle_text); }
+        .nrc-mg-meta b { color: var(--color-text); font-weight: 600; }
+    `);
+}
+function openMolangGuide() {
+    const first = ENTRIES[0];
+    const state = {
+        search: '',
+        filter: 'all',
+        filters: FILTERS,
+        selected: first.name,
+        expression: (first.demo && first.demo.expression) || '',
+        graph: null,
+        rows: [],
+        hasStage: false,
+        seconds: 0,
+        compareAt: _molang_demo__WEBPACK_IMPORTED_MODULE_1__.COMPARE_ANIM_TIME,
+    };
+    const runtime = {
+        open: true,
+        timer: 0,
+        startedAt: 0,
+        seconds: 1,
+        values: [],
+        baked: '',
+    };
+    const close = () => {
+        runtime.open = false;
+        clearTimeout(runtime.timer);
+        (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_4__.clearLivePreviews)();
+    };
+    new Dialog('nrc_molang_guide', {
+        id: 'nrc_molang_guide',
+        title: 'Molang Guide',
+        width: 900,
+        buttons: ['dialog.close'],
+        onConfirm: close,
+        onCancel: close,
+        component: {
+            data() { return state; },
+            computed: {
+                entries() {
+                    return ENTRIES.filter((entry) => matchesFilter(entry, this.filter) && matchesSearch(entry, this.search));
+                },
+                entry() {
+                    return ENTRIES.find((entry) => entry.name === this.selected);
+                },
+                demoExpression() {
+                    const demo = this.entry && this.entry.demo;
+                    return (demo && demo.expression) || '';
+                },
+                edited() {
+                    return this.demoExpression !== '' && this.expression !== this.demoExpression;
+                },
+            },
+            watch: {
+                expression(value) {
+                    if (value === runtime.baked)
+                        return;
+                    clearTimeout(runtime.timer);
+                    runtime.timer = setTimeout(() => this.rebuild(), REBAKE_DELAY);
+                },
+            },
+            methods: {
+                shortCount,
+                supportLabel,
+                formatNumber: _molang_graph__WEBPACK_IMPORTED_MODULE_2__.formatNumber,
+                copy(text) { copy(text); },
+                select(name) {
+                    if (!ENTRIES.some((e) => e.name === name))
+                        return;
+                    this.selected = name;
+                    clearTimeout(runtime.timer);
+                    runtime.baked = this.demoExpression;
+                    this.expression = runtime.baked;
+                    this.$nextTick(() => this.rebuild());
+                },
+                reset() {
+                    this.expression = this.demoExpression;
+                },
+                rebuild() {
+                    const canvas = this.$refs.stage;
+                    if (canvas)
+                        (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_4__.removeLivePreview)(canvas);
+                    runtime.baked = this.expression;
+                    runtime.values = [];
+                    this.graph = null;
+                    this.rows = [];
+                    this.hasStage = false;
+                    const demo = this.entry && this.entry.demo;
+                    if (!demo)
+                        return;
+                    if (demo.compare) {
+                        this.rows = (0,_molang_demo__WEBPACK_IMPORTED_MODULE_1__.compareInKeyframe)(demo.compare);
+                        return;
+                    }
+                    const samples = demo.particle
+                        ? (0,_molang_demo__WEBPACK_IMPORTED_MODULE_1__.sampleParticleDemo)(this.expression)
+                        : (0,_molang_demo__WEBPACK_IMPORTED_MODULE_1__.sampleKeyframeDemo)(demo, this.expression);
+                    this.graph = (0,_molang_graph__WEBPACK_IMPORTED_MODULE_2__.buildGraph)(samples);
+                    runtime.seconds = samples.seconds;
+                    this.seconds = samples.seconds;
+                    runtime.values = samples.lines[0];
+                    runtime.startedAt = performance.now() / 1000;
+                    if (samples.animationJson && canvas) {
+                        this.hasStage = true;
+                        (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_4__.addLivePreview)(canvas, samples.animationJson, { fps: STAGE_FPS, cameraDistance: STAGE_CAMERA_DISTANCE });
+                    }
+                },
+                tick() {
+                    if (!runtime.open)
+                        return;
+                    requestAnimationFrame(() => this.tick());
+                    const line = this.$refs.playhead;
+                    if (!line || !runtime.values.length)
+                        return;
+                    const t = (performance.now() / 1000 - runtime.startedAt) % runtime.seconds;
+                    const x = (0,_molang_graph__WEBPACK_IMPORTED_MODULE_2__.playheadX)(t, runtime.seconds).toFixed(1);
+                    line.setAttribute('x1', x);
+                    line.setAttribute('x2', x);
+                    const readout = this.$refs.readout;
+                    if (!readout)
+                        return;
+                    const index = Math.round((t / runtime.seconds) * (runtime.values.length - 1));
+                    const particle = this.entry && this.entry.demo && this.entry.demo.particle;
+                    readout.textContent = (particle ? 'age' : 't') + ' = ' + t.toFixed(2) + ' s  →  '
+                        + (0,_molang_graph__WEBPACK_IMPORTED_MODULE_2__.formatNumber)(runtime.values[index]) + (particle ? '  (first particle)' : '');
+                },
+            },
+            mounted() {
+                this.$nextTick(() => {
+                    this.rebuild();
+                    this.tick();
+                });
+            },
+            template: `
+                <div class="nrc-mg">
+                    <div class="nrc-mg-side">
+                        <input type="text" class="dark_bordered" v-model="search" placeholder="Search…" @keydown.enter.stop>
+                        <div class="nrc-mg-chips">
+                            <span v-for="f in filters" :key="f.id" class="nrc-x-chip" :class="{ on: filter === f.id }"
+                                @click="filter = f.id">{{ f.label }}</span>
+                        </div>
+                        <div class="nrc-mg-list">
+                            <div v-if="!entries.length" class="nrc-mg-empty">Nothing matches.</div>
+                            <div v-for="e in entries" :key="e.name" class="nrc-mg-item" :class="{ on: e.name === selected }"
+                                :title="e.summary" @click="select(e.name)">
+                                <span class="nm">{{ e.name }}</span>
+                                <i v-if="e.demo" class="material-icons demo" title="Has a live example">play_circle</i>
+                                <span v-if="e.usage" class="use" :title="e.usage + ' uses in shipped cosmetics and emotes'">{{ shortCount(e.usage) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nrc-mg-main" v-if="entry">
+                        <div class="nrc-mg-title">
+                            <code title="Copy" @click="copy(entry.name)">{{ entry.name }}</code>
+                            <span v-if="entry.aliases.length" class="also">also {{ entry.aliases.join(', ') }}</span>
+                        </div>
+                        <p class="nrc-mg-summary">{{ entry.summary }}</p>
+                        <div class="nrc-mg-facts">
+                            <span v-if="entry.contexts.length" class="nrc-mg-fact">Works in <b>{{ entry.contexts.join(', ') }}</b></span>
+                            <span v-if="entry.returns" class="nrc-mg-fact">Returns <b>{{ entry.returns }}</b></span>
+                            <span v-if="entry.updates" class="nrc-mg-fact">Updates <b>{{ entry.updates }}</b></span>
+                        </div>
+
+                        <div class="nrc-mg-demo" v-show="graph">
+                            <div class="nrc-mg-stage" v-show="hasStage">
+                                <canvas ref="stage" width="${STAGE_SIZE}" height="${STAGE_SIZE}"></canvas>
+                            </div>
+                            <div class="nrc-mg-graph" v-if="graph">
+                                <div class="axis">
+                                    <span>{{ graph.max }}</span>
+                                    <span v-if="graph.inputLabel">- - - {{ graph.inputLabel }} (simulated)</span>
+                                    <span v-else-if="graph.lines.length > 1">one line per particle</span>
+                                </div>
+                                <svg viewBox="0 0 ${_molang_graph__WEBPACK_IMPORTED_MODULE_2__.GRAPH_W} ${_molang_graph__WEBPACK_IMPORTED_MODULE_2__.GRAPH_H}" preserveAspectRatio="none">
+                                    <line v-if="graph.zero !== null" x1="0" x2="${_molang_graph__WEBPACK_IMPORTED_MODULE_2__.GRAPH_W}" :y1="graph.zero" :y2="graph.zero"
+                                        stroke="currentColor" stroke-opacity="0.25" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                                    <path v-if="graph.input" :d="graph.input" fill="none" stroke="#d9a14a" stroke-width="1.5"
+                                        stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>
+                                    <path v-for="(d, i) in graph.lines" :key="i" :d="d" fill="none" style="stroke: var(--color-accent)"
+                                        :stroke-opacity="graph.lines.length > 1 ? 0.75 : 1" stroke-width="2" vector-effect="non-scaling-stroke"/>
+                                    <line ref="playhead" x1="0" x2="0" y1="0" y2="${_molang_graph__WEBPACK_IMPORTED_MODULE_2__.GRAPH_H}" stroke="currentColor" stroke-opacity="0.6"
+                                        stroke-width="1" vector-effect="non-scaling-stroke"/>
+                                </svg>
+                                <div class="axis"><span>{{ graph.min }}</span><span>{{ seconds }} s</span></div>
+                                <div class="readout" ref="readout"></div>
+                            </div>
+                        </div>
+
+                        <div v-if="entry.demo" class="nrc-mg-caption">{{ entry.demo.caption }}</div>
+
+                        <div v-if="demoExpression" class="nrc-mg-expr">
+                            <input type="text" class="dark_bordered" v-model="expression" spellcheck="false" @keydown.enter.stop>
+                            <i v-if="edited" class="material-icons" title="Back to the example" @click="reset()">restart_alt</i>
+                            <i class="material-icons" title="Copy" @click="copy(expression)">content_copy</i>
+                        </div>
+                        <div v-if="demoExpression" class="nrc-mg-hint">Edit the expression — Steve and the graph follow, evaluated exactly like the game does.</div>
+
+                        <table v-if="rows.length" class="nrc-mg-table">
+                            <tr><th>Written in a keyframe (anim_time = {{ compareAt }} s)</th><th>Game</th><th>Preview</th></tr>
+                            <tr v-for="r in rows" :key="r.expression" :class="{ bad: formatNumber(r.game) !== formatNumber(r.preview) }">
+                                <td class="code">{{ r.expression }}</td>
+                                <td>{{ formatNumber(r.game) }}</td>
+                                <td>{{ formatNumber(r.preview) }}</td>
+                            </tr>
+                        </table>
+
+                        <div v-if="!demoExpression && entry.example" class="nrc-mg-example" title="Copy" @click="copy(entry.example)">{{ entry.example }}</div>
+
+                        <div v-if="entry.caveat" class="nrc-mg-caveat"><i class="material-icons">warning</i><span>{{ entry.caveat }}</span></div>
+
+                        <div v-if="entry.usedIn && entry.usedIn.length" class="nrc-mg-meta">Used in <b>{{ entry.usedIn.join(', ') }}</b></div>
+                        <div class="nrc-mg-meta">
+                            Web preview <b>{{ supportLabel(entry.support.web) }}</b> ·
+                            Blockbench timeline <b>{{ supportLabel(entry.support.blockbench) }}</b> ·
+                            {{ entry.source }}
+                        </div>
+                    </div>
+                </div>
+            `,
+        },
+    }).show();
+}
+function createMolangGuideAction(registry, type) {
+    return registry.action('nrc_molang_guide_' + type.id, {
+        name: 'Molang Guide',
+        description: 'What every Molang query and function does in game, with live examples',
+        icon: 'functions',
+        category: 'tools',
+        condition: () => (0,_platform_format__WEBPACK_IMPORTED_MODULE_3__.isCosmeticFormat)(type),
+        click() { openMolangGuide(); },
     });
 }
 
@@ -7668,7 +9404,7 @@ function openTemplateDialog(type) {
                         if (!t || !t.animationJson)
                             return;
                         cv.setAttribute('data-bound', '1');
-                        (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_1__.addLivePreview)(cv, t.animationJson, t.geoJson, t.previewDataUri);
+                        (0,_platform_templates_livePreview__WEBPACK_IMPORTED_MODULE_1__.addLivePreview)(cv, t.animationJson, { propGeo: t.geoJson, propTexUri: t.previewDataUri });
                     });
                 },
             },
@@ -64731,7 +66467,7 @@ if ( typeof window !== 'undefined' ) {
   \**********************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.13.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.3.1","fflate":"^0.8.3","three":"^0.160.1"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"nrc_cosmetics","version":"1.14.0","private":true,"description":"NoRisk Client Cosmetics","main":"index.js","scripts":{"build":"npm run build:only","build:only":"webpack","start":"webpack --watch --mode=development","tsc":"tsc --noEmit"},"author":"NoRisk Client","license":"MIT","blockbenchConfig":{"title":"NoRisk Client Cosmetics","author":"NoRisk Client","icon":"fa-shapes","description":"Author NoRisk Client emotes against the player rig and export NRC-ready animation + cosmetic metadata.","min_version":"4.11.0","variant":"both"},"devDependencies":{"blockbench-types":"^4.9.0","ts-loader":"^9.4.4","typescript":"^4.9.5","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"@noriskclient/nrc-skin-renderer":"^0.3.1","fflate":"^0.8.3","three":"^0.160.1"}}');
 
 /***/ },
 
@@ -64822,9 +66558,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cosmetics/emote */ "./ts/cosmetics/emote.ts");
 /* harmony import */ var _cosmetics_cosmetic__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./cosmetics/cosmetic */ "./ts/cosmetics/cosmetic.ts");
 /* harmony import */ var _ui_dialogStyles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ui/dialogStyles */ "./ts/ui/dialogStyles.ts");
-/* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
-/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
-/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _ui_molangGuideDialog__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/molangGuideDialog */ "./ts/ui/molangGuideDialog.ts");
+/* harmony import */ var _ui_templateDialog__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./ui/templateDialog */ "./ts/ui/templateDialog.ts");
+/* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
+/* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
+/* harmony import */ var _platform_molangAutocomplete__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./platform/molangAutocomplete */ "./ts/platform/molangAutocomplete.ts");
+
+
 
 
 
@@ -64844,13 +66584,15 @@ const { version, blockbenchConfig } = _package_json__WEBPACK_IMPORTED_MODULE_0__
         version,
         await_loading: true,
         onload() {
-            (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_8__.ensureTemplateCss)(registry);
+            (0,_ui_templateDialog__WEBPACK_IMPORTED_MODULE_9__.ensureTemplateCss)(registry);
             (0,_ui_dialogStyles__WEBPACK_IMPORTED_MODULE_7__.ensureDialogCss)(registry);
-            (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_10__.installPlayerModel)(registry);
-            (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_9__.installSkinPreview)(registry);
+            (0,_ui_molangGuideDialog__WEBPACK_IMPORTED_MODULE_8__.ensureMolangGuideCss)(registry);
+            (0,_platform_playerModel__WEBPACK_IMPORTED_MODULE_11__.installPlayerModel)(registry);
+            (0,_platform_skinPreview__WEBPACK_IMPORTED_MODULE_10__.installSkinPreview)(registry);
             (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_5__.EMOTE, registry);
             (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_cosmetic__WEBPACK_IMPORTED_MODULE_6__.COSMETIC, registry);
             (0,_platform_easing__WEBPACK_IMPORTED_MODULE_4__.installEasing)(registry);
+            (0,_platform_molangAutocomplete__WEBPACK_IMPORTED_MODULE_12__.installMolangAutocomplete)(registry);
             (0,_platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__.installAnimationPatches)();
             console.log('Loaded NoRisk Client Cosmetics plugin');
         },
