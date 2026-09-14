@@ -119,7 +119,7 @@ export function openTemplateDialog(type: CosmeticType) {
                         const t = state.templates.find((x: Template) => x.id === id);
                         if (!t || !t.animationJson) return;
                         cv.setAttribute('data-bound', '1');
-                        addLivePreview(cv, t.animationJson, t.geoJson, t.previewDataUri);
+                        addLivePreview(cv, t.animationJson, { propGeo: t.geoJson, propTexUri: t.previewDataUri });
                     });
                 },
             },

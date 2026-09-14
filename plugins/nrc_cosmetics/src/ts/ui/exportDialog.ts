@@ -175,7 +175,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                             const cv = this.$refs.preview;
                             if (cv) {
                                 try {
-                                    addLivePreview(cv, buildAnimationJson(type), propGeoJson(), propTextureDataUri(), previewParticles());
+                                    addLivePreview(cv, buildAnimationJson(type), { propGeo: propGeoJson(), propTexUri: propTextureDataUri(), particles: previewParticles() });
                                 } catch (e) { /* ignore */ }
                             }
                         });

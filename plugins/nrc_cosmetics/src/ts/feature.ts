@@ -6,6 +6,7 @@ import { createSettingsAction } from './ui/settingsDialog';
 import { createExportAction } from './ui/exportDialog';
 import { createImportAction, createImportAnimationAction } from './ui/importDialog';
 import { createOutlineAction } from './tools/outline';
+import { createMolangGuideAction } from './ui/molangGuideDialog';
 import { openTemplateDialog } from './ui/templateDialog';
 import { makeToggleSkinAction, makeToggleLayerAction, makeToggleArmModelAction } from './platform/skinPreview';
 import { createSkinAction } from './ui/skinDialog';
@@ -35,6 +36,7 @@ export function registerCosmeticType(type: CosmeticType, registry: Registry) {
     installEffectsPanel(registry, type);
 
     registry.menu(createOutlineAction(registry, type), 'tools');
+    registry.menu(createMolangGuideAction(registry, type), 'tools');
     registry.menu(createRenameAction(registry, type), 'file');
     registry.menu(createImportAction(registry, type), 'file.import');
     if (type.hasBareAnimations) registry.menu(createImportAnimationAction(registry, type), 'file.import');

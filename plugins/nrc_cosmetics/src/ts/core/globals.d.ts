@@ -11,11 +11,15 @@ declare const Animator: any;
 declare const BoneAnimator: any;
 declare const EffectAnimator: any;
 declare const document: any;
+declare const window: any;
+declare const navigator: any;
 declare function fetch(url: string, opts?: any): Promise<any>;
 declare function btoa(data: string): string;
 declare function atob(data: string): string;
 declare function requestAnimationFrame(cb: (t: number) => void): number;
 declare function cancelAnimationFrame(id: number): void;
+declare function setTimeout(cb: () => void, ms?: number): number;
+declare function clearTimeout(id?: number): void;
 declare const performance: { now(): number };
 declare class AudioContext { decodeAudioData(buffer: any): Promise<any>; }
 declare class Audio { constructor(src?: string); play(): any; pause(): void; }

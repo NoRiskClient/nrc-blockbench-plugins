@@ -6,9 +6,11 @@ import { installEasing } from './platform/easing';
 import { EMOTE } from './cosmetics/emote';
 import { COSMETIC } from './cosmetics/cosmetic';
 import { ensureDialogCss } from './ui/dialogStyles';
+import { ensureMolangGuideCss } from './ui/molangGuideDialog';
 import { ensureTemplateCss } from './ui/templateDialog';
 import { installSkinPreview } from './platform/skinPreview';
 import { installPlayerModel } from './platform/playerModel';
+import { installMolangAutocomplete } from './platform/molangAutocomplete';
 
 const { version, blockbenchConfig } = packageJson;
 
@@ -25,12 +27,14 @@ const { version, blockbenchConfig } = packageJson;
             onload() {
                 ensureTemplateCss(registry);
                 ensureDialogCss(registry);
+                ensureMolangGuideCss(registry);
                 installPlayerModel(registry);
                 installSkinPreview(registry);
 
                 registerCosmeticType(EMOTE, registry);
                 registerCosmeticType(COSMETIC, registry);
                 installEasing(registry);
+                installMolangAutocomplete(registry);
                 installAnimationPatches();
                 console.log('Loaded NoRisk Client Cosmetics plugin');
             },
