@@ -8,6 +8,8 @@ declare const Keyframe: any;
 declare const Locator: any;
 declare const Timeline: any;
 declare const Animator: any;
+declare const AnimationController: any;
+declare const Interface: any;
 declare const BoneAnimator: any;
 declare const EffectAnimator: any;
 declare const document: any;

@@ -22,6 +22,7 @@ function baseFormatOptions(type: CosmeticType): any {
         centered_grid: true,
         locators: true,
         animation_mode: type.hasAnimation,
+        animation_controllers: type.hasAnimation,
         animation_files: type.hasAnimation,
         animation_codec: type.hasAnimation ? createAnimationCodec(type) : undefined,
         display_mode: false,

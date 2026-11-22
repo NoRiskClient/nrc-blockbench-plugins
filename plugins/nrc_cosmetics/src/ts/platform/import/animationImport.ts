@@ -1,6 +1,28 @@
 import { CosmeticType } from '../../cosmetics/types';
 import { lockPropKey } from '../../domain/meta';
 import { log } from '../../core/log';
+import { exportedAnimationId } from '../../serialization/animation';
+
+function importControllers(type: CosmeticType, controllers: any) {
+    if (!controllers || !Format || !Format.animation_controllers) return;
+    let loaded: any[] = [];
+    try {
+        loaded = (AnimationCodec as any).codecs.bedrock_animation_controller.loadFile({ json: { animation_controllers: controllers }, path: '' }) || [];
+    } catch (e: any) {
+        log('importControllers loadFile ERROR: ' + (e && e.stack ? e.stack : String(e)));
+        return;
+    }
+    const animations = (Animation.all || []) as any[];
+    for (const controller of loaded) {
+        for (const state of controller.states) {
+            for (const entry of state.animations) {
+                if (entry.animation) continue;
+                const anim = animations.find((a) => exportedAnimationId(type, a) === entry.key);
+                if (anim) entry.animation = anim.uuid;
+            }
+        }
+    }
+}
 
 export function importAnimation(type: CosmeticType, file: any): any {
     const animations = (file && file.animations) || {};
@@ -13,6 +35,7 @@ export function importAnimation(type: CosmeticType, file: any): any {
         return null;
     }
     const added = (Animation.all || []).filter((a: any) => !before.has(a.uuid));
+    importControllers(type, file && file.animation_controllers);
 
     for (const anim of added) {
         const data = animations[anim.name];

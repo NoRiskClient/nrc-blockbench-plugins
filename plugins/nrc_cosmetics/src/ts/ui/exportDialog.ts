@@ -16,6 +16,7 @@ import { particleTextureOf } from '../platform/particleTexture';
 import { fs, toBase64 } from '../core/node';
 import { mcId } from '../core/util';
 import { log, logReset } from '../core/log';
+import { reportControllerProblems } from './controllerReport';
 
 const RARITIES = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
 
@@ -271,6 +272,7 @@ export function createExportAction(registry: Registry, type: CosmeticType): any 
                     if (state.exportAnimation) applyEmoteSettings(metaAnim, type, state);
                     if (state.exportAnimation) {
                         files.push({ suffix: '.animation.json', content: JSON.stringify(buildAnimationJson(type, undefined, base), null, 2) });
+                        reportControllerProblems(type);
                     }
                     if (state.exportModel) {
                         files.push({ suffix: '.geo.json', content: buildGeoJson() });

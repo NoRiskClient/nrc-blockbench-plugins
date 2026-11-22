@@ -2,7 +2,11 @@ export type ClientQueries = { [name: string]: number | undefined };
 
 type Node = (q: ClientQueries) => number;
 
-const QUERIES = new Set(['anim_time', 'life_time', 'is_moving', 'is_sneaking']);
+const QUERIES = new Set([
+    'anim_time', 'life_time', 'is_moving', 'is_sneaking',
+    'is_riding', 'is_sleeping', 'health', 'look_yaw', 'look_pitch',
+    'all_animations_finished', 'any_animation_finished',
+]);
 for (const part of ['head', 'body', 'right_arm', 'left_arm', 'right_leg', 'left_leg']) {
     for (const axis of ['x', 'y', 'z']) QUERIES.add(`${part}_${axis}_rot`);
 }

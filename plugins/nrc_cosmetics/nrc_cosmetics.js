@@ -3104,6 +3104,136 @@ const EMOTE = {
 
 /***/ },
 
+/***/ "./ts/domain/controller.ts"
+/*!*********************************!*\
+  !*** ./ts/domain/controller.ts ***!
+  \*********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PREVIEW_STOP_LINE: () => (/* binding */ PREVIEW_STOP_LINE),
+/* harmony export */   PREVIEW_STOP_VARIABLE: () => (/* binding */ PREVIEW_STOP_VARIABLE),
+/* harmony export */   STOP_STATE: () => (/* binding */ STOP_STATE),
+/* harmony export */   STOP_TIMEOUT_SECONDS: () => (/* binding */ STOP_TIMEOUT_SECONDS),
+/* harmony export */   assignedNames: () => (/* binding */ assignedNames),
+/* harmony export */   controllerScripts: () => (/* binding */ controllerScripts),
+/* harmony export */   findState: () => (/* binding */ findState),
+/* harmony export */   queryName: () => (/* binding */ queryName),
+/* harmony export */   usedQueries: () => (/* binding */ usedQueries)
+/* harmony export */ });
+const STOP_STATE = 'stop';
+const STOP_TIMEOUT_SECONDS = 10;
+const PREVIEW_STOP_VARIABLE = 'variable.preview_stop';
+const PREVIEW_STOP_LINE = `${PREVIEW_STOP_VARIABLE} = toggle('Preview stop')`;
+const QUERY_PREFIX = /^(?:q|query)\./i;
+const QUERY_USE = /\b(?:q|query)\.([a-z0-9_]+)/gi;
+const ASSIGNMENT = /^\s*([a-z0-9_.]+)\s*=/gim;
+function queryName(name) {
+    return name.replace(QUERY_PREFIX, '').toLowerCase();
+}
+function collect(pattern, texts) {
+    const found = new Set();
+    for (const text of texts) {
+        text.replace(pattern, (_, name) => {
+            found.add(name.toLowerCase());
+            return '';
+        });
+    }
+    return found;
+}
+function controllerScripts(controller) {
+    const scripts = [];
+    for (const state of controller.states) {
+        scripts.push(state.on_entry || '', state.on_exit || '', ...state.transitions.map((t) => t.condition || ''));
+    }
+    return scripts;
+}
+function usedQueries(controllers) {
+    return collect(QUERY_USE, controllers.reduce((all, c) => all.concat(controllerScripts(c)), []));
+}
+function assignedNames(text) {
+    return collect(ASSIGNMENT, [text]);
+}
+function findState(controller, name) {
+    return controller.states.find((s) => s.name === name);
+}
+
+
+/***/ },
+
+/***/ "./ts/domain/controllerCheck.ts"
+/*!**************************************!*\
+  !*** ./ts/domain/controllerCheck.ts ***!
+  \**************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   controllerProblems: () => (/* binding */ controllerProblems)
+/* harmony export */ });
+/* harmony import */ var _cosmetics_emote__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../cosmetics/emote */ "./ts/cosmetics/emote.ts");
+/* harmony import */ var _molang_catalog__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../molang/catalog */ "./ts/molang/catalog.ts");
+/* harmony import */ var _controller__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./controller */ "./ts/domain/controller.ts");
+
+
+
+function knownQueries() {
+    const known = new Set();
+    for (const entry of _molang_catalog__WEBPACK_IMPORTED_MODULE_1__.MOLANG_CATALOG) {
+        if (entry.kind !== 'query' || entry.support.client === 'no')
+            continue;
+        for (const name of [entry.name, ...entry.aliases])
+            known.add((0,_controller__WEBPACK_IMPORTED_MODULE_2__.queryName)(name));
+    }
+    return known;
+}
+function controllerProblems(type) {
+    const controllers = (AnimationController.all || []);
+    if (!controllers.length)
+        return [];
+    const problems = [];
+    const controller = controllers[0];
+    const states = controller.states;
+    const animations = (Animation.all || []);
+    if (controllers.length > 1) {
+        problems.push(`Only "${controller.name}" runs in game, the other ${controllers.length - 1} controller(s) are ignored.`);
+    }
+    for (const state of states) {
+        if (state.animations.length > 1) {
+            problems.push(`State "${state.name}" plays only its first animation in game.`);
+        }
+        if (state.animations.some((a) => { var _a; return String((_a = a.blend_value) !== null && _a !== void 0 ? _a : '').trim(); })) {
+            problems.push(`State "${state.name}": the value next to an animation is ignored in game, the animation always plays fully.`);
+        }
+        if (state.sounds.length || state.particles.length) {
+            problems.push(`State "${state.name}": sounds and particles on a controller state do not play in game, put them on the animation.`);
+        }
+    }
+    const known = knownQueries();
+    const unknown = [...(0,_controller__WEBPACK_IMPORTED_MODULE_2__.usedQueries)([controller])].filter((name) => !known.has(name));
+    if (unknown.length) {
+        problems.push(`These queries do not exist in game and read 0: ${unknown.map((name) => 'q.' + name).join(', ')}.`);
+    }
+    const stop = (0,_controller__WEBPACK_IMPORTED_MODULE_2__.findState)(controller, _controller__WEBPACK_IMPORTED_MODULE_2__.STOP_STATE);
+    const stopAnimation = stop && animations.find((a) => stop.animations.some((e) => e.animation === a.uuid));
+    if (type.id === _cosmetics_emote__WEBPACK_IMPORTED_MODULE_0__.EMOTE.id && (stopAnimation === null || stopAnimation === void 0 ? void 0 : stopAnimation.loop) === 'loop' && !stop.transitions.length) {
+        problems.push(`"${_controller__WEBPACK_IMPORTED_MODULE_2__.STOP_STATE}" plays a looping animation and has no transitions, so the emote only ends after ${_controller__WEBPACK_IMPORTED_MODULE_2__.STOP_TIMEOUT_SECONDS}s. Set it to play once.`);
+    }
+    const played = new Set();
+    for (const state of states)
+        for (const a of state.animations)
+            played.add(a.animation);
+    const unused = animations.filter((a) => !played.has(a.uuid)).map((a) => `"${a.name}"`);
+    if (unused.length) {
+        problems.push(`No controller state plays ${unused.join(', ')}, so they never show in game.`);
+    }
+    return problems;
+}
+
+
+/***/ },
+
 /***/ "./ts/domain/meta.ts"
 /*!***************************!*\
   !*** ./ts/domain/meta.ts ***!
@@ -3340,6 +3470,29 @@ const bone = (part, label) => ({
         sim: `pose:${part}`,
     },
 });
+const CONTROLLER_SOURCE = 'NRC animation controllers';
+const SCOPE_CONTEXTS = {
+    player: ['cosmetic', 'emote'],
+    controller: ['cosmetic', 'emote'],
+};
+const SCOPE_CAVEATS = {
+    player: 'In cosmetics it works in keyframes and animation controllers, in emotes only inside animation controllers. The web preview reads 0.',
+    controller: 'Only inside animation controllers, in emotes and cosmetics. Blockbench previews it in the Animation Controller panel; the web preview reads 0.',
+};
+const controllerQuery = (scope, name, summary, returns, example, placeholder, aliases = []) => ({
+    name: `query.${name}`,
+    aliases,
+    kind: 'query',
+    contexts: SCOPE_CONTEXTS[scope],
+    summary,
+    returns,
+    updates: 'every tick in animation controllers, every frame in keyframes',
+    example,
+    support: { client: 'yes', web: 'no', blockbench: placeholder ? 'partial' : 'yes' },
+    caveat: placeholder ? `${SCOPE_CAVEATS[scope]} ${PLACEHOLDER} Hint: ${placeholder}` : SCOPE_CAVEATS[scope],
+    placeholder: placeholder !== null && placeholder !== void 0 ? placeholder : undefined,
+    source: CONTROLLER_SOURCE,
+});
 const MOLANG_CATALOG = [
     {
         name: 'query.anim_time',
@@ -3396,6 +3549,7 @@ const MOLANG_CATALOG = [
         example: 'query.is_moving * math.sin(query.anim_time * 360) * 5',
         support: { client: 'yes', web: 'no', blockbench: 'partial' },
         caveat: `Cosmetics use limb swing, emotes use position change, so the threshold differs slightly. ${PLACEHOLDER}`,
+        placeholder: "query.is_moving = toggle('Moving')",
         source: 'GeoMolang.kt:68',
         usage: 2,
         usedIn: ['halloween_bike'],
@@ -3418,6 +3572,7 @@ const MOLANG_CATALOG = [
         example: '-query.is_sneaking * 3',
         support: { client: 'partial', web: 'no', blockbench: 'partial' },
         caveat: `Emotes only, and not on 1.8.9 — reads 0 there and in cosmetics. ${PLACEHOLDER}`,
+        placeholder: "query.is_sneaking = toggle('Sneaking')",
         source: 'GeoMolang.kt:69',
         demo: {
             caption: 'Steve sneaks for 2 s, then stands up. The arm lifts only while sneaking.',
@@ -3426,6 +3581,51 @@ const MOLANG_CATALOG = [
             axis: 'x',
             sim: 'sneak',
         },
+    },
+    controllerQuery('player', 'is_on_ground', 'Whether the player stands on a block.', '1 or 0', '!query.is_on_ground', "query.is_on_ground = 1 - toggle('In air')"),
+    controllerQuery('player', 'is_sprinting', 'Whether the player is sprinting.', '1 or 0', 'query.is_moving && query.is_sprinting', "query.is_sprinting = toggle('Sprinting')"),
+    controllerQuery('player', 'is_in_water', 'Whether the player is in water or swimming.', '1 or 0', 'query.is_in_water', "query.is_in_water = toggle('In water')"),
+    controllerQuery('player', 'is_gliding', 'Whether the player flies with an elytra.', '1 or 0', 'query.is_gliding', "query.is_gliding = toggle('Gliding')"),
+    controllerQuery('player', 'is_flying', 'Whether the player flies in creative mode. Other players only see this for the local player.', '1 or 0', 'query.is_flying || query.is_gliding', "query.is_flying = toggle('Creative flying')"),
+    controllerQuery('player', 'vertical_speed', 'How fast the player moves up or down, positive is up.', 'blocks per second', 'query.vertical_speed < 0', "query.vertical_speed = slider('Vertical speed', 0.5, -20, 20)"),
+    controllerQuery('player', 'ground_speed', 'How fast the player moves horizontally.', 'blocks per second', 'query.ground_speed > 4', "query.ground_speed = slider('Ground speed', 0.5, 0, 10)"),
+    controllerQuery('player', 'forward_speed', 'Horizontal speed along the look direction, negative is walking backwards.', 'blocks per second', 'query.forward_speed < 0', "query.forward_speed = slider('Forward speed', 0.5, -10, 10)"),
+    controllerQuery('player', 'strafe_speed', 'Horizontal speed to the side.', 'blocks per second', 'math.abs(query.strafe_speed) > 1', "query.strafe_speed = slider('Strafe speed', 0.5, -10, 10)"),
+    controllerQuery('player', 'yaw_speed', 'How fast the player turns.', 'degrees per second', 'math.abs(query.yaw_speed) > 90', "query.yaw_speed = slider('Turn speed', 10, -360, 360)"),
+    controllerQuery('player', 'limb_swing', 'How far the walk cycle has advanced.', 'walk cycle position', 'math.sin(query.limb_swing * 40)', "query.limb_swing = slider('Walk cycle', 1, 0, 50)"),
+    controllerQuery('player', 'limb_swing_amount', 'How strongly the legs swing while walking.', '0 to 1', 'query.limb_swing_amount > 0.5', "query.limb_swing_amount = slider('Leg swing', 0.05, 0, 1)", ['query.modified_move_speed']),
+    controllerQuery('player', 'is_riding', 'Whether the player sits on a mount or in a vehicle.', '1 or 0', 'query.is_riding', "query.is_riding = toggle('Riding')"),
+    controllerQuery('player', 'is_sleeping', 'Whether the player lies in a bed.', '1 or 0', 'query.is_sleeping', "query.is_sleeping = toggle('Sleeping')"),
+    controllerQuery('player', 'health', "The player's current health, 20 is full health without extra hearts.", 'half hearts, 0 to max health', 'query.health < 6', "query.health = slider('Health', 1, 0, 20)"),
+    controllerQuery('player', 'look_yaw', 'Horizontal direction the player is looking.', 'degrees', 'math.clamp(query.look_yaw, -45, 45)', "query.look_yaw = slider('Look yaw', 1, -90, 90)"),
+    controllerQuery('player', 'look_pitch', 'Vertical direction the player is looking, negative is up.', 'degrees', 'query.look_pitch * 0.5', "query.look_pitch = slider('Look pitch', 1, -90, 90)"),
+    controllerQuery('controller', 'all_animations_finished', 'Becomes 1 once every animation of the current controller state has played through at least once since the state was entered. For a looping animation that is the end of its first cycle.', '1 or 0', 'query.all_animations_finished', null),
+    controllerQuery('controller', 'any_animation_finished', 'Becomes 1 once any animation of the current controller state has played through at least once since the state was entered. For a looping animation that is the end of its first cycle.', '1 or 0', 'query.any_animation_finished', null),
+    {
+        name: 'variable.<name>',
+        aliases: [],
+        kind: 'variable',
+        contexts: ['cosmetic', 'emote'],
+        summary: 'Your own value, set in on_entry or on_exit of a controller state and read in transitions or later states.',
+        returns: 'whatever you stored',
+        updates: 'when a state is entered or left',
+        example: 'v.idle_since = q.life_time;',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'Animation controllers only, in emotes and cosmetics. variable. and v. are the same variable. math.random in on_entry rolls the same on every client; in a transition it rolls once per tick.',
+        source: CONTROLLER_SOURCE,
+    },
+    {
+        name: 'state "stop"',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['emote'],
+        summary: 'When the emote is stopped or interrupted, the controller jumps to the state named stop from wherever it is. A state without transitions ends the emote once its animation has played through, then the emote fades out over 0.3s.',
+        returns: '',
+        updates: '',
+        example: '"stop": { "animations": ["stop"] }',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'Emotes only. Toggle "Preview stop" under Variable Placeholders to preview the jump. Without a stop state, stopping fades the emote out at once.',
+        source: CONTROLLER_SOURCE,
     },
     bone('head', 'head'),
     bone('body', 'body'),
@@ -4100,12 +4300,12 @@ const MOLANG_CATALOG = [
         name: '<  >  <=  >=  ==  !=',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Comparisons, giving 1 or 0.',
         returns: '1 or 0',
         updates: '',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game. In a keyframe the parser stops at the operator without an error, so a > b quietly becomes a — it previews correctly and breaks in game.',
+        caveat: 'In animation controllers of emotes and cosmetics (transitions, on_entry, on_exit) the game supports it. Otherwise particles only. In a keyframe the parser stops at the operator without an error, so a > b quietly becomes a — it previews correctly and breaks in game.',
         source: 'api/molang/GeoMolang.kt',
         demo: {
             caption: 'In a keyframe the game only reads up to the comparison.',
@@ -4116,12 +4316,12 @@ const MOLANG_CATALOG = [
         name: '&&  ||  !',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Logic, giving 1 or 0.',
         returns: '1 or 0',
         updates: '',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game, and both sides are always evaluated.',
+        caveat: 'In animation controllers of emotes and cosmetics (transitions, on_entry, on_exit) the game supports it. Otherwise particles only, and both sides are always evaluated.',
         source: 'GeoMolangExpression.kt:113-121',
         demo: {
             caption: 'In a keyframe the game stops at the first logic operator.',
@@ -4132,13 +4332,13 @@ const MOLANG_CATALOG = [
         name: 'condition ? a : b',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Pick a or b depending on the condition.',
         returns: '',
         updates: '',
         example: 'variable.particle_age > 1 ? 0.1 : 0.3',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game. Without the : part the game returns the condition itself.',
+        caveat: 'In animation controllers of emotes and cosmetics (transitions, on_entry, on_exit) the game supports it. Otherwise particles only. Without the : part the game returns the condition itself.',
         source: 'api/molang/GeoMolang.kt:69-81',
         demo: {
             caption: 'Looks right in every preview, but in a keyframe the game returns the left side of the comparison.',
@@ -4149,13 +4349,13 @@ const MOLANG_CATALOG = [
         name: 'variable.name = value;',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Store a value for later expressions; statements are separated by ;.',
         returns: 'the last statement',
         updates: '',
         example: 'variable.size = 0.2 + variable.particle_random_1 * 0.1;',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game. Emitter variables are copied into each particle when it spawns.',
+        caveat: 'Works in particles and in on_entry / on_exit of animation controllers (emotes and cosmetics), e.g. v.idle_since = q.life_time; — read it back in a transition. Emitter variables are copied into each particle when it spawns. Keyframes cannot store variables.',
         source: 'GeoParticleInstanceLogic.kt:54',
         demo: {
             caption: 'Keyframes cannot store variables in game.',
@@ -4166,12 +4366,12 @@ const MOLANG_CATALOG = [
         name: 'q.  v.  t.  c.',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Short forms of query., variable., temp. and context.',
         returns: '',
         updates: '',
         support: { client: 'partial', web: 'partial', blockbench: 'yes' },
-        caveat: 'The game only accepts v. (in particles). q. reads 0 everywhere in game even though both previews accept it — always write query. fivehead ships math.sin(q.anim_time * 3000), which stands still in game.',
+        caveat: 'Animation controllers of emotes and cosmetics accept q. and v. in game. Elsewhere the game only accepts v. (in particles) and q. reads 0 even though both previews accept it — write query. in keyframes. fivehead ships math.sin(q.anim_time * 3000), which stands still in game.',
         source: 'GeoMolang.kt:330',
         usedIn: ['fivehead'],
         demo: {
@@ -4207,7 +4407,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   evalClient: () => (/* binding */ evalClient),
 /* harmony export */   parseClient: () => (/* binding */ parseClient)
 /* harmony export */ });
-const QUERIES = new Set(['anim_time', 'life_time', 'is_moving', 'is_sneaking']);
+const QUERIES = new Set([
+    'anim_time', 'life_time', 'is_moving', 'is_sneaking',
+    'is_riding', 'is_sleeping', 'health', 'look_yaw', 'look_pitch',
+    'all_animations_finished', 'any_animation_finished',
+]);
 for (const part of ['head', 'body', 'right_arm', 'left_arm', 'right_leg', 'left_leg']) {
     for (const axis of ['x', 'y', 'z'])
         QUERIES.add(`${part}_${axis}_rot`);
@@ -4775,6 +4979,201 @@ function safeParse(text) {
     catch (_a) {
         return null;
     }
+}
+
+
+/***/ },
+
+/***/ "./ts/platform/controllerIntegration.ts"
+/*!**********************************************!*\
+  !*** ./ts/platform/controllerIntegration.ts ***!
+  \**********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   installControllerIntegration: () => (/* binding */ installControllerIntegration)
+/* harmony export */ });
+/* harmony import */ var _cosmetics_emote__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../cosmetics/emote */ "./ts/cosmetics/emote.ts");
+/* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
+/* harmony import */ var _domain_controller__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../domain/controller */ "./ts/domain/controller.ts");
+
+
+
+const BLEND = 0.15;
+const QUIRK_TIMER = 'v.quirk_at = q.life_time + math.random(4, 8);';
+const EMOTE_PRESETS = [
+    {
+        name: 'NRC Emote: Intro & Stop',
+        initial_state: 'start',
+        states: {
+            start: { animations: ['start'], transitions: [{ idle: 'q.all_animations_finished' }], blend_transition: BLEND },
+            idle: { animations: ['idle'], blend_transition: BLEND },
+            [_domain_controller__WEBPACK_IMPORTED_MODULE_2__.STOP_STATE]: { animations: [_domain_controller__WEBPACK_IMPORTED_MODULE_2__.STOP_STATE] },
+        },
+    },
+    {
+        name: 'NRC Emote: Walking',
+        initial_state: 'idle',
+        states: {
+            idle: { animations: ['idle'], transitions: [{ walk: 'q.is_moving' }], blend_transition: BLEND },
+            walk: { animations: ['walk'], transitions: [{ idle: '!q.is_moving' }], blend_transition: BLEND },
+        },
+    },
+    {
+        name: 'NRC Emote: Random Quirk',
+        initial_state: 'idle',
+        states: {
+            idle: { animations: ['idle'], on_entry: QUIRK_TIMER, transitions: [{ quirk: 'q.life_time > v.quirk_at' }], blend_transition: BLEND },
+            quirk: { animations: ['quirk'], transitions: [{ idle: 'q.all_animations_finished' }], blend_transition: BLEND },
+        },
+    },
+];
+const COSMETIC_PRESETS = [
+    {
+        name: 'NRC Cosmetic: Walking',
+        initial_state: 'idle',
+        states: {
+            idle: { animations: ['idle'], transitions: [{ walking: 'q.is_moving' }], blend_transition: BLEND },
+            walking: { animations: ['walking'], transitions: [{ idle: '!q.is_moving' }], blend_transition: BLEND },
+        },
+    },
+    {
+        name: 'NRC Cosmetic: Random Quirk',
+        initial_state: 'idle',
+        states: {
+            idle: { animations: ['idle'], on_entry: QUIRK_TIMER, transitions: [{ quirk: 'q.life_time > v.quirk_at' }], blend_transition: BLEND },
+            quirk: { animations: ['quirk'], transitions: [{ idle: 'q.all_animations_finished' }], blend_transition: BLEND },
+        },
+    },
+];
+const ALL_PRESETS = [...EMOTE_PRESETS, ...COSMETIC_PRESETS];
+function presetsFor(type) {
+    if (!type || !type.hasAnimation)
+        return [];
+    return type.id === _cosmetics_emote__WEBPACK_IMPORTED_MODULE_0__.EMOTE.id ? EMOTE_PRESETS : COSMETIC_PRESETS;
+}
+function removeOurPresets() {
+    const presets = AnimationController.presets;
+    for (let i = presets.length - 1; i >= 0; i--) {
+        if (ALL_PRESETS.includes(presets[i]))
+            presets.splice(i, 1);
+    }
+}
+function syncPresets() {
+    removeOurPresets();
+    AnimationController.presets.push(...presetsFor((0,_format__WEBPACK_IMPORTED_MODULE_1__.currentType)()));
+}
+function saveAnimationFile() {
+    var _a;
+    const path = ((_a = (Animation.all || []).find((a) => a.path)) === null || _a === void 0 ? void 0 : _a.path) || '';
+    Format.animation_codec.exportFile(path);
+    for (const controller of AnimationController.all)
+        controller.saved = true;
+}
+function renameController(controller) {
+    Blockbench.textPrompt('generic.name', controller.name, (name) => {
+        if (!name || name === controller.name)
+            return;
+        Undo.initEdit({ animation_controllers: [controller] });
+        controller.name = name;
+        controller.createUniqueName();
+        Undo.finishEdit('Rename animation controller');
+    });
+}
+function previewStopJump(controller) {
+    var _a;
+    if (!(0,_format__WEBPACK_IMPORTED_MODULE_1__.isCosmeticFormat)(_cosmetics_emote__WEBPACK_IMPORTED_MODULE_0__.EMOTE) || ((_a = BarItems.animation_controller_preview_mode) === null || _a === void 0 ? void 0 : _a.value) !== 'play')
+        return false;
+    const stop = (0,_domain_controller__WEBPACK_IMPORTED_MODULE_2__.findState)(controller, _domain_controller__WEBPACK_IMPORTED_MODULE_2__.STOP_STATE);
+    const stopping = !!Animator.MolangParser.parse(_domain_controller__WEBPACK_IMPORTED_MODULE_2__.PREVIEW_STOP_VARIABLE);
+    if (!stopping)
+        controller.nrcStopJumped = false;
+    if (!stop || !stopping || controller.nrcStopJumped)
+        return false;
+    controller.nrcStopJumped = true;
+    if (controller.selected_state !== stop)
+        stop.select();
+    Animator.preview();
+    return true;
+}
+function installControllerIntegration(registry) {
+    registry.monkeypatch(AnimationController.prototype, 'updatePreview', (original) => function (...args) {
+        if (previewStopJump(this))
+            return;
+        return original.apply(this, args);
+    });
+    registry.monkeypatch(AnimationController.prototype, 'save', (original) => function (...args) {
+        if (!(0,_format__WEBPACK_IMPORTED_MODULE_1__.isCosmeticFormat)())
+            return original.apply(this, args);
+        saveAnimationFile();
+    });
+    registry.monkeypatch(AnimationController.prototype, 'propertiesDialog', (original) => function (...args) {
+        if (!(0,_format__WEBPACK_IMPORTED_MODULE_1__.isCosmeticFormat)())
+            return original.apply(this, args);
+        renameController(this);
+        return this;
+    });
+    for (const event of ['load_project', 'select_project', 'unselect_project', 'select_mode'])
+        registry.event(event, syncPresets);
+    registry.track(removeOurPresets);
+    syncPresets();
+}
+
+
+/***/ },
+
+/***/ "./ts/platform/controllerPlaceholders.ts"
+/*!***********************************************!*\
+  !*** ./ts/platform/controllerPlaceholders.ts ***!
+  \***********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   installControllerPlaceholders: () => (/* binding */ installControllerPlaceholders),
+/* harmony export */   syncControllerPlaceholders: () => (/* binding */ syncControllerPlaceholders)
+/* harmony export */ });
+/* harmony import */ var _format__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./format */ "./ts/platform/format.ts");
+/* harmony import */ var _domain_controller__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../domain/controller */ "./ts/domain/controller.ts");
+/* harmony import */ var _molang_catalog__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../molang/catalog */ "./ts/molang/catalog.ts");
+
+
+
+function placeholderLines() {
+    const lines = [];
+    for (const entry of _molang_catalog__WEBPACK_IMPORTED_MODULE_2__.MOLANG_CATALOG) {
+        if (!entry.placeholder)
+            continue;
+        for (const name of [entry.name, ...entry.aliases])
+            lines.push({ query: (0,_domain_controller__WEBPACK_IMPORTED_MODULE_1__.queryName)(name), line: entry.placeholder });
+    }
+    return lines;
+}
+function syncControllerPlaceholders() {
+    var _a, _b;
+    if (!(0,_format__WEBPACK_IMPORTED_MODULE_0__.isCosmeticFormat)())
+        return;
+    const panel = (_b = (_a = Interface === null || Interface === void 0 ? void 0 : Interface.Panels) === null || _a === void 0 ? void 0 : _a.variable_placeholders) === null || _b === void 0 ? void 0 : _b.inside_vue;
+    const controllers = (AnimationController.all || []);
+    if (!panel || !controllers.length)
+        return;
+    const text = panel.text || '';
+    const assigned = [...(0,_domain_controller__WEBPACK_IMPORTED_MODULE_1__.assignedNames)(text)].map(_domain_controller__WEBPACK_IMPORTED_MODULE_1__.queryName);
+    const used = (0,_domain_controller__WEBPACK_IMPORTED_MODULE_1__.usedQueries)(controllers);
+    const missing = placeholderLines()
+        .filter(({ query }) => used.has(query) && !assigned.includes(query))
+        .map(({ line }) => line)
+        .filter((line, i, all) => all.indexOf(line) === i);
+    if (controllers.some((c) => (0,_domain_controller__WEBPACK_IMPORTED_MODULE_1__.findState)(c, _domain_controller__WEBPACK_IMPORTED_MODULE_1__.STOP_STATE)) && !assigned.includes(_domain_controller__WEBPACK_IMPORTED_MODULE_1__.PREVIEW_STOP_VARIABLE))
+        missing.push(_domain_controller__WEBPACK_IMPORTED_MODULE_1__.PREVIEW_STOP_LINE);
+    if (!missing.length)
+        return;
+    panel.text = [text.trim(), ...missing].filter(Boolean).join('\n');
+}
+function installControllerPlaceholders(registry) {
+    for (const event of ['finish_edit', 'load_project', 'select_project'])
+        registry.event(event, syncControllerPlaceholders);
 }
 
 
@@ -5525,6 +5924,7 @@ function baseFormatOptions(type) {
         centered_grid: true,
         locators: true,
         animation_mode: type.hasAnimation,
+        animation_controllers: type.hasAnimation,
         animation_files: type.hasAnimation,
         animation_codec: type.hasAnimation ? (0,_animationCodec__WEBPACK_IMPORTED_MODULE_0__.createAnimationCodec)(type) : undefined,
         display_mode: false,
@@ -5571,8 +5971,34 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../domain/meta */ "./ts/domain/meta.ts");
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../serialization/animation */ "./ts/serialization/animation.ts");
 
 
+
+function importControllers(type, controllers) {
+    if (!controllers || !Format || !Format.animation_controllers)
+        return;
+    let loaded = [];
+    try {
+        loaded = AnimationCodec.codecs.bedrock_animation_controller.loadFile({ json: { animation_controllers: controllers }, path: '' }) || [];
+    }
+    catch (e) {
+        (0,_core_log__WEBPACK_IMPORTED_MODULE_1__.log)('importControllers loadFile ERROR: ' + (e && e.stack ? e.stack : String(e)));
+        return;
+    }
+    const animations = (Animation.all || []);
+    for (const controller of loaded) {
+        for (const state of controller.states) {
+            for (const entry of state.animations) {
+                if (entry.animation)
+                    continue;
+                const anim = animations.find((a) => (0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.exportedAnimationId)(type, a) === entry.key);
+                if (anim)
+                    entry.animation = anim.uuid;
+            }
+        }
+    }
+}
 function importAnimation(type, file) {
     const animations = (file && file.animations) || {};
     const before = new Set((Animation.all || []).map((a) => a.uuid));
@@ -5584,6 +6010,7 @@ function importAnimation(type, file) {
         return null;
     }
     const added = (Animation.all || []).filter((a) => !before.has(a.uuid));
+    importControllers(type, file && file.animation_controllers);
     for (const anim of added) {
         const data = animations[anim.name];
         if (!data)
@@ -7319,7 +7746,8 @@ function playVanillaSound(effect) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   buildAnimationJson: () => (/* binding */ buildAnimationJson)
+/* harmony export */   buildAnimationJson: () => (/* binding */ buildAnimationJson),
+/* harmony export */   exportedAnimationId: () => (/* binding */ exportedAnimationId)
 /* harmony export */ });
 /* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
 /* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
@@ -7329,6 +7757,35 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+function exportedAnimationId(type, anim) {
+    return (0,_core_util__WEBPACK_IMPORTED_MODULE_2__.animationId)(anim.name) || type.defaultName;
+}
+function compileController(type, controller) {
+    const animations = (Animation.all || []);
+    const compiled = controller.compileForBedrock();
+    for (const state of controller.states) {
+        const json = compiled.states && compiled.states[state.name];
+        if (!json || !Array.isArray(json.animations))
+            continue;
+        json.animations = json.animations.map((item, i) => {
+            const anim = animations.find((a) => { var _a; return a.uuid === ((_a = state.animations[i]) === null || _a === void 0 ? void 0 : _a.animation); });
+            if (!anim)
+                return item;
+            const key = exportedAnimationId(type, anim);
+            return typeof item === 'string' ? key : { [key]: Object.values(item)[0] };
+        });
+    }
+    return compiled;
+}
+function buildControllersJson(type) {
+    const controllers = (AnimationController.all || []);
+    if (!controllers.length)
+        return undefined;
+    const out = {};
+    for (const controller of controllers)
+        out[controller.name] = compileController(type, controller);
+    return out;
+}
 function buildAnimationJson(type, only, emoteId) {
     const animations = {};
     const source = only !== null && only !== void 0 ? only : Animation.all;
@@ -7340,14 +7797,18 @@ function buildAnimationJson(type, only, emoteId) {
             compiled.lockVanillaBones = (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.buildLockMap)(anim, type);
         if (emoteId)
             (0,_platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_1__.retargetSoundIds)(compiled, anim, type, emoteId);
-        const id = (0,_core_util__WEBPACK_IMPORTED_MODULE_2__.animationId)(anim.name) || type.defaultName;
+        const id = exportedAnimationId(type, anim);
         if (animations[id]) {
             (0,_core_log__WEBPACK_IMPORTED_MODULE_3__.log)('buildAnimationJson: "' + anim.name + '" collides with an earlier animation on "' + id + '"');
             Blockbench.showQuickMessage('Two animations share the id "' + id + '", only the last one is exported', 2600);
         }
         animations[id] = compiled;
     }
-    return { format_version: '1.8.0', animations };
+    const json = { format_version: '1.8.0', animations };
+    const controllers = buildControllersJson(type);
+    if (controllers)
+        json.animation_controllers = controllers;
+    return json;
 }
 
 
@@ -7575,6 +8036,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _serialization_animation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../serialization/animation */ "./ts/serialization/animation.ts");
 /* harmony import */ var _platform_emoteIdentity__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform/emoteIdentity */ "./ts/platform/emoteIdentity.ts");
 /* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
+/* harmony import */ var _controllerReport__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./controllerReport */ "./ts/ui/controllerReport.ts");
+
 
 
 
@@ -7665,8 +8128,36 @@ function openAnimationExportDialog(type) {
                 name: emoteId + '.animation',
                 content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_1__.buildAnimationJson)(type, chosen, emoteId), null, 2),
             });
+            (0,_controllerReport__WEBPACK_IMPORTED_MODULE_4__.reportControllerProblems)(type);
         },
     }).show();
+}
+
+
+/***/ },
+
+/***/ "./ts/ui/controllerReport.ts"
+/*!***********************************!*\
+  !*** ./ts/ui/controllerReport.ts ***!
+  \***********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   reportControllerProblems: () => (/* binding */ reportControllerProblems)
+/* harmony export */ });
+/* harmony import */ var _domain_controllerCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain/controllerCheck */ "./ts/domain/controllerCheck.ts");
+
+function reportControllerProblems(type) {
+    const problems = (0,_domain_controllerCheck__WEBPACK_IMPORTED_MODULE_0__.controllerProblems)(type);
+    if (!problems.length)
+        return;
+    Blockbench.showMessageBox({
+        title: 'Animation controller',
+        icon: 'warning',
+        message: problems.map((p) => '• ' + p).join('\n\n'),
+        buttons: ['OK'],
+    });
 }
 
 
@@ -8259,6 +8750,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_particleTexture__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../platform/particleTexture */ "./ts/platform/particleTexture.ts");
 /* harmony import */ var _core_util__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../core/util */ "./ts/core/util.ts");
 /* harmony import */ var _core_log__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../core/log */ "./ts/core/log.ts");
+/* harmony import */ var _controllerReport__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./controllerReport */ "./ts/ui/controllerReport.ts");
+
 
 
 
@@ -8513,6 +9006,7 @@ function createExportAction(registry, type) {
                         (0,_emoteSettingsPanel__WEBPACK_IMPORTED_MODULE_1__.applyEmoteSettings)(metaAnim, type, state);
                     if (state.exportAnimation) {
                         files.push({ suffix: '.animation.json', content: JSON.stringify((0,_serialization_animation__WEBPACK_IMPORTED_MODULE_2__.buildAnimationJson)(type, undefined, base), null, 2) });
+                        (0,_controllerReport__WEBPACK_IMPORTED_MODULE_15__.reportControllerProblems)(type);
                     }
                     if (state.exportModel) {
                         files.push({ suffix: '.geo.json', content: (0,_serialization_geometry__WEBPACK_IMPORTED_MODULE_3__.buildGeoJson)() });
@@ -66563,6 +67057,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _platform_skinPreview__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform/skinPreview */ "./ts/platform/skinPreview.ts");
 /* harmony import */ var _platform_playerModel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./platform/playerModel */ "./ts/platform/playerModel.ts");
 /* harmony import */ var _platform_molangAutocomplete__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./platform/molangAutocomplete */ "./ts/platform/molangAutocomplete.ts");
+/* harmony import */ var _platform_controllerPlaceholders__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./platform/controllerPlaceholders */ "./ts/platform/controllerPlaceholders.ts");
+/* harmony import */ var _platform_controllerIntegration__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./platform/controllerIntegration */ "./ts/platform/controllerIntegration.ts");
+
+
 
 
 
@@ -66593,6 +67091,8 @@ const { version, blockbenchConfig } = _package_json__WEBPACK_IMPORTED_MODULE_0__
             (0,_feature__WEBPACK_IMPORTED_MODULE_2__.registerCosmeticType)(_cosmetics_cosmetic__WEBPACK_IMPORTED_MODULE_6__.COSMETIC, registry);
             (0,_platform_easing__WEBPACK_IMPORTED_MODULE_4__.installEasing)(registry);
             (0,_platform_molangAutocomplete__WEBPACK_IMPORTED_MODULE_12__.installMolangAutocomplete)(registry);
+            (0,_platform_controllerPlaceholders__WEBPACK_IMPORTED_MODULE_13__.installControllerPlaceholders)(registry);
+            (0,_platform_controllerIntegration__WEBPACK_IMPORTED_MODULE_14__.installControllerIntegration)(registry);
             (0,_platform_animationPatches__WEBPACK_IMPORTED_MODULE_3__.installAnimationPatches)();
             console.log('Loaded NoRisk Client Cosmetics plugin');
         },

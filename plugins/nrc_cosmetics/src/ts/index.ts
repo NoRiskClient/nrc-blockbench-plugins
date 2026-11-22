@@ -11,6 +11,8 @@ import { ensureTemplateCss } from './ui/templateDialog';
 import { installSkinPreview } from './platform/skinPreview';
 import { installPlayerModel } from './platform/playerModel';
 import { installMolangAutocomplete } from './platform/molangAutocomplete';
+import { installControllerPlaceholders } from './platform/controllerPlaceholders';
+import { installControllerIntegration } from './platform/controllerIntegration';
 
 const { version, blockbenchConfig } = packageJson;
 
@@ -35,6 +37,8 @@ const { version, blockbenchConfig } = packageJson;
                 registerCosmeticType(COSMETIC, registry);
                 installEasing(registry);
                 installMolangAutocomplete(registry);
+                installControllerPlaceholders(registry);
+                installControllerIntegration(registry);
                 installAnimationPatches();
                 console.log('Loaded NoRisk Client Cosmetics plugin');
             },

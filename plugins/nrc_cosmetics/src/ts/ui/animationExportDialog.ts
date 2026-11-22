@@ -3,6 +3,7 @@ import { emoteSettingsState, applyEmoteSettings, EmoteSettingsValues, EMOTE_SETT
 import { buildAnimationJson } from '../serialization/animation';
 import { currentEmoteId } from '../platform/emoteIdentity';
 import { animationId } from '../core/util';
+import { reportControllerProblems } from './controllerReport';
 
 export function openAnimationExportDialog(type: CosmeticType) {
     const animations = (Animation.all || []) as any[];
@@ -99,6 +100,7 @@ export function openAnimationExportDialog(type: CosmeticType) {
                 name: emoteId + '.animation',
                 content: JSON.stringify(buildAnimationJson(type, chosen, emoteId), null, 2),
             });
+            reportControllerProblems(type);
         },
     }).show();
 }

@@ -29,6 +29,7 @@ export interface MolangEntry {
     example?: string;
     support: { client: Support; web: Support; blockbench: Support };
     caveat?: string;
+    placeholder?: string;
     source: string;
     usage?: number;
     usedIn?: string[];
@@ -58,6 +59,35 @@ const bone = (part: DemoBone, label: string): MolangEntry => ({
         axis: 'x',
         sim: `pose:${part}`,
     },
+});
+
+const CONTROLLER_SOURCE = 'NRC animation controllers';
+
+type ControllerQueryScope = 'player' | 'controller';
+
+const SCOPE_CONTEXTS: Record<ControllerQueryScope, MolangContext[]> = {
+    player: ['cosmetic', 'emote'],
+    controller: ['cosmetic', 'emote'],
+};
+
+const SCOPE_CAVEATS: Record<ControllerQueryScope, string> = {
+    player: 'In cosmetics it works in keyframes and animation controllers, in emotes only inside animation controllers. The web preview reads 0.',
+    controller: 'Only inside animation controllers, in emotes and cosmetics. Blockbench previews it in the Animation Controller panel; the web preview reads 0.',
+};
+
+const controllerQuery = (scope: ControllerQueryScope, name: string, summary: string, returns: string, example: string, placeholder: string | null, aliases: string[] = []): MolangEntry => ({
+    name: `query.${name}`,
+    aliases,
+    kind: 'query',
+    contexts: SCOPE_CONTEXTS[scope],
+    summary,
+    returns,
+    updates: 'every tick in animation controllers, every frame in keyframes',
+    example,
+    support: { client: 'yes', web: 'no', blockbench: placeholder ? 'partial' : 'yes' },
+    caveat: placeholder ? `${SCOPE_CAVEATS[scope]} ${PLACEHOLDER} Hint: ${placeholder}` : SCOPE_CAVEATS[scope],
+    placeholder: placeholder ?? undefined,
+    source: CONTROLLER_SOURCE,
 });
 
 export const MOLANG_CATALOG: MolangEntry[] = [
@@ -116,6 +146,7 @@ export const MOLANG_CATALOG: MolangEntry[] = [
         example: 'query.is_moving * math.sin(query.anim_time * 360) * 5',
         support: { client: 'yes', web: 'no', blockbench: 'partial' },
         caveat: `Cosmetics use limb swing, emotes use position change, so the threshold differs slightly. ${PLACEHOLDER}`,
+        placeholder: "query.is_moving = toggle('Moving')",
         source: 'GeoMolang.kt:68',
         usage: 2,
         usedIn: ['halloween_bike'],
@@ -138,6 +169,7 @@ export const MOLANG_CATALOG: MolangEntry[] = [
         example: '-query.is_sneaking * 3',
         support: { client: 'partial', web: 'no', blockbench: 'partial' },
         caveat: `Emotes only, and not on 1.8.9 — reads 0 there and in cosmetics. ${PLACEHOLDER}`,
+        placeholder: "query.is_sneaking = toggle('Sneaking')",
         source: 'GeoMolang.kt:69',
         demo: {
             caption: 'Steve sneaks for 2 s, then stands up. The arm lifts only while sneaking.',
@@ -146,6 +178,70 @@ export const MOLANG_CATALOG: MolangEntry[] = [
             axis: 'x',
             sim: 'sneak',
         },
+    },
+    controllerQuery('player', 'is_on_ground', 'Whether the player stands on a block.', '1 or 0',
+        '!query.is_on_ground', "query.is_on_ground = 1 - toggle('In air')"),
+    controllerQuery('player', 'is_sprinting', 'Whether the player is sprinting.', '1 or 0',
+        'query.is_moving && query.is_sprinting', "query.is_sprinting = toggle('Sprinting')"),
+    controllerQuery('player', 'is_in_water', 'Whether the player is in water or swimming.', '1 or 0',
+        'query.is_in_water', "query.is_in_water = toggle('In water')"),
+    controllerQuery('player', 'is_gliding', 'Whether the player flies with an elytra.', '1 or 0',
+        'query.is_gliding', "query.is_gliding = toggle('Gliding')"),
+    controllerQuery('player', 'is_flying', 'Whether the player flies in creative mode. Other players only see this for the local player.', '1 or 0',
+        'query.is_flying || query.is_gliding', "query.is_flying = toggle('Creative flying')"),
+    controllerQuery('player', 'vertical_speed', 'How fast the player moves up or down, positive is up.', 'blocks per second',
+        'query.vertical_speed < 0', "query.vertical_speed = slider('Vertical speed', 0.5, -20, 20)"),
+    controllerQuery('player', 'ground_speed', 'How fast the player moves horizontally.', 'blocks per second',
+        'query.ground_speed > 4', "query.ground_speed = slider('Ground speed', 0.5, 0, 10)"),
+    controllerQuery('player', 'forward_speed', 'Horizontal speed along the look direction, negative is walking backwards.', 'blocks per second',
+        'query.forward_speed < 0', "query.forward_speed = slider('Forward speed', 0.5, -10, 10)"),
+    controllerQuery('player', 'strafe_speed', 'Horizontal speed to the side.', 'blocks per second',
+        'math.abs(query.strafe_speed) > 1', "query.strafe_speed = slider('Strafe speed', 0.5, -10, 10)"),
+    controllerQuery('player', 'yaw_speed', 'How fast the player turns.', 'degrees per second',
+        'math.abs(query.yaw_speed) > 90', "query.yaw_speed = slider('Turn speed', 10, -360, 360)"),
+    controllerQuery('player', 'limb_swing', 'How far the walk cycle has advanced.', 'walk cycle position',
+        'math.sin(query.limb_swing * 40)', "query.limb_swing = slider('Walk cycle', 1, 0, 50)"),
+    controllerQuery('player', 'limb_swing_amount', 'How strongly the legs swing while walking.', '0 to 1',
+        'query.limb_swing_amount > 0.5', "query.limb_swing_amount = slider('Leg swing', 0.05, 0, 1)", ['query.modified_move_speed']),
+    controllerQuery('player', 'is_riding', 'Whether the player sits on a mount or in a vehicle.', '1 or 0',
+        'query.is_riding', "query.is_riding = toggle('Riding')"),
+    controllerQuery('player', 'is_sleeping', 'Whether the player lies in a bed.', '1 or 0',
+        'query.is_sleeping', "query.is_sleeping = toggle('Sleeping')"),
+    controllerQuery('player', 'health', "The player's current health, 20 is full health without extra hearts.", 'half hearts, 0 to max health',
+        'query.health < 6', "query.health = slider('Health', 1, 0, 20)"),
+    controllerQuery('player', 'look_yaw', 'Horizontal direction the player is looking.', 'degrees',
+        'math.clamp(query.look_yaw, -45, 45)', "query.look_yaw = slider('Look yaw', 1, -90, 90)"),
+    controllerQuery('player', 'look_pitch', 'Vertical direction the player is looking, negative is up.', 'degrees',
+        'query.look_pitch * 0.5', "query.look_pitch = slider('Look pitch', 1, -90, 90)"),
+    controllerQuery('controller', 'all_animations_finished', 'Becomes 1 once every animation of the current controller state has played through at least once since the state was entered. For a looping animation that is the end of its first cycle.', '1 or 0',
+        'query.all_animations_finished', null),
+    controllerQuery('controller', 'any_animation_finished', 'Becomes 1 once any animation of the current controller state has played through at least once since the state was entered. For a looping animation that is the end of its first cycle.', '1 or 0',
+        'query.any_animation_finished', null),
+    {
+        name: 'variable.<name>',
+        aliases: [],
+        kind: 'variable',
+        contexts: ['cosmetic', 'emote'],
+        summary: 'Your own value, set in on_entry or on_exit of a controller state and read in transitions or later states.',
+        returns: 'whatever you stored',
+        updates: 'when a state is entered or left',
+        example: 'v.idle_since = q.life_time;',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'Animation controllers only, in emotes and cosmetics. variable. and v. are the same variable. math.random in on_entry rolls the same on every client; in a transition it rolls once per tick.',
+        source: CONTROLLER_SOURCE,
+    },
+    {
+        name: 'state "stop"',
+        aliases: [],
+        kind: 'syntax',
+        contexts: ['emote'],
+        summary: 'When the emote is stopped or interrupted, the controller jumps to the state named stop from wherever it is. A state without transitions ends the emote once its animation has played through, then the emote fades out over 0.3s.',
+        returns: '',
+        updates: '',
+        example: '"stop": { "animations": ["stop"] }',
+        support: { client: 'yes', web: 'no', blockbench: 'yes' },
+        caveat: 'Emotes only. Toggle "Preview stop" under Variable Placeholders to preview the jump. Without a stop state, stopping fades the emote out at once.',
+        source: CONTROLLER_SOURCE,
     },
     bone('head', 'head'),
     bone('body', 'body'),
@@ -823,12 +919,12 @@ export const MOLANG_CATALOG: MolangEntry[] = [
         name: '<  >  <=  >=  ==  !=',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Comparisons, giving 1 or 0.',
         returns: '1 or 0',
         updates: '',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game. In a keyframe the parser stops at the operator without an error, so a > b quietly becomes a — it previews correctly and breaks in game.',
+        caveat: 'In animation controllers of emotes and cosmetics (transitions, on_entry, on_exit) the game supports it. Otherwise particles only. In a keyframe the parser stops at the operator without an error, so a > b quietly becomes a — it previews correctly and breaks in game.',
         source: 'api/molang/GeoMolang.kt',
         demo: {
             caption: 'In a keyframe the game only reads up to the comparison.',
@@ -839,12 +935,12 @@ export const MOLANG_CATALOG: MolangEntry[] = [
         name: '&&  ||  !',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Logic, giving 1 or 0.',
         returns: '1 or 0',
         updates: '',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game, and both sides are always evaluated.',
+        caveat: 'In animation controllers of emotes and cosmetics (transitions, on_entry, on_exit) the game supports it. Otherwise particles only, and both sides are always evaluated.',
         source: 'GeoMolangExpression.kt:113-121',
         demo: {
             caption: 'In a keyframe the game stops at the first logic operator.',
@@ -855,13 +951,13 @@ export const MOLANG_CATALOG: MolangEntry[] = [
         name: 'condition ? a : b',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Pick a or b depending on the condition.',
         returns: '',
         updates: '',
         example: 'variable.particle_age > 1 ? 0.1 : 0.3',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game. Without the : part the game returns the condition itself.',
+        caveat: 'In animation controllers of emotes and cosmetics (transitions, on_entry, on_exit) the game supports it. Otherwise particles only. Without the : part the game returns the condition itself.',
         source: 'api/molang/GeoMolang.kt:69-81',
         demo: {
             caption: 'Looks right in every preview, but in a keyframe the game returns the left side of the comparison.',
@@ -872,13 +968,13 @@ export const MOLANG_CATALOG: MolangEntry[] = [
         name: 'variable.name = value;',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Store a value for later expressions; statements are separated by ;.',
         returns: 'the last statement',
         updates: '',
         example: 'variable.size = 0.2 + variable.particle_random_1 * 0.1;',
         support: { client: 'partial', web: 'yes', blockbench: 'yes' },
-        caveat: 'Particles only in the game. Emitter variables are copied into each particle when it spawns.',
+        caveat: 'Works in particles and in on_entry / on_exit of animation controllers (emotes and cosmetics), e.g. v.idle_since = q.life_time; — read it back in a transition. Emitter variables are copied into each particle when it spawns. Keyframes cannot store variables.',
         source: 'GeoParticleInstanceLogic.kt:54',
         demo: {
             caption: 'Keyframes cannot store variables in game.',
@@ -889,12 +985,12 @@ export const MOLANG_CATALOG: MolangEntry[] = [
         name: 'q.  v.  t.  c.',
         aliases: [],
         kind: 'syntax',
-        contexts: ['particle'],
+        contexts: ['particle', 'cosmetic', 'emote'],
         summary: 'Short forms of query., variable., temp. and context.',
         returns: '',
         updates: '',
         support: { client: 'partial', web: 'partial', blockbench: 'yes' },
-        caveat: 'The game only accepts v. (in particles). q. reads 0 everywhere in game even though both previews accept it — always write query. fivehead ships math.sin(q.anim_time * 3000), which stands still in game.',
+        caveat: 'Animation controllers of emotes and cosmetics accept q. and v. in game. Elsewhere the game only accepts v. (in particles) and q. reads 0 even though both previews accept it — write query. in keyframes. fivehead ships math.sin(q.anim_time * 3000), which stands still in game.',
         source: 'GeoMolang.kt:330',
         usedIn: ['fivehead'],
         demo: {
