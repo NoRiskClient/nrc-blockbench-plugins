@@ -1,6 +1,6 @@
 {
   "name": "nrc_cosmetics",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "private": true,
   "description": "NoRisk Client Cosmetics",
   "main": "index.js",
