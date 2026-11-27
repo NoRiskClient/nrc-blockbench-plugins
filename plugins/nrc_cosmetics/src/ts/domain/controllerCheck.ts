@@ -2,6 +2,7 @@ import { CosmeticType } from '../cosmetics/types';
 import { EMOTE } from '../cosmetics/emote';
 import { MOLANG_CATALOG } from '../molang/catalog';
 import { STOP_STATE, STOP_TIMEOUT_SECONDS, findState, queryName, usedQueries } from './controller';
+import { flagsDiffer } from './meta';
 
 function knownQueries(): Set<string> {
     const known = new Set<string>();
@@ -46,6 +47,12 @@ export function controllerProblems(type: CosmeticType): string[] {
     const stopAnimation = stop && animations.find((a) => stop.animations.some((e: any) => e.animation === a.uuid));
     if (type.id === EMOTE.id && stopAnimation?.loop === 'loop' && !stop.transitions.length) {
         problems.push(`"${STOP_STATE}" plays a looping animation and has no transitions, so the emote only ends after ${STOP_TIMEOUT_SECONDS}s. Set it to play once.`);
+    }
+
+    const initial = findState(controller, controller.initial_state) ?? states[0];
+    const initialAnimation = initial && animations.find((a) => initial.animations.some((e: any) => e.animation === a.uuid));
+    if (type.metaFields.length && initialAnimation && flagsDiffer(animations, type)) {
+        problems.push(`The emote settings differ between animations. In game only those of "${initialAnimation.name}" count, open its settings and save them once to apply them to all.`);
     }
 
     const played = new Set<string>();

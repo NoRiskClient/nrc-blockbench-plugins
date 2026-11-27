@@ -3175,6 +3175,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _cosmetics_emote__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../cosmetics/emote */ "./ts/cosmetics/emote.ts");
 /* harmony import */ var _molang_catalog__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../molang/catalog */ "./ts/molang/catalog.ts");
 /* harmony import */ var _controller__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./controller */ "./ts/domain/controller.ts");
+/* harmony import */ var _meta__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./meta */ "./ts/domain/meta.ts");
+
 
 
 
@@ -3189,6 +3191,7 @@ function knownQueries() {
     return known;
 }
 function controllerProblems(type) {
+    var _a;
     const controllers = (AnimationController.all || []);
     if (!controllers.length)
         return [];
@@ -3220,6 +3223,11 @@ function controllerProblems(type) {
     if (type.id === _cosmetics_emote__WEBPACK_IMPORTED_MODULE_0__.EMOTE.id && (stopAnimation === null || stopAnimation === void 0 ? void 0 : stopAnimation.loop) === 'loop' && !stop.transitions.length) {
         problems.push(`"${_controller__WEBPACK_IMPORTED_MODULE_2__.STOP_STATE}" plays a looping animation and has no transitions, so the emote only ends after ${_controller__WEBPACK_IMPORTED_MODULE_2__.STOP_TIMEOUT_SECONDS}s. Set it to play once.`);
     }
+    const initial = (_a = (0,_controller__WEBPACK_IMPORTED_MODULE_2__.findState)(controller, controller.initial_state)) !== null && _a !== void 0 ? _a : states[0];
+    const initialAnimation = initial && animations.find((a) => initial.animations.some((e) => e.animation === a.uuid));
+    if (type.metaFields.length && initialAnimation && (0,_meta__WEBPACK_IMPORTED_MODULE_3__.flagsDiffer)(animations, type)) {
+        problems.push(`The emote settings differ between animations. In game only those of "${initialAnimation.name}" count, open its settings and save them once to apply them to all.`);
+    }
     const played = new Set();
     for (const state of states)
         for (const a of state.animations)
@@ -3244,11 +3252,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   anyLocked: () => (/* binding */ anyLocked),
 /* harmony export */   buildLockMap: () => (/* binding */ buildLockMap),
+/* harmony export */   flagsDiffer: () => (/* binding */ flagsDiffer),
 /* harmony export */   initFlags: () => (/* binding */ initFlags),
 /* harmony export */   initLocks: () => (/* binding */ initLocks),
 /* harmony export */   lockPropKey: () => (/* binding */ lockPropKey),
 /* harmony export */   readFlag: () => (/* binding */ readFlag),
-/* harmony export */   writeMeta: () => (/* binding */ writeMeta)
+/* harmony export */   writeFlags: () => (/* binding */ writeFlags),
+/* harmony export */   writeLocks: () => (/* binding */ writeLocks)
 /* harmony export */ });
 const lockPropKey = (bone) => `nrc_lock_${bone}`;
 function readFlag(anim, key, fallback) {
@@ -3269,15 +3279,24 @@ function initLocks(anim, type) {
 function anyLocked(anim, type) {
     return type.bones.some((b) => readFlag(anim, lockPropKey(b), false));
 }
-function writeMeta(anim, type, flags, locks) {
+function writeFlags(anim, type, flags) {
     for (const f of type.metaFields)
         anim[f.key] = !!flags[f.key];
+    markUnsaved(anim);
+}
+function writeLocks(anim, type, locks) {
     if (type.hasLockBones)
         for (const b of type.bones)
             anim[lockPropKey(b)] = !!locks[b];
+    markUnsaved(anim);
+}
+function markUnsaved(anim) {
     anim.saved = false;
     if (typeof Project !== 'undefined' && Project)
         Project.saved = false;
+}
+function flagsDiffer(animations, type) {
+    return animations.some((anim) => type.metaFields.some((f) => readFlag(anim, f.key, f.default) !== readFlag(animations[0], f.key, f.default)));
 }
 function buildLockMap(anim, type) {
     const m = {};
@@ -8689,6 +8708,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _domain_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain/meta */ "./ts/domain/meta.ts");
 
+const hasController = () => (AnimationController.all || []).length > 0;
 function emoteSettingsState(anim, type) {
     return {
         flags: (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.initFlags)(anim, type),
@@ -8697,11 +8717,13 @@ function emoteSettingsState(anim, type) {
         flagDefs: type.metaFields,
         bones: type.bones,
         hasLockBones: type.hasLockBones,
+        hasController: hasController(),
     };
 }
 const EMOTE_SETTINGS_TEMPLATE = `
     <div>
         <div class="nrc-x-sec-h">Emote settings</div>
+        <div class="desc" v-if="hasController">These apply to every animation of the emote. Locked bones apply only to this animation, while its controller state plays.</div>
         <div class="nrc-x-switches">
             <label class="nrc-x-switch" v-for="f in flagDefs" :key="f.key">
                 <span class="txt"><div class="lbl">{{ f.label }}</div><div class="desc">{{ f.description }}</div></span>
@@ -8722,7 +8744,10 @@ const EMOTE_SETTINGS_TEMPLATE = `
 function applyEmoteSettings(anim, type, state) {
     if (!anim)
         return;
-    (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.writeMeta)(anim, type, state.flags, state.lockOpen ? state.locks : {});
+    const flagTargets = hasController() ? Animation.all : [anim];
+    for (const target of flagTargets)
+        (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.writeFlags)(target, type, state.flags);
+    (0,_domain_meta__WEBPACK_IMPORTED_MODULE_0__.writeLocks)(anim, type, state.lockOpen ? state.locks : {});
 }
 
 
